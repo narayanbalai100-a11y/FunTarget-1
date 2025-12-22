@@ -145,10 +145,11 @@
         async function triggerNewRound() {
             if (state.isResetting) return;
             state.isResetting = true;
-            console.log("Triggering New Round on Firebase...");
             try {
                 await timerDoc.set({
-                    timerStartTime: firebase.firestore.FieldValue.serverTimestamp()
+                    timerStartTime: firebase.firestore.FieldValue.serverTimestamp(),
+                    status: "BET",
+                    bets: {} // Reset bets on server
                 }, { merge: true });
             } catch (e) {
                 console.error("Firebase Update Error: ", e);
@@ -162,9 +163,14 @@
                 return;
             }
             const data = snap.data();
+
+            // 🔥 Logic based on your provided snippet
+            if (data.status === "RESULT" && !state.spinning && data.result !== undefined) {
+                START_SPIN_ANIMATION(data.result);
+            }
+
             if (data.timerStartTime) {
                 const newServerTime = data.timerStartTime.toMillis();
-                // If the new timestamp is different from current, reset local state
                 if (serverStartTime !== newServerTime) {
                     serverStartTime = newServerTime;
                     RESET_ROUND_LOCALLY();
@@ -182,39 +188,65 @@
                 const diff = Math.floor((now - serverStartTime) / 1000);
                 let left = TIMER_DURATION - diff;
 
-                // Display Timer
                 document.getElementById("time").innerText = left > 0 ? left : 0;
                 state.timer = left;
 
-                // 1. Spin Phase (at 8 seconds)
+                // 🔥 Trigger Result Calculation at 8 seconds left
                 if (left === 8 && !state.spinStarted) {
-                    state.spinStarted = true;
-                    state.betting = false;
-                    document.getElementById('gameStatus').textContent = "SPINNING...";
-                    START_SPIN_ANIMATION();
+                    calculateAndSetResult();
                 }
 
-                // 2. Automatic Restart Trigger (at -5 seconds)
-                // If time goes below -5, it means the result has been shown, now restart.
                 if (left <= -5) {
                     triggerNewRound();
                 }
             }, 1000);
         }
 
+        // 🔥 Your Result Logic Integration
+        async function calculateAndSetResult() {
+            state.spinStarted = true;
+            state.betting = false;
+            
+            const snap = await timerDoc.get();
+            const d = snap.data();
+            if (!d || d.status !== "BET") return;
+
+            let bets = d.bets || {};
+            let zeroBet = [];
+            let minAmt = Infinity;
+            let minBet = [];
+
+            for (let i = 0; i < 10; i++) {
+                let amt = bets[i] || 0;
+                if (amt === 0) zeroBet.push(i);
+                if (amt < minAmt) {
+                    minAmt = amt;
+                    minBet = [i];
+                } else if (amt === minAmt) {
+                    minBet.push(i);
+                }
+            }
+
+            let result;
+            if (zeroBet.length > 0) {
+                result = zeroBet[Math.floor(Math.random() * zeroBet.length)];
+            } else {
+                result = minBet[Math.floor(Math.random() * minBet.length)];
+            }
+
+            await timerDoc.update({
+                status: "RESULT",
+                result: result
+            });
+        }
+
         // ================= Game Mechanics =================
 
-        function START_SPIN_ANIMATION() {
+        function START_SPIN_ANIMATION(winnerNum) {
             state.spinning = true;
+            document.getElementById('gameStatus').textContent = "SPINNING...";
             document.getElementById('ptrOverlay').classList.add('jiggle');
-            
-            // Logic for winner
-            let min = Math.min(...state.bets);
-            let candidates = [];
-            state.bets.forEach((bet, i) => { if(bet === min) candidates.push(i); });
-            const result = candidates[Math.floor(Math.random() * candidates.length)];
-            
-            runSpinAnimation(result);
+            runSpinAnimation(winnerNum);
         }
 
         function STOP_SPIN_AND_SHOW_RESULT(result) {
@@ -247,11 +279,17 @@
             updateUI();
         }
 
-        function PLACE_BET_LOCALLY(number, amount) {
+        async function PLACE_BET_LOCALLY(number, amount) {
             if (state.betting && state.coins >= amount) {
                 state.coins -= amount;
                 state.bets[number] += amount;
                 state.betHistory.push({ num: number, amount: amount });
+                
+                // Sync bet to Firebase
+                const updateObj = {};
+                updateObj[`bets.${number}`] = firebase.firestore.FieldValue.increment(amount);
+                await timerDoc.update(updateObj);
+                
                 updateUI();
                 return true;
             }
@@ -283,18 +321,30 @@
             document.querySelector(`.chip[data-amt="${amt}"]`).classList.add('active');
         }
 
-        function cancelLastBet() {
+        async function cancelLastBet() {
             if (state.betHistory.length > 0 && state.betting) {
                 const last = state.betHistory.pop();
                 state.coins += last.amount;
                 state.bets[last.num] -= last.amount;
+                
+                const updateObj = {};
+                updateObj[`bets.${last.num}`] = firebase.firestore.FieldValue.increment(-last.amount);
+                await timerDoc.update(updateObj);
+
                 updateUI();
                 playClickSound();
             }
         }
 
-        function cancelAllBets() {
+        async function cancelAllBets() {
             if (state.betting) {
+                for(let i=0; i<10; i++) {
+                    if(state.bets[i] > 0) {
+                        const updateObj = {};
+                        updateObj[`bets.${i}`] = firebase.firestore.FieldValue.increment(-state.bets[i]);
+                        await timerDoc.update(updateObj);
+                    }
+                }
                 state.coins += state.bets.reduce((a, b) => a + b, 0);
                 state.bets.fill(0);
                 state.betHistory = [];
