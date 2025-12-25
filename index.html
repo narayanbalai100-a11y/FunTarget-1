@@ -5,121 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>FunTarget Spinner - Auto Sync Edition</title>
     
-    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js">
-function openSendPopup(){
-  if(!state.uid){ alert("Please login"); return; }
-  document.getElementById("sendPopup").style.display="flex";
-}
-function closeSendPopup(){
-  document.getElementById("sendPopup").style.display="none";
-}
-async function sendCoins(){
-  const toUID=document.getElementById("sendUID").value.trim();
-  const amt=Number(document.getElementById("sendAmount").value);
-  const st=document.getElementById("sendStatus");
-  if(!toUID||amt<=0){st.style.color="red";st.innerText="Invalid Input";return;}
-  if(amt>state.coins){st.style.color="red";st.innerText="Low Balance";return;}
-  const toRef=firebase.database().ref("users/uid/"+toUID);
-  const snap=await toRef.once("value");
-  if(!snap.exists()){st.style.color="red";st.innerText="UID Not Found";return;}
-  state.coins-=amt;
-  await firebase.database().ref("users/uid/"+state.uid).update({coins:state.coins});
-  const rc=Number(snap.val().coins)||0;
-  await toRef.update({coins:rc+amt});
-  updateUI();
-  st.style.color="#00ff88";st.innerText="Transfer Success";
-  setTimeout(closeSendPopup,1200);
-}
-function logoutUser(){
-  sessionStorage.removeItem("gk_uid");
-  state.uid=null;state.coins=0;state.betting=false;state.spinning=false;
-  state.bets.fill(0);state.betHistory=[];
-  document.getElementById("coins").innerText="0";
-  document.getElementById("winner").innerText="-";
-  document.getElementById("gameStatus").innerText="PLEASE LOGIN";
-  document.querySelectorAll(".bet-placed").forEach(e=>{e.style.display="none";});
-  document.getElementById("loginBlock").style.display="flex";
-}
-
-</script>
-    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore-compat.js">
-function openSendPopup(){
-  if(!state.uid){ alert("Please login"); return; }
-  document.getElementById("sendPopup").style.display="flex";
-}
-function closeSendPopup(){
-  document.getElementById("sendPopup").style.display="none";
-}
-async function sendCoins(){
-  const toUID=document.getElementById("sendUID").value.trim();
-  const amt=Number(document.getElementById("sendAmount").value);
-  const st=document.getElementById("sendStatus");
-  if(!toUID||amt<=0){st.style.color="red";st.innerText="Invalid Input";return;}
-  if(amt>state.coins){st.style.color="red";st.innerText="Low Balance";return;}
-  const toRef=firebase.database().ref("users/uid/"+toUID);
-  const snap=await toRef.once("value");
-  if(!snap.exists()){st.style.color="red";st.innerText="UID Not Found";return;}
-  state.coins-=amt;
-  await firebase.database().ref("users/uid/"+state.uid).update({coins:state.coins});
-  const rc=Number(snap.val().coins)||0;
-  await toRef.update({coins:rc+amt});
-  updateUI();
-  st.style.color="#00ff88";st.innerText="Transfer Success";
-  setTimeout(closeSendPopup,1200);
-}
-function logoutUser(){
-  sessionStorage.removeItem("gk_uid");
-  state.uid=null;state.coins=0;state.betting=false;state.spinning=false;
-  state.bets.fill(0);state.betHistory=[];
-  document.getElementById("coins").innerText="0";
-  document.getElementById("winner").innerText="-";
-  document.getElementById("gameStatus").innerText="PLEASE LOGIN";
-  document.querySelectorAll(".bet-placed").forEach(e=>{e.style.display="none";});
-  document.getElementById("loginBlock").style.display="flex";
-}
-
-</script>
-    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js">
-function openSendPopup(){
-  if(!state.uid){ alert("Please login"); return; }
-  document.getElementById("sendPopup").style.display="flex";
-}
-function closeSendPopup(){
-  document.getElementById("sendPopup").style.display="none";
-}
-async function sendCoins(){
-  const toUID=document.getElementById("sendUID").value.trim();
-  const amt=Number(document.getElementById("sendAmount").value);
-  const st=document.getElementById("sendStatus");
-  if(!toUID||amt<=0){st.style.color="red";st.innerText="Invalid Input";return;}
-  if(amt>state.coins){st.style.color="red";st.innerText="Low Balance";return;}
-  const toRef=firebase.database().ref("users/uid/"+toUID);
-  const snap=await toRef.once("value");
-  if(!snap.exists()){st.style.color="red";st.innerText="UID Not Found";return;}
-  state.coins-=amt;
-  await firebase.database().ref("users/uid/"+state.uid).update({coins:state.coins});
-  const rc=Number(snap.val().coins)||0;
-  await toRef.update({coins:rc+amt});
-  updateUI();
-  st.style.color="#00ff88";st.innerText="Transfer Success";
-  setTimeout(closeSendPopup,1200);
-}
-function logoutUser(){
-  sessionStorage.removeItem("gk_uid");
-  state.uid=null;state.coins=0;state.betting=false;state.spinning=false;
-  state.bets.fill(0);state.betHistory=[];
-  document.getElementById("coins").innerText="0";
-  document.getElementById("winner").innerText="-";
-  document.getElementById("gameStatus").innerText="PLEASE LOGIN";
-  document.querySelectorAll(".bet-placed").forEach(e=>{e.style.display="none";});
-  document.getElementById("loginBlock").style.display="flex";
-}
-
-</script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
 
     <style>
         /* =========================================
-           CSS STYLES (NO CHANGES)
+           CSS STYLES
            ========================================= */
         * { 
             box-sizing: border-box; 
@@ -168,7 +60,7 @@ function logoutUser(){
             display: flex; 
             justify-content: center; 
             align-items: flex-start; 
-            background-image: url('https://uploads.onecompiler.io/445tyzay6/448mutbvh/1000053141.png'); 
+            background-image: url('https://uploads.onecompiler.io/445tyzay6/448n7h4a3/1000053493.jpg'); 
             background-size: cover; 
             z-index: 100; 
             padding-top: 1px; 
@@ -335,14 +227,8 @@ function logoutUser(){
             transform: translate(-50%, -50%); 
             overflow: hidden; 
             border-radius: 50%; 
-            background:#FFD700;
-            linear-gradient(190deg, #000, #333),
-            linear-gradient(190deg, #FFD700, #b8860b);
-            background-blend-mode: overlay;
-            box-shadow:
-            0 0 25px rgba(255,215,0,0.8),
-            inset 0 0 25px rgba(0,0,0,0.9);
-   
+            background: #FFD700;
+            box-shadow: 0 0 25px rgba(255,215,0,0.8), inset 0 0 25px rgba(0,0,0,0.9);
         }
         
         .slides-inner { 
@@ -350,19 +236,15 @@ function logoutUser(){
             width: 1000%; 
             height: 150%; 
             transition: transform 8s cubic-bezier(0.1, 0, 0.1, 1); 
-          
- 
-}
+        }
 
-         .slide-item { 
+        .slide-item { 
             width: 150%;
             height: 80%; 
             display: flex; 
             justify-content: center; 
             align-items: center;
             margin-top: -9px;
-            background:
-   
         }
       
         .slide { width: 70%; height: 70%; object-fit: contain; }
@@ -384,22 +266,15 @@ function logoutUser(){
             width: 60px; 
             height: 60px;
             border-radius: 50px; 
-            background: linear-gradient(180deg, #fff3cf, #ffd36f); 
             display: inline-flex; 
             align-items: center; 
             justify-content: center; 
             font-weight: 1000; 
             color: #1b1300; 
-            box-shadow: 0 0 0 10px #ffd36a; 
-            transform: translateY(-14px); 
-            background:
-            linear-gradient(145deg, #000, #333),
-            linear-gradient(145deg, #FFD700, #b8860b);
+            transform: translateY(10px); 
+            background: linear-gradient(145deg, #000, #333), linear-gradient(145deg, #FFD700, #b8860b);
             background-blend-mode: overlay;
-            box-shadow:
-            0 0 20px rgba(255,215,0,0.8),
-            inset 0 0 20px rgba(0,0,0,0.95);
-  
+            box-shadow: 0 0 20px rgba(255,215,0,0.8), inset 0 0 20px rgba(0,0,0,0.95);
         }
 
         .number-box .bet-placed { 
@@ -410,20 +285,14 @@ function logoutUser(){
             padding: 2px 15px; 
             border-radius: 20px; 
             display: none; 
-            background: #ffd700; 
             color: #111; 
             font-weight: 800; 
-            background:
-            linear-gradient(145deg, #000, #333),
-            linear-gradient(145deg, #FFD700, #b8860b);
+            background: linear-gradient(145deg, #000, #333), linear-gradient(145deg, #FFD700, #b8860b);
             background-blend-mode: overlay;
-            box-shadow:
-            0 0 15px rgba(255,215,0,0.8),
-            inset 0 0 10px rgba(0,0,0,0.9);
-            display:flex;
-            align-items:center;
-            justify-content:center;
-           
+            box-shadow: 0 0 15px rgba(255,215,0,0.8), inset 0 0 10px rgba(0,0,0,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .status-bar { 
@@ -433,56 +302,60 @@ function logoutUser(){
             text-align: center; 
             color: #eee; 
             font-weight: 800; 
-            margin-top: 5px; 
-            background:
-      linear-gradient(145deg, #000, #333),
-      linear-gradient(145deg, #FFD700, #b8860b);
-    background-blend-mode: overlay;
-    box-shadow:
-      0 0 15px rgba(255,215,0,0.8),
-      inset 0 0 10px rgba(0,0,0,0.9);
-    display:flex;
-    align-items:center;
-    justify-content:center;
+            margin-top: 20px; 
+            background: linear-gradient(145deg, #000, #333), linear-gradient(145deg, #FFD700, #b8860b);
+            background-blend-mode: overlay;
+            box-shadow: 0 0 15px rgba(255,215,0,0.8), inset 0 0 10px rgba(0,0,0,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-    
-#topActions{
-  position:absolute;
-  top:10px;
-  right:10px;
-  display:flex;
-  gap:8px;
-  z-index:99999;
-}
-#topActions button{
-  padding:6px 14px;
-  font-size:12px;
-  font-weight:bold;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
-  color:#fff;
-}
-#topActions button:first-child{
-  background:linear-gradient(180deg,#00c853,#009624);
-}
-#topActions button:last-child{
-  background:linear-gradient(180deg,#1e90ff,#003cff);
-}
 
-</style>
+        /* --- BLINK ANIMATION --- */
+        @keyframes result-blink {
+            0%, 100% { background: linear-gradient(145deg, #000, #333), linear-gradient(145deg, #FFD700, #b8860b); color: #1b1300; }
+            50% { background: #0072ff; color: #fff; box-shadow: 0 0 30px #0072ff; }
+        }
+        .blink-blue {
+            animation: result-blink 0.4s ease-in-out 10;
+        }
+        
+        @keyframes history-blink {
+            0%, 100% { background: transparent; color: inherit; }
+            50% { background: #0072ff; color: #fff; border-radius: 4px; }
+        }
+        .hist-blink { animation: history-blink 0.4s ease-in-out 10; }
+
+        #topActions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 8px;
+            z-index: 99999;
+        }
+        #topActions button {
+            padding: 6px 14px;
+            font-size: 12px;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            color: #fff;
+        }
+        #topActions button:first-child { background: linear-gradient(180deg,#00c853,#009624); }
+        #topActions button:last-child { background: linear-gradient(180deg,#1e90ff,#003cff); }
+    </style>
 </head>
 
 <body>
     <div class="stars"></div>
     <div class="game-container-wrap" id="mainGame">
         <div class="game-app">
-
-<div id="topActions">
-  <button onclick="openSendPopup()">SEND</button>
-  <button onclick="logoutUser()">LOGOUT</button>
-</div>
-
+            <div id="topActions">
+                <button onclick="openSendPopup()">SEND</button>
+                <button onclick="logoutUser()">LOGOUT</button>
+            </div>
             
             <button id="cancelSpecific" onclick="cancelLastBet()">CANCEL</button>
             <button id="cancelAll" onclick="cancelAllBets()">CLEAR</button>
@@ -533,7 +406,7 @@ function logoutUser(){
                     </div>
                     <div class="panel">
                         <h4>History</h4>
-                        <div id="last10" class="value" style="font-size:12px;">Waiting...</div>
+                        <div id="last10" class="value" style="font-size:16px;">Waiting...</div>
                     </div>
                     <div class="chip-container">
                         <div class="chip" data-amt="100" onclick="selectChip(100)">100</div>
@@ -553,9 +426,6 @@ function logoutUser(){
     </audio>
 
     <script>
-        /* =========================================
-           JS LOGIC WITH COIN SYNC
-           ========================================= */
         const firebaseConfig = {
             apiKey: "AIzaSyA-KabHNxU7PmQ3sARjqY7XrZ7LI5rSI8E",
             authDomain: "funtop-453ec.firebaseapp.com",
@@ -580,7 +450,8 @@ function logoutUser(){
             last10: [],
             selectedAmount: 10,
             spinStarted: false,
-            isResetting: false
+            isResetting: false,
+            noBetRounds: 0 // Counter for auto-logout
         };
 
         let timerInterval = null;
@@ -588,12 +459,10 @@ function logoutUser(){
         let serverStartTime = null; 
         const TIMER_DURATION = 60;
 
-        // --- DATABASE SYNC: Update Coins in Realtime DB ---
         async function syncCoinsToDB(newCoinVal) {
             if(!state.uid) return;
-            try {
-                await rtdb.ref("users/uid/" + state.uid).update({ coins: newCoinVal });
-            } catch(e) { console.error("Coin sync error", e); }
+            try { await rtdb.ref("users/uid/" + state.uid).update({ coins: newCoinVal }); } 
+            catch(e) { console.error("Coin sync error", e); }
         }
 
         async function triggerNewRound() {
@@ -619,6 +488,23 @@ function logoutUser(){
                 const newServerTime = data.timerStartTime.toMillis();
                 if (serverStartTime !== newServerTime) {
                     serverStartTime = newServerTime;
+                    
+                    // --- AUTO LOGOUT CHECK ---
+                    if (state.uid) {
+                        const totalBetThisRound = state.bets.reduce((a, b) => a + b, 0);
+                        if (totalBetThisRound === 0) {
+                            state.noBetRounds++;
+                            console.log("No Bet Round: " + state.noBetRounds);
+                            if (state.noBetRounds >= 5) {
+                                alert("You have been logged out for inactivity (5 rounds no bet).");
+                                logoutUser();
+                                return;
+                            }
+                        } else {
+                            state.noBetRounds = 0; // Reset if bet placed
+                        }
+                    }
+
                     RESET_ROUND_LOCALLY();
                     startSyncTimer();
                 }
@@ -659,7 +545,7 @@ function logoutUser(){
             await timerDoc.update({ status: "RESULT", result: result });
         }
 
-      async  function START_SPIN_ANIMATION(winnerNum) {
+        async function START_SPIN_ANIMATION(winnerNum) {
             state.spinning = true;
             document.getElementById('gameStatus').textContent = "SPINNING...";
             document.getElementById('ptrOverlay').classList.add('jiggle');
@@ -670,6 +556,13 @@ function logoutUser(){
             cancelAnimationFrame(spinAnimationFrame);
             document.getElementById('ptrOverlay').classList.remove('jiggle');
             document.getElementById('winner').textContent = result;
+            
+            const targetBtn = document.getElementById(`btn-num-${result}`);
+            if(targetBtn) {
+                targetBtn.classList.add('blink-blue');
+                setTimeout(() => targetBtn.classList.remove('blink-blue'), 4000);
+            }
+
             if (state.bets[result] > 0) {
                 const winAmount = state.bets[result] * 9;
                 state.coins += winAmount;
@@ -683,13 +576,14 @@ function logoutUser(){
         function RESET_ROUND_LOCALLY() {
             state.bets.fill(0);
             state.betHistory = [];
-            state.betting = !!state.uid; // Only allow betting if logged in
+            state.betting = !!state.uid;
             state.spinning = false;
             state.spinStarted = false;
             document.getElementById('winner').textContent = "-";
             document.getElementById('gameStatus').textContent = state.uid ? "PLACE YOUR BETS" : "PLEASE LOGIN";
             document.getElementById('slider').style.transition = "none";
             document.getElementById('slider').style.transform = "translateX(0)";
+            document.querySelectorAll('.num').forEach(el => el.classList.remove('blink-blue'));
             updateUI();
         }
 
@@ -698,6 +592,10 @@ function logoutUser(){
                 state.coins -= amount;
                 state.bets[number] += amount;
                 state.betHistory.push({ num: number, amount: amount });
+                
+                // Important: Reset inactivity counter if user places a bet
+                state.noBetRounds = 0; 
+
                 updateUI();
                 await syncCoinsToDB(state.coins);
                 const updateObj = {};
@@ -716,21 +614,29 @@ function logoutUser(){
             });
         }
 
-       async function updateLast10History(result) {
+        async function updateLast10History(result) {
             state.last10.unshift(result);
             if (state.last10.length > 10) state.last10.pop();
-            document.getElementById('last10').textContent = state.last10.join(', ');
+            const historyBox = document.getElementById('last10');
+            historyBox.innerHTML = ""; 
+            state.last10.forEach((num, index) => {
+                const span = document.createElement('span');
+                span.textContent = num + (index < state.last10.length - 1 ? ", " : "");
+                if (index === 0) span.classList.add('hist-blink');
+                historyBox.appendChild(span);
+            });
         }
 
         function selectChip(amt) {
             state.selectedAmount = amt;
             document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-            document.querySelector(`.chip[data-amt="${amt}"]`).classList.add('active');
+            const activeChip = document.querySelector(`.chip[data-amt="${amt}"]`);
+            if(activeChip) activeChip.classList.add('active');
         }
 
         async function cancelLastBet() {
             if (state.betHistory.length > 0 && state.betting) {
-                const last = state.betHistory.pop(1,2,3,4,5,6,7,8,9,0);
+                const last = state.betHistory.pop();
                 state.coins += last.amount;
                 state.bets[last.num] -= last.amount;
                 updateUI();
@@ -774,7 +680,7 @@ function logoutUser(){
             for (let i = 0; i < 10; i++) {
                 const box = document.createElement('div');
                 box.className = 'number-box';
-                box.innerHTML = `<div class="num">${i}</div><div class="bet-placed" id="bet-${i}">0</div>`;
+                box.innerHTML = `<div class="num" id="btn-num-${i}">${i}</div><div class="bet-placed" id="bet-${i}">0</div>`;
                 box.onclick = () => { if (PLACE_BET_LOCALLY(i, state.selectedAmount)) playClickSound(); };
                 betRow.appendChild(box);
             }
@@ -821,132 +727,79 @@ function logoutUser(){
             selectChip(10);
             updateUI();
         };
-    
-function openSendPopup(){
-  if(!state.uid){ alert("Please login"); return; }
-  document.getElementById("sendPopup").style.display="flex";
-}
-function closeSendPopup(){
-  document.getElementById("sendPopup").style.display="none";
-}
-async function sendCoins(){
-  const toUID=document.getElementById("sendUID").value.trim();
-  const amt=Number(document.getElementById("sendAmount").value);
-  const st=document.getElementById("sendStatus");
-  if(!toUID||amt<=0){st.style.color="red";st.innerText="Invalid Input";return;}
-  if(amt>state.coins){st.style.color="red";st.innerText="Low Balance";return;}
-  const toRef=firebase.database().ref("users/uid/"+toUID);
-  const snap=await toRef.once("value");
-  if(!snap.exists()){st.style.color="red";st.innerText="UID Not Found";return;}
-  state.coins-=amt;
-  await firebase.database().ref("users/uid/"+state.uid).update({coins:state.coins});
-  const rc=Number(snap.val().coins)||0;
-  await toRef.update({coins:rc+amt});
-  updateUI();
-  st.style.color="#00ff88";st.innerText="Transfer Success";
-  setTimeout(closeSendPopup,1200);
-}
-function logoutUser(){
-  sessionStorage.removeItem("gk_uid");
-  state.uid=null;state.coins=0;state.betting=false;state.spinning=false;
-  state.bets.fill(0);state.betHistory=[];
-  document.getElementById("coins").innerText="0";
-  document.getElementById("winner").innerText="-";
-  document.getElementById("gameStatus").innerText="PLEASE LOGIN";
-  document.querySelectorAll(".bet-placed").forEach(e=>{e.style.display="none";});
-  document.getElementById("loginBlock").style.display="flex";
-}
 
-</script>
+        // Auth
+        async function login(){
+            const uid=document.getElementById("uid").value.trim();
+            const pass=document.getElementById("pass").value.trim();
+            const st=document.getElementById("loginStatus");
+            if(!uid||!pass){st.style.color="red";st.innerText="UID/Password डालें";return;}
+            st.style.color="#00ccff";st.innerText="Connecting...";
+            try{
+                const snap=await firebase.database().ref("users/uid/"+uid).once("value");
+                if(!snap.exists()){st.style.color="red";st.innerText="UID नहीं मिला";return;}
+                const d=snap.val();
+                if(String(d.password)!==pass){st.style.color="red";st.innerText="Password गलत";return;}
+                if(Number(d.isActive)!==10){st.style.color="red";st.innerText="Account Active नहीं";return;}
+                state.uid = uid; state.coins = Number(d.coins) || 0; state.betting = true;
+                state.noBetRounds = 0; // Reset counter on login
+                sessionStorage.setItem("gk_uid", uid);
+                updateUI();
+                document.getElementById("gameStatus").textContent = "PLACE YOUR BETS";
+                document.getElementById("loginBlock").style.display="none";
+            }catch(e){ st.style.color="red";st.innerText="Firebase Error"; }
+        }
+
+        function logoutUser(){
+            sessionStorage.removeItem("gk_uid");
+            state.uid=null; state.coins=0; state.betting=false; state.noBetRounds = 0;
+            state.bets.fill(0); state.betHistory=[];
+            updateUI();
+            document.getElementById("winner").innerText="-";
+            document.getElementById("gameStatus").innerText="PLEASE LOGIN";
+            document.getElementById("loginBlock").style.display="flex";
+        }
+
+        function openSendPopup(){ if(!state.uid){ alert("Please login"); return; } document.getElementById("sendPopup").style.display="flex"; }
+        function closeSendPopup(){ document.getElementById("sendPopup").style.display="none"; }
+        async function sendCoins(){
+            const toUID=document.getElementById("sendUID").value.trim();
+            const amt=Number(document.getElementById("sendAmount").value);
+            const st=document.getElementById("sendStatus");
+            if(!toUID||amt<=0){st.style.color="red";st.innerText="Invalid Input";return;}
+            if(amt>state.coins){st.style.color="red";st.innerText="Low Balance";return;}
+            const toRef=firebase.database().ref("users/uid/"+toUID);
+            const snap=await toRef.once("value");
+            if(!snap.exists()){st.style.color="red";st.innerText="UID Not Found";return;}
+            state.coins-=amt;
+            await firebase.database().ref("users/uid/"+state.uid).update({coins:state.coins});
+            const rc=Number(snap.val().coins)||0;
+            await toRef.update({coins:rc+amt});
+            updateUI();
+            st.style.color="#00ff88";st.innerText="Transfer Success";
+            setTimeout(closeSendPopup,1200);
+        }
+    </script>
 
     <div id="loginBlock" style="position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:999999">
-      <div style="background:#111;padding:25px;border-radius:12px;width:280px;text-align:center">
-        <h3 style="margin:0 0 15px">Login Required</h3>
-        <input id="uid" placeholder="UID" style="width:100%;padding:10px;margin:6px 0">
-        <input id="pass" type="password" placeholder="Password" style="width:100%;padding:10px;margin:6px 0">
-        <button onclick="login()" style="width:100%;padding:10px;margin-top:10px;background:#FFEB00;border:none;border-radius:6px;font-weight:bold">
-          LOGIN
-        </button>
-        <div id="loginStatus" style="margin-top:10px;font-size:13px"></div>
-      </div>
+        <div style="background:#111;padding:25px;border-radius:12px;width:280px;text-align:center">
+            <h3>Login Required</h3>
+            <input id="uid" placeholder="UID" style="width:100%;padding:10px;margin:6px 0">
+            <input id="pass" type="password" placeholder="Password" style="width:100%;padding:10px;margin:6px 0">
+            <button onclick="login()" style="width:100%;padding:10px;margin-top:10px;background:#FFEB00;border:none;border-radius:6px;font-weight:bold">LOGIN</button>
+            <div id="loginStatus" style="margin-top:10px;font-size:13px"></div>
+        </div>
     </div>
 
-    <script>
-    async function login(){
-      const uid=document.getElementById("uid").value.trim();
-      const pass=document.getElementById("pass").value.trim();
-      const st=document.getElementById("loginStatus");
-      if(!uid||!pass){st.style.color="red";st.innerText="UID/Password डालें";return;}
-      st.style.color="#00ccff";st.innerText="Connecting...";
-      try{
-        const snap=await firebase.database().ref("users/uid/"+uid).once("value");
-        if(!snap.exists()){st.style.color="red";st.innerText="UID नहीं मिला";return;}
-        const d=snap.val();
-        if(String(d.password)!==pass){st.style.color="red";st.innerText="Password गलत";return;}
-        if(Number(d.isActive)!==10){st.style.color="red";st.innerText="Account Active नहीं";return;}
-        
-        // --- COIN LOADING LOGIC ---
-        state.uid = uid;
-        state.coins = Number(d.coins) || 0; // Load coins from DB
-        state.betting = true;
-        
-        sessionStorage.setItem("gk_uid", uid);
-        updateUI();
-        document.getElementById("gameStatus").textContent = "PLACE YOUR BETS";
-        document.getElementById("loginBlock").style.display="none";
-      }catch(e){
-        st.style.color="red";st.innerText="Firebase Error";
-      }
-    }
-    
-function openSendPopup(){
-  if(!state.uid){ alert("Please login"); return; }
-  document.getElementById("sendPopup").style.display="flex";
-}
-function closeSendPopup(){
-  document.getElementById("sendPopup").style.display="none";
-}
-async function sendCoins(){
-  const toUID=document.getElementById("sendUID").value.trim();
-  const amt=Number(document.getElementById("sendAmount").value);
-  const st=document.getElementById("sendStatus");
-  if(!toUID||amt<=0){st.style.color="red";st.innerText="Invalid Input";return;}
-  if(amt>state.coins){st.style.color="red";st.innerText="Low Balance";return;}
-  const toRef=firebase.database().ref("users/uid/"+toUID);
-  const snap=await toRef.once("value");
-  if(!snap.exists()){st.style.color="red";st.innerText="UID Not Found";return;}
-  state.coins-=amt;
-  await firebase.database().ref("users/uid/"+state.uid).update({coins:state.coins});
-  const rc=Number(snap.val().coins)||0;
-  await toRef.update({coins:rc+amt});
-  updateUI();
-  st.style.color="#00ff88";st.innerText="Transfer Success";
-  setTimeout(closeSendPopup,1200);
-}
-function logoutUser(){
-  sessionStorage.removeItem("gk_uid");
-  state.uid=null;state.coins=0;state.betting=false;state.spinning=false;
-  state.bets.fill(0);state.betHistory=[];
-  document.getElementById("coins").innerText="0";
-  document.getElementById("winner").innerText="-";
-  document.getElementById("gameStatus").innerText="PLEASE LOGIN";
-  document.querySelectorAll(".bet-placed").forEach(e=>{e.style.display="none";});
-  document.getElementById("loginBlock").style.display="flex";
-}
-
-</script>
-    
-<div id="sendPopup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);
-z-index:999999;align-items:center;justify-content:center">
-  <div style="background:#111;padding:20px;border-radius:12px;width:280px;text-align:center">
-    <h3>Send Coins</h3>
-    <input id="sendUID" placeholder="Receiver UID" style="width:100%;padding:10px;margin:6px 0">
-    <input id="sendAmount" type="number" placeholder="Amount" style="width:100%;padding:10px;margin:6px 0">
-    <button onclick="sendCoins()" style="width:100%;padding:10px;background:#00c853;border:none;border-radius:6px;font-weight:bold">SEND</button>
-    <button onclick="closeSendPopup()" style="width:100%;margin-top:6px;padding:8px;background:#444;color:#fff;border:none;border-radius:6px">CANCEL</button>
-    <div id="sendStatus" style="margin-top:8px;font-size:13px"></div>
-  </div>
-</div>
-
+    <div id="sendPopup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:999999;align-items:center;justify-content:center">
+        <div style="background:#111;padding:20px;border-radius:12px;width:280px;text-align:center">
+            <h3>Send Coins</h3>
+            <input id="sendUID" placeholder="Receiver UID" style="width:100%;padding:10px;margin:6px 0">
+            <input id="sendAmount" type="number" placeholder="Amount" style="width:100%;padding:10px;margin:6px 0">
+            <button onclick="sendCoins()" style="width:100%;padding:10px;background:#00c853;border:none;border-radius:6px;font-weight:bold">SEND</button>
+            <button onclick="closeSendPopup()" style="width:100%;margin-top:6px;padding:8px;background:#444;color:#fff;border:none;border-radius:6px">CANCEL</button>
+            <div id="sendStatus" style="margin-top:8px;font-size:13px"></div>
+        </div>
+    </div>
 </body>
 </html>
