@@ -60,7 +60,7 @@
             display: flex; 
             justify-content: center; 
             align-items: flex-start; 
-            background-image: url('https://uploads.onecompiler.io/445tyzay6/447hgwnps/1000050466.jpg'); 
+            background-image: url('https://uploads.onecompiler.io/445tyzay6/448mutbvh/1000053141.png'); 
             background-size: cover; 
             z-index: 100; 
             padding-top: 1px; 
@@ -184,7 +184,7 @@
 
         canvas#wheel { 
             width: 260%; 
-            height: 95%; 
+            height: 95%;
             border-radius: 50%; 
         }
 
@@ -219,34 +219,45 @@
         @keyframes blink-pointer { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
         .slider-container { 
-            width: 122px; 
-            height: 90px; 
+            width: 116px; 
+            height: 89px; 
             position: absolute; 
             top: 50%; 
             left: 50%; 
             transform: translate(-50%, -50%); 
             overflow: hidden; 
             border-radius: 50%; 
-            background: #000; 
-            z-index: 100; 
+            background:#FFD700;
+            linear-gradient(190deg, #000, #333),
+            linear-gradient(190deg, #FFD700, #b8860b);
+            background-blend-mode: overlay;
+            box-shadow:
+            0 0 25px rgba(255,215,0,0.8),
+            inset 0 0 25px rgba(0,0,0,0.9);
+   
         }
-
+        
         .slides-inner { 
             display: flex; 
             width: 1000%; 
-            height: 100%; 
+            height: 150%; 
             transition: transform 8s cubic-bezier(0.1, 0, 0.1, 1); 
-        }
+          
+ 
+}
 
-        .slide-item { 
-            width: 10%; 
-            height: 100%; 
+         .slide-item { 
+            width: 150%;
+            height: 80%; 
             display: flex; 
             justify-content: center; 
-            align-items: center; 
+            align-items: center;
+            margin-top: -9px;
+            background:
+   
         }
-
-        .slide { width: 85%; height: 85%; object-fit: contain; }
+      
+        .slide { width: 70%; height: 70%; object-fit: contain; }
 
         .bet-row { 
             display: flex; 
@@ -255,15 +266,15 @@
             max-width: 900px; 
             margin: auto; 
             z-index: 500; 
-            position: relative; 
-            margin-top: -30px; 
+            position: relative;
+            margin-top: -30px;
         }
 
         .number-box { flex: 1; text-align: center; position: relative; cursor: pointer; }
 
         .number-box .num { 
-            width: 50px; 
-            height: 50px; 
+            width: 60px; 
+            height: 60px;
             border-radius: 50px; 
             background: linear-gradient(180deg, #fff3cf, #ffd36f); 
             display: inline-flex; 
@@ -272,7 +283,15 @@
             font-weight: 1000; 
             color: #1b1300; 
             box-shadow: 0 0 0 10px #ffd36a; 
-            transform: translateY(-22px); 
+            transform: translateY(-14px); 
+            background:
+            linear-gradient(145deg, #000, #333),
+            linear-gradient(145deg, #FFD700, #b8860b);
+            background-blend-mode: overlay;
+            box-shadow:
+            0 0 20px rgba(255,215,0,0.8),
+            inset 0 0 20px rgba(0,0,0,0.95);
+  
         }
 
         .number-box .bet-placed { 
@@ -281,11 +300,22 @@
             transform: translateX(-50%); 
             bottom: 85px; 
             padding: 2px 15px; 
-            border-radius: 100px; 
+            border-radius: 20px; 
             display: none; 
-            background: #ffd36a; 
+            background: #ffd700; 
             color: #111; 
             font-weight: 800; 
+            background:
+            linear-gradient(145deg, #000, #333),
+            linear-gradient(145deg, #FFD700, #b8860b);
+            background-blend-mode: overlay;
+            box-shadow:
+            0 0 15px rgba(255,215,0,0.8),
+            inset 0 0 10px rgba(0,0,0,0.9);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+           
         }
 
         .status-bar { 
@@ -296,6 +326,16 @@
             color: #eee; 
             font-weight: 800; 
             margin-top: 0px; 
+            background:
+      linear-gradient(145deg, #000, #333),
+      linear-gradient(145deg, #FFD700, #b8860b);
+    background-blend-mode: overlay;
+    box-shadow:
+      0 0 15px rgba(255,215,0,0.8),
+      inset 0 0 10px rgba(0,0,0,0.9);
+    display:flex;
+    align-items:center;
+    justify-content:center;
         }
     </style>
 </head>
@@ -331,16 +371,16 @@
                         <div class="pointer-top-image"></div>
                         <div class="slider-container">
                             <div class="slides-inner" id="slider">
-                                <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/447p69nev/1000052760.jpg"></div>
-                                <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/447p5tvep/1000052761.jpg"></div>
-                                <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/447p5tvep/1000052761.jpg"></div>
-                                <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/447k2jy8e/1000050485.jpg"></div>
-                                <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/447p5tvep/1000052761.jpg"></div>
-                                <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/447k2jy8e/1000050486.jpg"></div>
-                                <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/447k2jy8e/1000050485.jpg"></div>
-                                <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/447k2jy8e/1000050484.jpg"></div>
-                                <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/447k2jy8e/1000050486.jpg"></div>
-                                <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/447k2jy8e/1000050485.jpg"></div>
+                                <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/448mfppru/1000053482.png"></div>
+                                <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/448mfppru/1000053482.png"></div>
+                                <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/448mfppru/1000053482.png"></div>
+                                <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/448mfppru/1000053482.png"></div>
+                                <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/448mfppru/1000053482.png"></div>
+                                <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/448mfppru/1000053482.png"></div>
+                                <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/448mfppru/1000053482.png"></div>
+                                <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/448mfppru/1000053482.png"></div>
+                                <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/448mfppru/1000053482.png"></div>
+                                <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/448mfppru/1000053482.png"></div>
                             </div>
                         </div>
                         <canvas id="wheel" width="600" height="600"></canvas>
@@ -480,7 +520,7 @@
             await timerDoc.update({ status: "RESULT", result: result });
         }
 
-        function START_SPIN_ANIMATION(winnerNum) {
+      async  function START_SPIN_ANIMATION(winnerNum) {
             state.spinning = true;
             document.getElementById('gameStatus').textContent = "SPINNING...";
             document.getElementById('ptrOverlay').classList.add('jiggle');
@@ -537,7 +577,7 @@
             });
         }
 
-        function updateLast10History(result) {
+       async function updateLast10History(result) {
             state.last10.unshift(result);
             if (state.last10.length > 10) state.last10.pop();
             document.getElementById('last10').textContent = state.last10.join(', ');
@@ -551,7 +591,7 @@
 
         async function cancelLastBet() {
             if (state.betHistory.length > 0 && state.betting) {
-                const last = state.betHistory.pop();
+                const last = state.betHistory.pop(1,2,3,4,5,6,7,8,9,0);
                 state.coins += last.amount;
                 state.bets[last.num] -= last.amount;
                 updateUI();
@@ -605,7 +645,7 @@
         const ctx = canvas.getContext('2d');
         const W = canvas.width, R = W / 2 - 10;
         const overlayImg = new Image();
-        overlayImg.src = 'https://uploads.onecompiler.io/445tyzay6/44789ygta/1000037218.png';
+        overlayImg.src = 'https://uploads.onecompiler.io/445tyzay6/448metr9w/1000053491.png';
 
         function drawWheel(rot = 0) {
             ctx.clearRect(0, 0, W, W);
