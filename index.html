@@ -5,9 +5,117 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>FunTarget Spinner - Auto Sync Edition</title>
     
-    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js">
+function openSendPopup(){
+  if(!state.uid){ alert("Please login"); return; }
+  document.getElementById("sendPopup").style.display="flex";
+}
+function closeSendPopup(){
+  document.getElementById("sendPopup").style.display="none";
+}
+async function sendCoins(){
+  const toUID=document.getElementById("sendUID").value.trim();
+  const amt=Number(document.getElementById("sendAmount").value);
+  const st=document.getElementById("sendStatus");
+  if(!toUID||amt<=0){st.style.color="red";st.innerText="Invalid Input";return;}
+  if(amt>state.coins){st.style.color="red";st.innerText="Low Balance";return;}
+  const toRef=firebase.database().ref("users/uid/"+toUID);
+  const snap=await toRef.once("value");
+  if(!snap.exists()){st.style.color="red";st.innerText="UID Not Found";return;}
+  state.coins-=amt;
+  await firebase.database().ref("users/uid/"+state.uid).update({coins:state.coins});
+  const rc=Number(snap.val().coins)||0;
+  await toRef.update({coins:rc+amt});
+  updateUI();
+  st.style.color="#00ff88";st.innerText="Transfer Success";
+  setTimeout(closeSendPopup,1200);
+}
+function logoutUser(){
+  sessionStorage.removeItem("gk_uid");
+  state.uid=null;state.coins=0;state.betting=false;state.spinning=false;
+  state.bets.fill(0);state.betHistory=[];
+  document.getElementById("coins").innerText="0";
+  document.getElementById("winner").innerText="-";
+  document.getElementById("gameStatus").innerText="PLEASE LOGIN";
+  document.querySelectorAll(".bet-placed").forEach(e=>{e.style.display="none";});
+  document.getElementById("loginBlock").style.display="flex";
+}
+
+</script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore-compat.js">
+function openSendPopup(){
+  if(!state.uid){ alert("Please login"); return; }
+  document.getElementById("sendPopup").style.display="flex";
+}
+function closeSendPopup(){
+  document.getElementById("sendPopup").style.display="none";
+}
+async function sendCoins(){
+  const toUID=document.getElementById("sendUID").value.trim();
+  const amt=Number(document.getElementById("sendAmount").value);
+  const st=document.getElementById("sendStatus");
+  if(!toUID||amt<=0){st.style.color="red";st.innerText="Invalid Input";return;}
+  if(amt>state.coins){st.style.color="red";st.innerText="Low Balance";return;}
+  const toRef=firebase.database().ref("users/uid/"+toUID);
+  const snap=await toRef.once("value");
+  if(!snap.exists()){st.style.color="red";st.innerText="UID Not Found";return;}
+  state.coins-=amt;
+  await firebase.database().ref("users/uid/"+state.uid).update({coins:state.coins});
+  const rc=Number(snap.val().coins)||0;
+  await toRef.update({coins:rc+amt});
+  updateUI();
+  st.style.color="#00ff88";st.innerText="Transfer Success";
+  setTimeout(closeSendPopup,1200);
+}
+function logoutUser(){
+  sessionStorage.removeItem("gk_uid");
+  state.uid=null;state.coins=0;state.betting=false;state.spinning=false;
+  state.bets.fill(0);state.betHistory=[];
+  document.getElementById("coins").innerText="0";
+  document.getElementById("winner").innerText="-";
+  document.getElementById("gameStatus").innerText="PLEASE LOGIN";
+  document.querySelectorAll(".bet-placed").forEach(e=>{e.style.display="none";});
+  document.getElementById("loginBlock").style.display="flex";
+}
+
+</script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js">
+function openSendPopup(){
+  if(!state.uid){ alert("Please login"); return; }
+  document.getElementById("sendPopup").style.display="flex";
+}
+function closeSendPopup(){
+  document.getElementById("sendPopup").style.display="none";
+}
+async function sendCoins(){
+  const toUID=document.getElementById("sendUID").value.trim();
+  const amt=Number(document.getElementById("sendAmount").value);
+  const st=document.getElementById("sendStatus");
+  if(!toUID||amt<=0){st.style.color="red";st.innerText="Invalid Input";return;}
+  if(amt>state.coins){st.style.color="red";st.innerText="Low Balance";return;}
+  const toRef=firebase.database().ref("users/uid/"+toUID);
+  const snap=await toRef.once("value");
+  if(!snap.exists()){st.style.color="red";st.innerText="UID Not Found";return;}
+  state.coins-=amt;
+  await firebase.database().ref("users/uid/"+state.uid).update({coins:state.coins});
+  const rc=Number(snap.val().coins)||0;
+  await toRef.update({coins:rc+amt});
+  updateUI();
+  st.style.color="#00ff88";st.innerText="Transfer Success";
+  setTimeout(closeSendPopup,1200);
+}
+function logoutUser(){
+  sessionStorage.removeItem("gk_uid");
+  state.uid=null;state.coins=0;state.betting=false;state.spinning=false;
+  state.bets.fill(0);state.betHistory=[];
+  document.getElementById("coins").innerText="0";
+  document.getElementById("winner").innerText="-";
+  document.getElementById("gameStatus").innerText="PLEASE LOGIN";
+  document.querySelectorAll(".bet-placed").forEach(e=>{e.style.display="none";});
+  document.getElementById("loginBlock").style.display="flex";
+}
+
+</script>
 
     <style>
         /* =========================================
@@ -150,7 +258,7 @@
             width: 50px; 
             height: 50px; 
             border-radius: 50%; 
-            border: 7px dashed rgba(255, 255, 255, 0.3); 
+            border: 5px dashed rgba(255, 255, 255, 0.3); 
             display: flex; 
             align-items: center; 
             justify-content: center; 
@@ -325,7 +433,7 @@
             text-align: center; 
             color: #eee; 
             font-weight: 800; 
-            margin-top: 0px; 
+            margin-top: 5px; 
             background:
       linear-gradient(145deg, #000, #333),
       linear-gradient(145deg, #FFD700, #b8860b);
@@ -337,13 +445,44 @@
     align-items:center;
     justify-content:center;
         }
-    </style>
+    
+#topActions{
+  position:absolute;
+  top:10px;
+  right:10px;
+  display:flex;
+  gap:8px;
+  z-index:99999;
+}
+#topActions button{
+  padding:6px 14px;
+  font-size:12px;
+  font-weight:bold;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  color:#fff;
+}
+#topActions button:first-child{
+  background:linear-gradient(180deg,#00c853,#009624);
+}
+#topActions button:last-child{
+  background:linear-gradient(180deg,#1e90ff,#003cff);
+}
+
+</style>
 </head>
 
 <body>
     <div class="stars"></div>
     <div class="game-container-wrap" id="mainGame">
         <div class="game-app">
+
+<div id="topActions">
+  <button onclick="openSendPopup()">SEND</button>
+  <button onclick="logoutUser()">LOGOUT</button>
+</div>
+
             
             <button id="cancelSpecific" onclick="cancelLastBet()">CANCEL</button>
             <button id="cancelAll" onclick="cancelAllBets()">CLEAR</button>
@@ -682,7 +821,43 @@
             selectChip(10);
             updateUI();
         };
-    </script>
+    
+function openSendPopup(){
+  if(!state.uid){ alert("Please login"); return; }
+  document.getElementById("sendPopup").style.display="flex";
+}
+function closeSendPopup(){
+  document.getElementById("sendPopup").style.display="none";
+}
+async function sendCoins(){
+  const toUID=document.getElementById("sendUID").value.trim();
+  const amt=Number(document.getElementById("sendAmount").value);
+  const st=document.getElementById("sendStatus");
+  if(!toUID||amt<=0){st.style.color="red";st.innerText="Invalid Input";return;}
+  if(amt>state.coins){st.style.color="red";st.innerText="Low Balance";return;}
+  const toRef=firebase.database().ref("users/uid/"+toUID);
+  const snap=await toRef.once("value");
+  if(!snap.exists()){st.style.color="red";st.innerText="UID Not Found";return;}
+  state.coins-=amt;
+  await firebase.database().ref("users/uid/"+state.uid).update({coins:state.coins});
+  const rc=Number(snap.val().coins)||0;
+  await toRef.update({coins:rc+amt});
+  updateUI();
+  st.style.color="#00ff88";st.innerText="Transfer Success";
+  setTimeout(closeSendPopup,1200);
+}
+function logoutUser(){
+  sessionStorage.removeItem("gk_uid");
+  state.uid=null;state.coins=0;state.betting=false;state.spinning=false;
+  state.bets.fill(0);state.betHistory=[];
+  document.getElementById("coins").innerText="0";
+  document.getElementById("winner").innerText="-";
+  document.getElementById("gameStatus").innerText="PLEASE LOGIN";
+  document.querySelectorAll(".bet-placed").forEach(e=>{e.style.display="none";});
+  document.getElementById("loginBlock").style.display="flex";
+}
+
+</script>
 
     <div id="loginBlock" style="position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:999999">
       <div style="background:#111;padding:25px;border-radius:12px;width:280px;text-align:center">
@@ -723,6 +898,55 @@
         st.style.color="red";st.innerText="Firebase Error";
       }
     }
-    </script>
-    </body>
+    
+function openSendPopup(){
+  if(!state.uid){ alert("Please login"); return; }
+  document.getElementById("sendPopup").style.display="flex";
+}
+function closeSendPopup(){
+  document.getElementById("sendPopup").style.display="none";
+}
+async function sendCoins(){
+  const toUID=document.getElementById("sendUID").value.trim();
+  const amt=Number(document.getElementById("sendAmount").value);
+  const st=document.getElementById("sendStatus");
+  if(!toUID||amt<=0){st.style.color="red";st.innerText="Invalid Input";return;}
+  if(amt>state.coins){st.style.color="red";st.innerText="Low Balance";return;}
+  const toRef=firebase.database().ref("users/uid/"+toUID);
+  const snap=await toRef.once("value");
+  if(!snap.exists()){st.style.color="red";st.innerText="UID Not Found";return;}
+  state.coins-=amt;
+  await firebase.database().ref("users/uid/"+state.uid).update({coins:state.coins});
+  const rc=Number(snap.val().coins)||0;
+  await toRef.update({coins:rc+amt});
+  updateUI();
+  st.style.color="#00ff88";st.innerText="Transfer Success";
+  setTimeout(closeSendPopup,1200);
+}
+function logoutUser(){
+  sessionStorage.removeItem("gk_uid");
+  state.uid=null;state.coins=0;state.betting=false;state.spinning=false;
+  state.bets.fill(0);state.betHistory=[];
+  document.getElementById("coins").innerText="0";
+  document.getElementById("winner").innerText="-";
+  document.getElementById("gameStatus").innerText="PLEASE LOGIN";
+  document.querySelectorAll(".bet-placed").forEach(e=>{e.style.display="none";});
+  document.getElementById("loginBlock").style.display="flex";
+}
+
+</script>
+    
+<div id="sendPopup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);
+z-index:999999;align-items:center;justify-content:center">
+  <div style="background:#111;padding:20px;border-radius:12px;width:280px;text-align:center">
+    <h3>Send Coins</h3>
+    <input id="sendUID" placeholder="Receiver UID" style="width:100%;padding:10px;margin:6px 0">
+    <input id="sendAmount" type="number" placeholder="Amount" style="width:100%;padding:10px;margin:6px 0">
+    <button onclick="sendCoins()" style="width:100%;padding:10px;background:#00c853;border:none;border-radius:6px;font-weight:bold">SEND</button>
+    <button onclick="closeSendPopup()" style="width:100%;margin-top:6px;padding:8px;background:#444;color:#fff;border:none;border-radius:6px">CANCEL</button>
+    <div id="sendStatus" style="margin-top:8px;font-size:13px"></div>
+  </div>
+</div>
+
+</body>
 </html>
