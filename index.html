@@ -34,7 +34,7 @@ html,body{
 /* Screen wrapper */
 #screen{
   width:100vw;
-  height:100vh;
+  height:50vh;
   overflow:hidden;
   display:flex;
   align-items:center;
@@ -43,8 +43,8 @@ html,body{
 
 /* Fixed design size */
 #gameRoot{
-  width:1200px;
-  height:900px;
+  width:1280px;
+  height:400px;
   transform-origin:center center;
   position:relative;
 }
@@ -321,7 +321,7 @@ html,body{
             display: flex; 
             justify-content: space-between; 
             width: 100%; 
-            max-width: 1280px; 
+            max-width: 900px; 
             margin: auto; 
             z-index: 500; 
             position: relative;
@@ -902,7 +902,7 @@ window.addEventListener('load', adjustLayout);
 <script>
 function scaleGameCover(){
     const baseW = 1280;
-    const baseH = 900;
+    const baseH = 720;
 
     const sw = window.innerWidth;
     const sh = window.innerHeight;
