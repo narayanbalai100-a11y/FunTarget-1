@@ -3,49 +3,60 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>FunTarget FINAL – Landscape Locked</title>
+<title>FunTarget FINAL COVER</title>
 
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{width:100%;height:100%;overflow:hidden;background:black;font-family:'Segoe UI',Roboto,Arial,sans-serif}
+html,body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:black;
+    font-family:'Segoe UI',Roboto,Arial,sans-serif;
+}
 
-/* Portrait block */
+/* Portrait lock message */
 @media screen and (orientation: portrait){
   body::before{
     content:"Please rotate your device";
-    position:fixed;inset:0;
-    background:black;color:white;
+    position:fixed;
+    inset:0;
+    background:black;
+    color:white;
     font-size:22px;
-    display:flex;align-items:center;justify-content:center;
+    display:flex;
+    align-items:center;
+    justify-content:center;
     z-index:99999999;
   }
 }
 
 /* Screen wrapper */
 #screen{
-  width:100vw;height:100vh;
-  display:flex;align-items:center;justify-content:center;
+  width:100vw;
+  height:100vh;
   overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 
-/* Fixed base size */
+/* Fixed design size */
 #gameRoot{
-  width:1280px;height:720px;
+  width:1280px;
+  height:720px;
   transform-origin:center center;
   position:relative;
 }
-
-/* --- original styles kept --- */
-html,body{touch-action:none}
 </style>
 </head>
 
 <body>
+
 <div id="screen">
 <div id="gameRoot">
 
-<!-- ===== ORIGINAL GAME FILE START ===== -->
-
+<!-- ===== ORIGINAL GAME FILE (UNCHANGED) ===== -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -883,21 +894,28 @@ window.addEventListener('load', adjustLayout);
 </body>
 </html>
 
-
 <!-- ===== ORIGINAL GAME FILE END ===== -->
 
 </div>
 </div>
 
 <script>
-function scaleGame(){
-  const baseW=1280, baseH=720;
-  const sw=window.innerWidth, sh=window.innerHeight;
-  const scale=Math.min(sw/baseW, sh/baseH);
-  document.getElementById('gameRoot').style.transform='scale('+scale+')';
+function scaleGameCover(){
+    const baseW = 1280;
+    const baseH = 720;
+
+    const sw = window.innerWidth;
+    const sh = window.innerHeight;
+
+    // COVER logic (no black bars)
+    const scale = Math.max(sw/baseW, sh/baseH);
+
+    document.getElementById("gameRoot").style.transform =
+        "scale(" + scale + ")";
 }
-window.addEventListener('resize',scaleGame);
-window.addEventListener('load',scaleGame);
+
+window.addEventListener("resize", scaleGameCover);
+window.addEventListener("load", scaleGameCover);
 </script>
 
 </body>
