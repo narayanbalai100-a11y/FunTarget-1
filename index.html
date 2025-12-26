@@ -72,7 +72,7 @@
 
         .game-app { 
             padding-bottom: 1;
-            margin-bottom: 10px;
+            margin-bottom: 0px;
             env(safe-area-inset-bottom);
             margin: 0px auto; 
             display: flex; 
@@ -337,18 +337,20 @@
 
         #topActions {
             position: absolute;
+            
             top: 10px;
             right: 10px;
             display: flex;
             gap: 8px;
+            left: 5px;
             z-index: 99999;
         }
         #topActions button {
-            padding: 6px 14px;
-            font-size: 12px;
+            padding: 1px 14px;
+            font-size: 10px;
             font-weight: bold;
             border: none;
-            border-radius: 6px;
+            border-radius: 7px;
             cursor: pointer;
             color: #fff;
         }
@@ -826,5 +828,9 @@ window.addEventListener('load', adjustLayout);
             <div id="sendStatus" style="margin-top:8px;font-size:13px"></div>
         </div>
     </div>
+    <div class="game-app" id="autoScaleApp">
+    ... गेम का बाकी सामान ...
+</div>
+
 </body>
 </html>
