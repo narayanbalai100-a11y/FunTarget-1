@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>FunTarget Spinner - Auto Sync Edition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>FunTarget Spinner - Bottom Adjusted</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore-compat.js"></script>
@@ -11,356 +11,183 @@
 
     <style>
         /* =========================================
-           CSS STYLES - RESPONSIVE SCALING
+           CORE RESET
            ========================================= */
-        * { 
-            box-sizing: border-box; 
-            margin: 0; 
-            padding: 0; 
-            font-family: 'Segoe UI', Roboto, Arial, sans-serif; 
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
 
         html, body { 
-            height: 100%; 
-            width: 100%;
+            width: 100vw; 
+            height: 100vh; 
             overflow: hidden; 
-            background: black; 
-            color: #fff; 
-            touch-action: none; 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        /* Responsive Wrapper: यह गेम को स्केल करेगा */
-        #viewport-wrapper {
-            width: 1300px; /* Base Width */
-            height: 600px; /* Base Height */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transform-origin: center center;
-            position: relative;
-        }
-
-        .stars { 
-            width: 100%; 
-            height: 100%; 
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            z-index: -1000; 
-            overflow: hidden; 
-        }
-
-        .stars::after { 
-            content: ""; 
-            position: absolute; 
-            width: 200%; 
-            height: 200%; 
-            background: radial-gradient(2px 2px at 20% 30%, #fff, transparent), 
-                        radial-gradient(2px 2px at 80% 60%, #fff, transparent); 
-            animation: moveStars 12s linear infinite; 
-        }
-
-        @keyframes moveStars { 
-            from { transform: translateY(0); } 
-            to { transform: translateY(-200px); } 
-        }
-
-        .game-container-wrap { 
-            width: 100%; 
-            height: 100%; 
+            background: #000; 
             display: flex; 
             justify-content: center; 
-            align-items: center; 
-            background-image: url('https://uploads.onecompiler.io/445tyzay6/448mutbvh/1000053141.png'); 
-            background-size: 100% 100%; 
-            position: relative;
+            align-items: flex-end; /* गेम हमेशा नीचे रहेगा */
+            touch-action: none;
         }
 
-        .game-app { 
-            display: flex; 
-            flex-direction: column; 
-            position: relative; 
-            background: rgba(0, 0, 0, 0.3); 
-            width: 100%; 
-            height: 100%;
-            padding: 20px;
+        /* Responsive Wrapper: Bottom-Center Origin */
+        #game-wrapper {
+            width: 1280px; 
+            height: 720px; 
+            position: absolute;
+            bottom: 0; /* नीचे से सटा हुआ */
+            transform-origin: bottom center; /* स्केल नीचे से ऊपर होगा */
+            display: flex;
+            flex-direction: column;
+            background-image: url('https://uploads.onecompiler.io/445tyzay6/448mutbvh/1000053141.png');
+            background-size: 100% 100%;
+            overflow: hidden;
+            z-index: 10;
         }
 
-        #cancelSpecific { 
-            background: linear-gradient(180deg, #9c2b2b, #6a1a1a); 
-            position: absolute; 
-            top: 220px; 
-            left: 20px; 
-            width: 80px; 
-            height: 35px; 
-            z-index: 1000; 
-            font-size: 14px; 
-            color: white; 
-            border: none; 
-            border-radius: 4px; 
-            cursor: pointer; 
+        .stars { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+        .stars::after { 
+            content: ""; position: absolute; width: 200%; height: 200%; 
+            background: radial-gradient(2px 2px at 20% 30%, #fff, transparent), radial-gradient(2px 2px at 80% 60%, #fff, transparent); 
+            animation: moveStars 12s linear infinite; 
         }
+        @keyframes moveStars { from { transform: translateY(0); } to { transform: translateY(-200px); } }
 
-        #cancelAll { 
-            background: linear-gradient(180deg, #223b8b, #14255a); 
-            position: absolute; 
-            top: 220px; 
-            right: 20px; 
-            width: 80px; 
-            height: 35px; 
-            z-index: 1000; 
-            font-size: 14px; 
-            color: white; 
-            border: none; 
-            border-radius: 4px; 
-            cursor: pointer; 
-        }
+        .content { position: relative; z-index: 10; width: 100%; height: 100%; display: flex; flex-direction: column; padding: 10px; }
 
-        .top-row { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            flex: 1;
-        }
+        /* Controls */
+        #cancelSpecific { position: absolute; top: 45%; left: 30px; background: linear-gradient(180deg, #9c2b2b, #6a1a1a); color: white; border: none; padding: 12px 25px; border-radius: 5px; font-weight: bold; cursor: pointer; z-index: 100; font-size: 18px; }
+        #cancelAll { position: absolute; top: 45%; right: 30px; background: linear-gradient(180deg, #223b8b, #14255a); color: white; border: none; padding: 12px 25px; border-radius: 5px; font-weight: bold; cursor: pointer; z-index: 100; font-size: 18px; }
 
-        .panel { 
-            background: rgba(0, 0, 0, 0.4); 
-            border-radius: 12px; 
-            padding: 8px; 
-            min-width: 180px; 
-            margin-bottom: 10px; 
-            border: 1px solid rgba(255,215,0,0.3);
-        }
-
-        .panel h4 { font-size: 16px; text-align: center; margin-bottom: 5px; color: #ffd36a; }
-        .panel .value { 
-            background: linear-gradient(0deg, #fff3b1, #ffd36a); 
-            color: #000; 
-            padding: 5px 10px; 
-            border-radius: 30px; 
-            text-align: center; 
-            font-weight: 900; 
-            font-size: 28px; 
-        }
+        .top-section { display: flex; justify-content: space-between; align-items: flex-start; flex: 1; padding: 10px 40px; }
         
-        .chip-container { display: flex; gap: 15px; justify-content: center; }
-        .chip { 
-            width: 55px; height: 55px; border-radius: 50%; 
-            border: 3px solid rgba(255,255,255,0.5); display: flex; 
-            align-items: center; justify-content: center; font-weight: bold; 
-            cursor: pointer; transition: 0.2s; font-size: 14px;
-        }
-        .chip.active { transform: scale(1.2); border: 4px solid #fff; box-shadow: 0 0 15px #ffd36a; }
-        .chip[data-amt="1"] { background: radial-gradient(circle, #ff5f6d, #ffc371); }
-        .chip[data-amt="5"] { background: radial-gradient(circle, #ff9966, #ff5e62); }
-        .chip[data-amt="10"] { background: radial-gradient(circle, #11998e, #38ef7d); }
-        .chip[data-amt="100"] { background: radial-gradient(circle, #4568dc, #b06ab3); }
-        .chip[data-amt="500"] { background: radial-gradient(circle, #f80759, #bc4e9c); }
-        .chip[data-amt="1000"] { background: radial-gradient(circle, #00c6ff, #0072ff); }
+        .panel { background: rgba(0,0,0,0.7); border: 2px solid gold; border-radius: 10px; padding: 10px; min-width: 180px; text-align: center; }
+        .panel h4 { font-size: 16px; margin-bottom: 5px; color: gold; letter-spacing: 1px; }
+        .panel .value { background: linear-gradient(0deg, #fff3b1, #ffd36a); color: #000; font-size: 32px; font-weight: 900; border-radius: 5px; padding: 5px; }
 
-        .wheel-wrap { 
-            width: 450px; height: 450px; 
-            display: flex; align-items: center; justify-content: center; position: relative; 
-        }
+        /* Wheel Area */
+        .wheel-container { position: relative; width: 450px; height: 450px; display: flex; justify-content: center; align-items: center; margin-top: -20px; }
+        canvas#wheel { width: 100%; height: 100%; filter: drop-shadow(0 0 15px rgba(255,215,0,0.5)); }
 
-        canvas#wheel { width: 100%; height: 100%; border-radius: 50%; }
-
-        .pointer-overlay, .pointer-top-image { 
-            position: absolute; top: 50%; left: 50%; 
-            transform: translate(-50%, -145%); 
-            width: 160px; height: 160px; background-size: contain; z-index: 100; 
+        .slider-box { 
+            position: absolute; width: 110px; height: 110px; background: #000; border: 5px solid gold; 
+            border-radius: 50%; overflow: hidden; z-index: 50; box-shadow: 0 0 30px gold;
         }
-        .pointer-overlay { background-image: url('https://uploads.onecompiler.io/445tyzay6/447a3r3jd/1000038035.png'); }
-        .pointer-top-image { background-image: url('https://uploads.onecompiler.io/445tyzay6/4479yvh72/1000038029.png'); z-index: 50; }
+        .slides-inner { display: flex; width: 1000%; height: 100%; transition: transform 5s cubic-bezier(0.1, 0, 0.1, 1); }
+        .slide-item { width: 10%; display: flex; justify-content: center; align-items: center; }
+        .slide-item img { width: 80%; }
 
-        .slider-container { 
-            width: 120px; height: 120px; position: absolute; 
-            top: 50%; left: 50%; transform: translate(-50%, -50%); 
-            overflow: hidden; border-radius: 50%; background: #FFD700;
-            box-shadow: 0 0 25px rgba(255,215,0,0.8), inset 0 0 25px rgba(0,0,0,0.9);
-            z-index: 60;
-        }
-        .slides-inner { display: flex; width: 1000%; height: 100%; }
-        .slide-item { width: 10%; height: 100%; display: flex; justify-content: center; align-items: center; }
-        .slide { width: 80%; height: 80%; object-fit: contain; }
+        .ptr { position: absolute; top: -15px; width: 160px; z-index: 60; filter: drop-shadow(0 5px 5px black); }
 
-        .bet-row { 
-            display: flex; justify-content: center; gap: 10px; width: 100%; 
-            padding: 10px 0; margin-top: 10px;
-        }
+        /* Bottom Betting - FIXED AT BOTTOM */
+        .bet-grid { display: flex; justify-content: center; gap: 12px; padding: 20px 0; background: rgba(0,0,0,0.5); }
+        .num-box { width: 100px; height: 100px; background: linear-gradient(145deg, #FFD700, #b8860b); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; position: relative; border: 3px solid #111; box-shadow: 0 5px 0 #666; }
+        .num-box .digit { font-size: 45px; font-weight: 900; color: #111; }
+        .num-box .bet-val { position: absolute; top: -12px; background: #ff0000; padding: 3px 10px; border-radius: 12px; font-size: 14px; color: white; display: none; border: 2px solid white; font-weight: bold; z-index: 20; }
 
-        .number-box { width: 85px; height: 85px; position: relative; cursor: pointer; }
-        .number-box .num { 
-            width: 100%; height: 100%; border-radius: 12px; 
-            display: flex; align-items: center; justify-content: center; 
-            font-weight: 900; font-size: 32px; color: #1b1300; 
-            background: linear-gradient(145deg, #FFD700, #b8860b);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-        }
+        .chip-stack { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
+        .chip { width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 4px dashed white; cursor: pointer; transition: 0.2s; font-size: 18px; color: white; }
+        .chip.active { transform: scale(1.25); border-style: solid; box-shadow: 0 0 20px white; z-index: 5; }
 
-        .number-box .bet-placed { 
-            position: absolute; top: -15px; right: -10px; 
-            background: #ff0000; color: white; padding: 2px 8px; 
-            border-radius: 10px; font-size: 14px; font-weight: bold; border: 2px solid white;
-        }
+        /* Status & UI Elements */
+        #gameStatus { text-align: center; color: #ffd36a; font-size: 24px; font-weight: bold; padding: 10px; background: rgba(0,0,0,0.8); border-top: 2px solid gold; }
 
-        .status-bar { 
-            background: linear-gradient(90deg, transparent, rgba(255,215,0,0.2), transparent);
-            padding: 10px; text-align: center; font-weight: bold; font-size: 20px; color: #ffd36a;
-        }
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+        .card { background: #111; padding: 40px; border-radius: 20px; border: 3px solid gold; width: 350px; text-align: center; color: white; }
+        .card input { width: 100%; padding: 15px; margin: 15px 0; border-radius: 8px; border: none; font-size: 16px; }
+        .card button { width: 100%; padding: 15px; background: gold; border: none; font-weight: bold; cursor: pointer; font-size: 18px; border-radius: 8px; }
 
-        #topActions { position: absolute; top: 20px; right: 20px; display: flex; gap: 10px; z-index: 10000; }
-        #topActions button { padding: 8px 16px; font-weight: bold; border-radius: 5px; border: none; cursor: pointer; color: white; }
-        .btn-send { background: #00c853; }
-        .btn-logout { background: #1e90ff; }
-
-        /* Login & Popup Styling */
-        .modal-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.9); 
-            display: flex; align-items: center; justify-content: center; z-index: 999999;
-        }
-        .modal-content {
-            background: #111; padding: 30px; border-radius: 15px; width: 320px; 
-            text-align: center; border: 1px solid #ffd36a;
-        }
-        .modal-content input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 5px; border: none; }
-        .modal-content button { width: 100%; padding: 12px; background: #FFEB00; border: none; font-weight: bold; cursor: pointer; }
-
-        @keyframes result-blink {
-            0%, 100% { background: linear-gradient(145deg, #FFD700, #b8860b); }
-            50% { background: #0072ff; color: #fff; box-shadow: 0 0 30px #0072ff; }
-        }
-        .blink-blue { animation: result-blink 0.4s ease-in-out 10; }
     </style>
 </head>
-
 <body>
-    <div class="stars"></div>
-    
-    <div id="viewport-wrapper">
-        <div class="game-container-wrap" id="mainGame">
-            <div class="game-app">
-                <div id="topActions">
-                    <button class="btn-send" onclick="openSendPopup()">SEND</button>
-                    <button class="btn-logout" onclick="logoutUser()">LOGOUT</button>
-                </div>
-                
-                <button id="cancelSpecific" onclick="cancelLastBet()">UNDO</button>
-                <button id="cancelAll" onclick="cancelAllBets()">CLEAR</button>
 
-                <div class="top-row">
-                    <div class="left-panels">
-                        <div class="panel">
-                            <h4>COINS</h4>
-                            <div id="coins" class="value">0</div>
-                        </div>
-                        <div class="panel">
-                            <h4>TIME</h4>
-                            <div id="time" class="value">60</div>
-                        </div>
-                        <div class="chip-container">
-                            <div class="chip" data-amt="1" onclick="selectChip(1)">1</div>
-                            <div class="chip" data-amt="5" onclick="selectChip(5)">5</div>
-                            <div class="chip" data-amt="10" onclick="selectChip(10)">10</div>
-                        </div>
-                    </div>
-
-                    <div class="center-wheel-container">
-                        <div class="wheel-wrap">
-                            <div class="pointer-overlay" id="ptrOverlay"></div>
-                            <div class="pointer-top-image"></div>
-                            <div class="slider-container">
-                                <div class="slides-inner" id="slider">
-                                    <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/448mfppru/1000053482.png"></div>
-                                    <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/448mfppru/1000053482.png"></div>
-                                    <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/448mfppru/1000053482.png"></div>
-                                    <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/448mfppru/1000053482.png"></div>
-                                    <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/448mfppru/1000053482.png"></div>
-                                    <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/448mfppru/1000053482.png"></div>
-                                    <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/448mfppru/1000053482.png"></div>
-                                    <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/448mfppru/1000053482.png"></div>
-                                    <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/448mfppru/1000053482.png"></div>
-                                    <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/448mfppru/1000053482.png"></div>
-                                </div>
-                            </div>
-                            <canvas id="wheel" width="600" height="600"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="right-panels">
-                        <div class="panel">
-                            <h4>WINNER</h4>
-                            <div id="winner" class="value">-</div>
-                        </div>
-                        <div class="panel">
-                            <h4>HISTORY</h4>
-                            <div id="last10" class="value" style="font-size:18px; min-height: 40px;">-</div>
-                        </div>
-                        <div class="chip-container">
-                            <div class="chip" data-amt="100" onclick="selectChip(100)">100</div>
-                            <div class="chip" data-amt="500" onclick="selectChip(500)">500</div>
-                            <div class="chip" data-amt="1000" onclick="selectChip(1000)">1000</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bet-row" id="betRow"></div>
-                <div class="status-bar" id="gameStatus">PLEASE LOGIN FIRST</div>
+    <div id="game-wrapper">
+        <div class="stars"></div>
+        <div class="content">
+            <div style="position: absolute; top: 15px; right: 20px; display: flex; gap: 15px;">
+                <button onclick="openSendPopup()" style="background:#00c853; color:white; border:none; padding:8px 20px; border-radius:5px; font-weight:bold; cursor:pointer;">SEND</button>
+                <button onclick="logoutUser()" style="background:#1e90ff; color:white; border:none; padding:8px 20px; border-radius:5px; font-weight:bold; cursor:pointer;">LOGOUT</button>
             </div>
+
+            <button id="cancelSpecific" onclick="cancelLastBet()">UNDO</button>
+            <button id="cancelAll" onclick="cancelAllBets()">CLEAR</button>
+
+            <div class="top-section">
+                <div>
+                    <div class="panel"><h4>COINS</h4><div id="coins" class="value">0</div></div>
+                    <div class="chip-stack">
+                        <div class="chip" style="background:linear-gradient(#9c27b0, #673ab7)" onclick="selectChip(1, this)">1</div>
+                        <div class="chip" style="background:linear-gradient(#ff9800, #f44336)" onclick="selectChip(5, this)">5</div>
+                        <div class="chip active" style="background:linear-gradient(#009688, #00796b)" onclick="selectChip(10, this)">10</div>
+                    </div>
+                </div>
+
+                <div class="wheel-container">
+                    <img src="https://uploads.onecompiler.io/445tyzay6/447a3r3jd/1000038035.png" class="ptr">
+                    <div class="slider-box">
+                        <div class="slides-inner" id="slider"></div>
+                    </div>
+                    <canvas id="wheel" width="500" height="500"></canvas>
+                </div>
+
+                <div>
+                    <div class="panel"><h4>WINNER</h4><div id="winner" class="value">-</div></div>
+                    <div class="panel" style="margin-top:10px;"><h4>TIME</h4><div id="time" class="value">60</div></div>
+                    <div class="chip-stack">
+                        <div class="chip" style="background:linear-gradient(#2196f3, #0d47a1)" onclick="selectChip(100, this)">100</div>
+                        <div class="chip" style="background:linear-gradient(#f44336, #b71c1c)" onclick="selectChip(500, this)">500</div>
+                        <div class="chip" style="background:linear-gradient(#ffd600, #ff8f00); color:black" onclick="selectChip(1000, this)">1k</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="last10" style="text-align:center; padding:5px; color:gold; font-weight:bold; font-size:18px;">HISTORY: ...</div>
+
+            <div class="bet-grid" id="betGrid"></div>
+            
+            <div id="gameStatus">PLEASE LOGIN FIRST</div>
         </div>
     </div>
 
-    <div id="loginBlock" class="modal-overlay">
-        <div class="modal-content">
-            <h3>GAME LOGIN</h3>
-            <input id="uid" placeholder="Enter UID">
-            <input id="pass" type="password" placeholder="Enter Password">
+    <div id="loginBlock" class="overlay">
+        <div class="card">
+            <h2 style="color:gold; margin-bottom:10px;">GAME LOGIN</h2>
+            <input id="uid" placeholder="User ID">
+            <input id="pass" type="password" placeholder="Password">
             <button onclick="login()">LOGIN NOW</button>
-            <div id="loginStatus" style="margin-top:10px; font-size:14px; color: #ff5f6d;"></div>
+            <p id="loginStatus" style="color:#ff5252; margin-top:10px;"></p>
         </div>
     </div>
 
-    <div id="sendPopup" class="modal-overlay" style="display:none;">
-        <div class="modal-content">
-            <h3>SEND COINS</h3>
+    <div id="sendPopup" class="overlay" style="display:none">
+        <div class="card">
+            <h2 style="margin-bottom:10px;">SEND COINS</h2>
             <input id="sendUID" placeholder="Receiver UID">
             <input id="sendAmount" type="number" placeholder="Amount">
-            <button onclick="sendCoins()" style="background:#00c853; color:white;">TRANSFER</button>
-            <button onclick="closeSendPopup()" style="background:#444; color:white; margin-top:5px;">CANCEL</button>
-            <div id="sendStatus" style="margin-top:10px;"></div>
+            <button onclick="sendCoins()" style="background:#00c853; color:white;">CONFIRM SEND</button>
+            <button onclick="closeSendPopup()" style="background:#444; color:white; margin-top:10px;">CANCEL</button>
         </div>
     </div>
 
-    <audio id="clickSound" preload="auto">
-        <source src="https://assets.mixkit.co/sfx/preview/mixkit-game-click-1114.mp3" type="audio/mpeg">
-    </audio>
+    <audio id="clickSound" src="https://assets.mixkit.co/sfx/preview/mixkit-game-click-1114.mp3"></audio>
 
     <script>
         /* =========================================
-           SCALING LOGIC: यह गेम को स्क्रीन के अनुसार एडजस्ट करेगा
+           BOTTOM-UP SCALING LOGIC
            ========================================= */
-        function scaleGame() {
-            const wrapper = document.getElementById('viewport-wrapper');
-            const baseWidth = 1300;
-            const baseHeight = 600;
-            const windowWidth = window.innerWidth;
-            const windowHeight = window.innerHeight;
-
-            const scaleX = windowWidth / baseWidth;
-            const scaleY = windowHeight / baseHeight;
-            const scale = Math.min(scaleX, scaleY); // स्क्रीन के बाहर न जाए इसलिए कम वाला स्केल लेंगे
-
+        function adjustScale() {
+            const wrapper = document.getElementById('game-wrapper');
+            const winW = window.innerWidth;
+            const winH = window.innerHeight;
+            
+            // स्केल को विड्थ और हाइट के हिसाब से कैलकुलेट करें
+            const scale = Math.min(winW / 1280, winH / 720);
             wrapper.style.transform = `scale(${scale})`;
+            
+            // गेम हमेशा नीचे सटा रहे
+            wrapper.style.bottom = "0px";
         }
-
-        window.addEventListener('resize', scaleGame);
-        window.addEventListener('load', scaleGame);
+        window.addEventListener('resize', adjustScale);
+        window.addEventListener('load', adjustScale);
 
         /* =========================================
-           GAME LOGIC (Same as your previous code)
+           GAME LOGIC (Firebase & Mechanics)
            ========================================= */
         const firebaseConfig = {
             apiKey: "AIzaSyA-KabHNxU7PmQ3sARjqY7XrZ7LI5rSI8E",
@@ -369,308 +196,145 @@
             projectId: "funtop-453ec",
             appId: "1:711635468186:web:3a8170c59cf9daa8c34423"
         };
-        
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const rtdb = firebase.database();
+        const db = firebase.firestore(), rtdb = firebase.database();
         const timerDoc = db.collection("settings").doc("timer");
 
         const state = {
-            uid: null, coins: 0, timer: 60, betting: false, spinning: false,
-            bets: Array(10).fill(0), betHistory: [], last10: [],
-            selectedAmount: 10, spinStarted: false, isResetting: false, noBetRounds: 0
+            uid: null, coins: 0, timer: 60, bets: Array(10).fill(0), 
+            selectedAmt: 10, spinning: false, history: []
         };
 
-        let timerInterval = null;
-        let spinAnimationFrame = null;
-        let serverStartTime = null; 
-        const TIMER_DURATION = 60;
-
-        async function syncCoinsToDB(newCoinVal) {
-            if(!state.uid) return;
-            try { await rtdb.ref("users/uid/" + state.uid).update({ coins: newCoinVal }); } 
-            catch(e) { console.error(e); }
+        // Initialize UI
+        const slider = document.getElementById('slider');
+        for(let i=0; i<10; i++) {
+            slider.innerHTML += `<div class="slide-item"><img src="https://uploads.onecompiler.io/445tyzay6/448mfppru/1000053482.png"></div>`;
+            document.getElementById('betGrid').innerHTML += `
+                <div class="num-box" onclick="placeBet(${i})">
+                    <div class="bet-val" id="bet-${i}">0</div>
+                    <div class="digit">${i}</div>
+                </div>
+            `;
         }
 
-        async function triggerNewRound() {
-            if (state.isResetting) return;
-            state.isResetting = true;
-            try {
-                await timerDoc.set({
-                    timerStartTime: firebase.firestore.FieldValue.serverTimestamp(),
-                    status: "BET",
-                    bets: {} 
-                }, { merge: true });
-            } catch (e) { console.error(e); }
-            state.isResetting = false;
-        }
-
-        timerDoc.onSnapshot((snap) => {
-            if (!snap.exists) { triggerNewRound(); return; }
+        // Realtime Sync
+        timerDoc.onSnapshot(snap => {
             const data = snap.data();
-            if (data.status === "RESULT" && !state.spinning && data.result !== undefined) {
-                START_SPIN_ANIMATION(data.result);
-            }
-            if (data.timerStartTime) {
-                const newServerTime = data.timerStartTime.toMillis();
-                if (serverStartTime !== newServerTime) {
-                    serverStartTime = newServerTime;
-                    if (state.uid) {
-                        const totalBetThisRound = state.bets.reduce((a, b) => a + b, 0);
-                        if (totalBetThisRound === 0) {
-                            state.noBetRounds++;
-                            if (state.noBetRounds >= 5) { logoutUser(); return; }
-                        } else { state.noBetRounds = 0; }
-                    }
-                    RESET_ROUND_LOCALLY();
-                    startSyncTimer();
+            if(!data) return;
+            
+            if(data.timerStartTime) {
+                const now = Date.now();
+                const diff = Math.floor((now - data.timerStartTime.toMillis())/1000);
+                let left = 60 - diff;
+                state.timer = left < 0 ? 0 : left;
+                document.getElementById('time').innerText = state.timer;
+
+                if(left > 10) { 
+                    if(state.spinning) resetGameUI(); 
+                    document.getElementById('gameStatus').innerText = "PLACE YOUR BETS";
+                    document.getElementById('gameStatus').style.color = "#ffd36a";
+                } else {
+                    document.getElementById('gameStatus').innerText = "STOP BETTING";
+                    document.getElementById('gameStatus').style.color = "#ff5252";
                 }
             }
+
+            if(data.status === "RESULT" && !state.spinning) startSpin(data.result);
         });
 
-        function startSyncTimer() {
-            clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                if (!serverStartTime) return;
-                const now = Date.now();
-                const diff = Math.floor((now - serverStartTime) / 1000);
-                let left = TIMER_DURATION - diff;
-                document.getElementById("time").innerText = left > 0 ? left : 0;
-                state.timer = left;
-                if (left === 8 && !state.spinStarted) calculateAndSetResult();
-                if (left <= -5) triggerNewRound();
-            }, 1000);
-        }
-
-        async function calculateAndSetResult() {
-            state.spinStarted = true;
-            state.betting = false;
-            const snap = await timerDoc.get();
-            const d = snap.data();
-            if (!d || d.status !== "BET") return;
-            let bets = d.bets || {};
-            let zeroBet = [];
-            let minAmt = Infinity;
-            let minBet = [];
-            for (let i = 0; i < 10; i++) {
-                let amt = bets[i] || 0;
-                if (amt === 0) zeroBet.push(i);
-                if (amt < minAmt) { minAmt = amt; minBet = [i]; } 
-                else if (amt === minAmt) { minBet.push(i); }
-            }
-            let result = zeroBet.length > 0 ? zeroBet[Math.floor(Math.random() * zeroBet.length)] : minBet[Math.floor(Math.random() * minBet.length)];
-            await timerDoc.update({ status: "RESULT", result: result });
-        }
-
-        async function START_SPIN_ANIMATION(winnerNum) {
-            state.spinning = true;
-            document.getElementById('gameStatus').textContent = "SPINNING...";
-            document.getElementById('ptrOverlay').classList.add('jiggle');
-            runSpinAnimation(winnerNum);
-        }
-
-        async function STOP_SPIN_AND_SHOW_RESULT(result) {
-            cancelAnimationFrame(spinAnimationFrame);
-            document.getElementById('ptrOverlay').classList.remove('jiggle');
-            document.getElementById('winner').textContent = result;
-            const targetBtn = document.getElementById(`btn-num-${result}`);
-            if(targetBtn) {
-                targetBtn.classList.add('blink-blue');
-                setTimeout(() => targetBtn.classList.remove('blink-blue'), 4000);
-            }
-            if (state.bets[result] > 0) {
-                const winAmount = state.bets[result] * 9;
-                state.coins += winAmount;
-                await syncCoinsToDB(state.coins);
-                updateUI();
-            }
-            updateLast10History(result);
-            document.getElementById('gameStatus').textContent = "WINNER: " + result;
-        }
-
-        function RESET_ROUND_LOCALLY() {
-            state.bets.fill(0);
-            state.betHistory = [];
-            state.betting = !!state.uid;
-            state.spinning = false;
-            state.spinStarted = false;
-            document.getElementById('winner').textContent = "-";
-            document.getElementById('gameStatus').textContent = state.uid ? "PLACE YOUR BETS" : "PLEASE LOGIN";
-            document.getElementById('slider').style.transition = "none";
-            document.getElementById('slider').style.transform = "translateX(0)";
-            document.querySelectorAll('.num').forEach(el => el.classList.remove('blink-blue'));
+        function placeBet(num) {
+            if(state.timer <= 10 || !state.uid || state.coins < state.selectedAmt) return;
+            state.coins -= state.selectedAmt;
+            state.bets[num] += state.selectedAmt;
             updateUI();
+            playClick();
+            
+            const up = {}; up[`bets.${num}`] = firebase.firestore.FieldValue.increment(state.selectedAmt);
+            timerDoc.update(up);
+            rtdb.ref("users/uid/"+state.uid).update({coins: state.coins});
         }
 
-        async function PLACE_BET_LOCALLY(number, amount) {
-            if (state.betting && state.coins >= amount && state.timer > 10) {
-                state.coins -= amount;
-                state.bets[number] += amount;
-                state.betHistory.push({ num: number, amount: amount });
-                state.noBetRounds = 0; 
+        function startSpin(res) {
+            state.spinning = true;
+            slider.style.transition = "transform 5s cubic-bezier(0.1, 0, 0.1, 1)";
+            slider.style.transform = `translateX(-${res * 10}%)`;
+            
+            const wheel = document.getElementById('wheel');
+            wheel.style.transition = "transform 5s cubic-bezier(0.1, 0, 0.1, 1)";
+            wheel.style.transform = `rotate(${3600 - (res * 36)}deg)`;
+
+            setTimeout(() => {
+                document.getElementById('winner').innerText = res;
+                state.history.unshift(res);
+                document.getElementById('last10').innerText = "HISTORY: " + state.history.slice(0,10).join(", ");
+                checkWin(res);
+            }, 5000);
+        }
+
+        function checkWin(res) {
+            if(state.bets[res] > 0) {
+                const win = state.bets[res] * 9;
+                state.coins += win;
                 updateUI();
-                await syncCoinsToDB(state.coins);
-                const updateObj = {};
-                updateObj[`bets.${number}`] = firebase.firestore.FieldValue.increment(amount);
-                await timerDoc.update(updateObj);
-                return true;
+                rtdb.ref("users/uid/"+state.uid).update({coins: state.coins});
+                document.getElementById('gameStatus').innerText = "YOU WON " + win + "!";
             }
-            return false;
+        }
+
+        function resetGameUI() {
+            state.spinning = false;
+            state.bets.fill(0);
+            document.getElementById('winner').innerText = "-";
+            slider.style.transition = "none";
+            slider.style.transform = "translateX(0)";
+            document.getElementById('wheel').style.transition = "none";
+            document.getElementById('wheel').style.transform = "rotate(0deg)";
+            updateUI();
         }
 
         function updateUI() {
-            document.getElementById('coins').textContent = state.coins;
-            state.bets.forEach((v, i) => {
+            document.getElementById('coins').innerText = state.coins;
+            state.bets.forEach((amt, i) => {
                 const el = document.getElementById(`bet-${i}`);
-                if (el) { el.style.display = v > 0 ? 'block' : 'none'; el.textContent = v; }
+                el.innerText = amt;
+                el.style.display = amt > 0 ? "block" : "none";
             });
         }
 
-        async function updateLast10History(result) {
-            state.last10.unshift(result);
-            if (state.last10.length > 10) state.last10.pop();
-            document.getElementById('last10').innerText = state.last10.join(", ");
-        }
-
-        function selectChip(amt) {
-            state.selectedAmount = amt;
+        function selectChip(amt, el) {
+            state.selectedAmt = amt;
             document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-            const activeChip = document.querySelector(`.chip[data-amt="${amt}"]`);
-            if(activeChip) activeChip.classList.add('active');
+            el.classList.add('active');
         }
 
-        async function cancelLastBet() {
-            if (state.betHistory.length > 0 && state.betting) {
-                const last = state.betHistory.pop();
-                state.coins += last.amount;
-                state.bets[last.num] -= last.amount;
+        const ctx = document.getElementById('wheel').getContext('2d');
+        function drawWheel() {
+            for(let i=0; i<10; i++) {
+                ctx.beginPath(); ctx.moveTo(250,250);
+                ctx.arc(250,250, 240, (i*36)*Math.PI/180, ((i+1)*36)*Math.PI/180);
+                ctx.fillStyle = i % 2 === 0 ? "#FFD700" : "#FFF3B1";
+                ctx.fill(); ctx.lineWidth = 2; ctx.stroke();
+                ctx.fillStyle = "#000"; ctx.font = "bold 30px Arial";
+                ctx.fillText(i, 250 + 180 * Math.cos((i*36+18)*Math.PI/180), 250 + 180 * Math.sin((i*36+18)*Math.PI/180));
+            }
+        }
+        drawWheel();
+
+        async function login() {
+            const id = document.getElementById('uid').value.trim();
+            const p = document.getElementById('pass').value.trim();
+            const snap = await rtdb.ref("users/uid/"+id).once("value");
+            if(snap.exists() && snap.val().password == p) {
+                state.uid = id; state.coins = snap.val().coins;
+                document.getElementById('loginBlock').style.display = "none";
                 updateUI();
-                await syncCoinsToDB(state.coins);
-                const updateObj = {};
-                updateObj[`bets.${last.num}`] = firebase.firestore.FieldValue.increment(-last.amount);
-                await timerDoc.update(updateObj);
-                playClickSound();
-            }
+            } else { document.getElementById('loginStatus').innerText = "Invalid ID or Password"; }
         }
 
-        async function cancelAllBets() {
-            if (state.betting) {
-                let totalToRefund = 0;
-                for(let i=0; i<10; i++) {
-                    if(state.bets[i] > 0) {
-                        totalToRefund += state.bets[i];
-                        const updateObj = {};
-                        updateObj[`bets.${i}`] = firebase.firestore.FieldValue.increment(-state.bets[i]);
-                        await timerDoc.update(updateObj);
-                    }
-                }
-                state.coins += totalToRefund;
-                state.bets.fill(0);
-                state.betHistory = [];
-                updateUI();
-                await syncCoinsToDB(state.coins);
-                playClickSound();
-            }
-        }
-
-        function playClickSound() {
-            const sound = document.getElementById('clickSound');
-            sound.currentTime = 0;
-            sound.play().catch(() => {});
-        }
-
-        function setupBettingUI() {
-            const betRow = document.getElementById('betRow');
-            betRow.innerHTML = "";
-            for (let i = 0; i < 10; i++) {
-                const box = document.createElement('div');
-                box.className = 'number-box';
-                box.innerHTML = `<div class="num" id="btn-num-${i}">${i}</div><div class="bet-placed" id="bet-${i}">0</div>`;
-                box.onclick = () => { if (PLACE_BET_LOCALLY(i, state.selectedAmount)) playClickSound(); };
-                betRow.appendChild(box);
-            }
-        }
-
-        const canvas = document.getElementById('wheel');
-        const ctx = canvas.getContext('2d');
-        const W = canvas.width, R = W / 2 - 10;
-        const overlayImg = new Image();
-        overlayImg.src = 'https://uploads.onecompiler.io/445tyzay6/448metr9w/1000053491.png';
-
-        function drawWheel(rot = 0) {
-            ctx.clearRect(0, 0, W, W);
-            ctx.save(); ctx.translate(W / 2, W / 2); ctx.rotate(rot);
-            for (let i = 0; i < 10; i++) {
-                ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, R, i * Math.PI * 2 / 10, (i + 1) * Math.PI * 2 / 10);
-                ctx.fillStyle = i % 2 == 0 ? '#ffd36a' : '#fff3b0'; ctx.fill();
-                ctx.lineWidth = 2; ctx.strokeStyle = "#9c7c2b"; ctx.stroke();
-            }
-            if (overlayImg.complete) ctx.drawImage(overlayImg, -R - 5, -R - 5, R * 2 + 10, R * 2 + 10);
-            ctx.restore();
-        }
-
-        function runSpinAnimation(winnerNum) {
-            const slider = document.getElementById('slider');
-            slider.style.transition = "transform 8s cubic-bezier(0.1, 0, 0.1, 1)";
-            slider.style.transform = `translateX(${-winnerNum * 10}%)`;
-            const targetRot = (Math.PI * 2 * 12) - (winnerNum * Math.PI * 2 / 10) - (Math.PI * 12 / 20);
-            let start = null;
-            function animate(now) {
-                if (!start) start = now;
-                const progress = Math.min((now - start) / 8000, 1);
-                const eased = 1 - Math.pow(1 - progress, 3);
-                drawWheel(targetRot * eased);
-                if (progress < 1) spinAnimationFrame = requestAnimationFrame(animate);
-                else STOP_SPIN_AND_SHOW_RESULT(winnerNum);
-            }
-            spinAnimationFrame = requestAnimationFrame(animate);
-        }
-
-        window.onload = () => {
-            setupBettingUI();
-            drawWheel(0);
-            selectChip(10);
-            updateUI();
-            scaleGame();
-        };
-
-        async function login(){
-            const uid=document.getElementById("uid").value.trim();
-            const pass=document.getElementById("pass").value.trim();
-            if(!uid||!pass) return;
-            try{
-                const snap=await rtdb.ref("users/uid/"+uid).once("value");
-                if(!snap.exists()) return;
-                const d=snap.val();
-                if(String(d.password)===pass && Number(d.isActive)===10){
-                    state.uid = uid; state.coins = Number(d.coins) || 0; state.betting = true;
-                    updateUI();
-                    document.getElementById("loginBlock").style.display="none";
-                }
-            }catch(e){ console.error(e); }
-        }
-
-        function logoutUser(){
-            state.uid=null; state.betting=false;
-            document.getElementById("loginBlock").style.display="flex";
-        }
-
-        function openSendPopup(){ if(state.uid) document.getElementById("sendPopup").style.display="flex"; }
-        function closeSendPopup(){ document.getElementById("sendPopup").style.display="none"; }
-        async function sendCoins(){
-            const toUID=document.getElementById("sendUID").value.trim();
-            const amt=Number(document.getElementById("sendAmount").value);
-            if(!toUID || amt <= 0 || amt > state.coins) return;
-            const toRef=rtdb.ref("users/uid/"+toUID);
-            const snap=await toRef.once("value");
-            if(snap.exists()){
-                state.coins -= amt;
-                await rtdb.ref("users/uid/"+state.uid).update({coins: state.coins});
-                await toRef.update({coins: (Number(snap.val().coins)||0) + amt});
-                updateUI();
-                closeSendPopup();
-            }
-        }
+        function logoutUser() { location.reload(); }
+        function openSendPopup() { document.getElementById('sendPopup').style.display="flex"; }
+        function closeSendPopup() { document.getElementById('sendPopup').style.display="none"; }
+        function playClick() { document.getElementById('clickSound').play().catch(()=>{}); }
     </script>
 </body>
 </html>
