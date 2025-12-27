@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-    <title>FunTarget Spinner - Full Screen Edition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>FunTarget Spinner - Auto Sync Edition</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore-compat.js"></script>
@@ -26,9 +26,10 @@
             width: 100%;
             overflow: hidden; 
             position: fixed;
+            touch-action: none;
             background: black; 
             color: #fff; 
-            touch-action: pan-x pan-y; 
+            touch-action: none; 
         }
 
         .stars { 
@@ -59,173 +60,119 @@
         .game-container-wrap { 
             height: 100vh;
             width: 100%; 
+            height: 100%; 
             display: flex; 
             justify-content: center; 
-            align-items: center; 
+            align-items: flex-start; 
             background-image: url('https://uploads.onecompiler.io/445tyzay6/448mutbvh/1000053141.png'); 
             background-size: cover; 
-            background-position: center;
-            background-attachment: fixed;
             z-index: 100; 
-            padding: 5px;
+            padding-top: 1px; 
         }
 
         .game-app { 
-            margin: 0; 
+            padding-bottom: 1;
+            margin-bottom: 0px;
+            env(safe-area-inset-bottom);
+            margin: 0px auto; 
             display: flex; 
             flex-direction: column; 
+            padding: 2px 0px; 
             position: relative; 
-            background: rgba(0, 0, 0, 0.6); 
-            width: 100%;
-            height: 100%;
-            max-height: 100vh;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 0 50px rgba(255,215,0,0.3);
-        }
-
-        /* --- NEW PROGRESS BAR CSS --- */
-        .progress-container {
-            width: 100%;
-            height: 15px;
-            background: rgba(255, 255, 255, 0.1);
-            position: absolute;
-            top: 50%;
-            left: 0;
-            z-index: 10001;
-            display: none; /* Default hidden */
-            overflow: hidden;
-            border-bottom: 2px solid rgba(255,215,0,0.4);
-        }
-
-        .progress-bar-fill {
-            height: 100%;
-            width: 100%;
-            background: linear-gradient(90deg, #00ff00, #008000);
-            transition: width 1s linear, background 0.3s ease;
+            background: rgba(0, 0, 0, 0.3); 
+            max-width: 1300px; 
+            width: 100%; 
+            transform-origin: bottom center;
+            transition: transform 0.3s ease;
         }
 
         #cancelSpecific { 
             background: linear-gradient(180deg, #9c2b2b, #6a1a1a); 
             position: absolute; 
-            top: 15px; 
-            left: 15px; 
-            width: 80px; 
-            height: 35px; 
+            top: 193px; 
+            left: 10px; 
+            width: 70px; 
+            height: 30px; 
             z-index: 1000; 
-            font-size: 13px; 
+            font-size: 12px; 
             color: white; 
             border: none; 
-            border-radius: 8px; 
+            border-radius: 4px; 
             cursor: pointer; 
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
 
         #cancelAll { 
             background: linear-gradient(180deg, #223b8b, #14255a); 
             position: absolute; 
-            top: 15px; 
-            right: 15px; 
-            width: 80px; 
-            height: 35px; 
+            top: 180px; 
+            right: 10px; 
+            width: 60px; 
+            height: 30px; 
             z-index: 1000; 
-            font-size: 13px; 
+            font-size: 12px; 
             color: white; 
             border: none; 
-            border-radius: 8px; 
+            border-radius: 4px; 
             cursor: pointer; 
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
 
         .top-row { 
             display: flex; 
-            height: 100%;
-            width: 100%;
-            padding: 10px;
-        }
-
-        .left-panels, .right-panels {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 10px;
-            min-width: 200px;
-        }
-
-        .center-wheel-container {
-            flex: 2;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 10px;
+            justify-content: space-between; 
+            align-items: flex-start; 
         }
 
         .panel { 
-            background: rgba(0, 0, 0, 0.7); 
-            border-radius: 15px; 
-            padding: 15px; 
-            margin: 10px 0;
-            border: 2px solid rgba(255,215,0,0.3);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.0); 
+            border-radius: 12px; 
+            padding: 5px; 
+            min-width: 160px; 
+            margin-bottom: 5px; 
         }
 
         .panel h4 { 
-            font-size: 18px; 
+            font-size: 14px; 
             text-align: center; 
-            margin-bottom: 10px; 
-            color: #FFD700;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 2px; 
         }
 
         .panel .value { 
             background: linear-gradient(0deg, #fff3b1, #ffd36a); 
             color: #000; 
-            padding: 15px; 
-            border-radius: 20px; 
+            padding: 2px 10px; 
+            border-radius: 30px; 
             text-align: center; 
-            font-weight: 800; 
-            font-size: 32px; 
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
-            border: 3px solid rgba(255,215,0,0.5);
+            font-weight: 700; 
+            font-size: 26px; 
         }
         
         * { -webkit-tap-highlight-color: transparent !important; }
 
         .chip-container { 
             display: flex; 
-            gap: 15px; 
+            gap: 10px; 
             justify-content: center; 
             flex-wrap: wrap; 
-            margin: 10px 0;
         }
 
         .chip { 
-            width: 70px; 
-            height: 70px; 
+            width: 50px; 
+            height: 50px; 
             border-radius: 50%; 
-            border: 6px dashed rgba(255, 255, 255, 0.4); 
+            border: 5px dashed rgba(255, 255, 255, 0.3); 
             display: flex; 
             align-items: center; 
             justify-content: center; 
             font-weight: bold; 
-            font-size: 20px;
             cursor: pointer; 
-            transition: all 0.3s ease; 
+            transition: 0.2s; 
             background: radial-gradient(circle, #444, #000); 
-            touch-action: manipulation;
-            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
-        }
-
-        .chip:hover, .chip:active { 
-            transform: scale(1.15); 
-            box-shadow: 0 8px 16px rgba(0,0,0,0.6);
         }
 
         .chip.active { 
-            border: 6px solid #ffd36a; 
-            transform: scale(1.2); 
-            box-shadow: 0 0 25px #ffd36a, 0 8px 16px rgba(0,0,0,0.6);
+            border: 4px solid #ffd36a; 
+            transform: scale(1.1); 
+            box-shadow: 0 0 15px #ffd36a; 
         }
 
         .chip[data-amt="1"] { background: radial-gradient(circle, #ff5f6d, #ffc371); }
@@ -236,10 +183,8 @@
         .chip[data-amt="1000"] { background: radial-gradient(circle, #00c6ff, #0072ff); }
 
         .wheel-wrap { 
-            width: 100%;
-            height: 100%;
-            max-width: 500px;
-            max-height: 400px;
+            width: 390px; 
+            height: 310px; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
@@ -247,37 +192,30 @@
         }
 
         canvas#wheel { 
-            width: 100% !important;
-            height: 100% !important;
-            max-width: 400px;
-            max-height: 400px;
+            width: 260%; 
+            height: 95%;
             border-radius: 50%; 
         }
 
         .pointer-overlay { 
             position: absolute; 
-            top: -15%; 
+            top: -62px; 
             left: 50%; 
-            transform: translateX(-50%); 
-            width: 30%; 
-            height: 30%; 
-            max-width: 180px;
-            max-height: 180px;
+            transform: translateX(-49%); 
+            width: 145px; 
+            height: 145px; 
             background-image: url('https://uploads.onecompiler.io/445tyzay6/447a3r3jd/1000038035.png'); 
             background-size: contain; 
-            background-repeat: no-repeat;
             z-index: 100; 
         }
 
         .pointer-top-image { 
             position: absolute; 
-            top: -15%; 
+            top: -62px; 
             left: 50%; 
-            transform: translateX(-50%); 
-            width: 30%; 
-            height: 30%; 
-            max-width: 180px;
-            max-height: 180px;
+            transform: translateX(-49%); 
+            width: 145px; 
+            height: 145px; 
             background-image: url('https://uploads.onecompiler.io/445tyzay6/4479yvh72/1000038029.png'); 
             background-size: contain; 
             background-repeat: no-repeat; 
@@ -290,10 +228,8 @@
         @keyframes blink-pointer { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
         .slider-container { 
-            width: 30%; 
-            height: 30%; 
-            max-width: 150px;
-            max-height: 120px;
+            width: 116px; 
+            height: 89px; 
             position: absolute; 
             top: 50%; 
             left: 50%; 
@@ -301,75 +237,53 @@
             overflow: hidden; 
             border-radius: 50%; 
             background: #FFD700;
-            box-shadow: 0 0 30px rgba(255,215,0,0.9), inset 0 0 30px rgba(0,0,0,0.9);
-            border: 4px solid rgba(0,0,0,0.8);
+            box-shadow: 0 0 25px rgba(255,215,0,0.8), inset 0 0 25px rgba(0,0,0,0.9);
         }
         
         .slides-inner { 
             display: flex; 
             width: 1000%; 
-            height: 100%; 
+            height: 150%; 
             transition: transform 8s cubic-bezier(0.1, 0, 0.1, 1); 
         }
 
         .slide-item { 
-            width: 10%;
-            height: 100%; 
+            width: 150%;
+            height: 80%; 
             display: flex; 
             justify-content: center; 
             align-items: center;
+            margin-top: -9px;
         }
       
-        .slide { 
-            width: 80%; 
-            height: 80%; 
-            object-fit: contain;
-        }
-
-        .bottom-section {
-            padding: 10px 20px;
-            margin-top: auto;
-        }
+        .slide { width: 70%; height: 70%; object-fit: contain; }
 
         .bet-row { 
             display: flex; 
             justify-content: space-between; 
             width: 100%; 
-            margin: 0 auto 15px; 
+            max-width: 900px; 
+            margin: auto; 
             z-index: 500; 
             position: relative;
+            margin-top: -30px;
         }
 
-        .number-box { 
-            flex: 1; 
-            text-align: center; 
-            position: relative; 
-            cursor: pointer; 
-            touch-action: manipulation;
-            margin: 0 5px;
-        }
+        .number-box { flex: 1; text-align: center; position: relative; cursor: pointer; }
 
         .number-box .num { 
-            width: 70px; 
-            height: 70px;
-            border-radius: 50%; 
+            width: 60px; 
+            height: 60px;
+            border-radius: 50px; 
             display: inline-flex; 
             align-items: center; 
             justify-content: center; 
             font-weight: 1000; 
-            font-size: 28px;
             color: #1b1300; 
+            transform: translateY(10px); 
             background: linear-gradient(145deg, #000, #333), linear-gradient(145deg, #FFD700, #b8860b);
             background-blend-mode: overlay;
-            box-shadow: 0 0 25px rgba(255,215,0,0.9), inset 0 0 20px rgba(0,0,0,0.95);
-            border: 3px solid rgba(255,215,0,0.6);
-            transition: all 0.3s ease;
-        }
-
-        .number-box:hover .num,
-        .number-box:active .num {
-            transform: scale(1.1);
-            box-shadow: 0 0 35px rgba(255,215,0,1), inset 0 0 20px rgba(0,0,0,0.95);
+            box-shadow: 0 0 20px rgba(255,215,0,0.8), inset 0 0 20px rgba(0,0,0,0.95);
         }
 
         .number-box .bet-placed { 
@@ -377,40 +291,43 @@
             left: 50%; 
             transform: translateX(-50%); 
             bottom: 85px; 
-            padding: 8px 15px; 
-            border-radius: 15px; 
+            padding: 2px 15px; 
+            border-radius: 20px; 
             display: none; 
             color: #111; 
-            font-weight: 900; 
-            font-size: 18px;
+            font-weight: 800; 
             background: linear-gradient(145deg, #000, #333), linear-gradient(145deg, #FFD700, #b8860b);
             background-blend-mode: overlay;
-            box-shadow: 0 0 20px rgba(255,215,0,0.8), inset 0 0 10px rgba(0,0,0,0.9);
-            border: 2px solid rgba(255,215,0,0.6);
-            z-index: 10;
-            min-width: 60px;
+            box-shadow: 0 0 15px rgba(255,215,0,0.8), inset 0 0 10px rgba(0,0,0,0.9);
+            display: flex; 1;
+            align-items: center;
+            justify-content: center;
         }
 
         .status-bar { 
-            background: rgba(27, 27, 27, 0.9); 
-            border-radius: 12px; 
-            padding: 15px; 
+            background: rgba(27, 27, 27, 0.85); 
+            border-radius: 6px; 
+            padding: 1px; 
             text-align: center; 
-            color: #FFD700; 
-            font-weight: 900; 
-            font-size: 22px;
+            color: #eee; 
+            font-weight: 800; 
+            margin-top: 20px; 
             background: linear-gradient(145deg, #000, #333), linear-gradient(145deg, #FFD700, #b8860b);
             background-blend-mode: overlay;
-            box-shadow: 0 0 20px rgba(255,215,0,0.8), inset 0 0 15px rgba(0,0,0,0.9);
-            border: 3px solid rgba(255,215,0,0.4);
-            margin: 0 10px;
+            box-shadow: 0 0 15px rgba(255,215,0,0.8), inset 0 0 10px rgba(0,0,0,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
+        /* --- BLINK ANIMATION --- */
         @keyframes result-blink {
             0%, 100% { background: linear-gradient(145deg, #000, #333), linear-gradient(145deg, #FFD700, #b8860b); color: #1b1300; }
-            50% { background: #0072ff; color: #fff; box-shadow: 0 0 40px #0072ff; }
+            50% { background: #0072ff; color: #fff; box-shadow: 0 0 30px #0072ff; }
         }
-        .blink-blue { animation: result-blink 0.4s ease-in-out 10; }
+        .blink-blue {
+            animation: result-blink 0.4s ease-in-out 10;
+        }
         
         @keyframes history-blink {
             0%, 100% { background: transparent; color: inherit; }
@@ -420,375 +337,32 @@
 
         #topActions {
             position: absolute;
-            top: 15px;
-            right: 110px;
+            
+            top: 10px;
+            right: 10px;
             display: flex;
-            gap: 15px;
+            gap: 8px;
+            left: 5px;
             z-index: 99999;
         }
         #topActions button {
-            padding: 8px 20px;
-            font-size: 14px;
+            padding: 1px 14px;
+            font-size: 10px;
             font-weight: bold;
             border: none;
-            border-radius: 10px;
+            border-radius: 7px;
             cursor: pointer;
             color: #fff;
-            min-height: 40px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-            transition: all 0.3s ease;
         }
-        #topActions button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
-        }
-        #topActions button:first-child { 
-            background: linear-gradient(180deg,#00c853,#009624); 
-            border: 2px solid rgba(0,200,83,0.5);
-        }
-        #topActions button:last-child { 
-            background: linear-gradient(180deg,#1e90ff,#003cff); 
-            border: 2px solid rgba(30,144,255,0.5);
-        }
-
-        /* =========================================
-           RESPONSIVE DESIGN
-           ========================================= */
-
-        /* Large Desktop (1200px और ऊपर) */
-        @media (min-width: 1200px) {
-            .game-app {
-                max-width: 1400px;
-                margin: 0 auto;
-            }
-            .chip {
-                width: 80px;
-                height: 80px;
-                font-size: 24px;
-            }
-            .number-box .num {
-                width: 80px;
-                height: 80px;
-                font-size: 32px;
-            }
-        }
-
-        /* Tablet Landscape (992px - 1199px) */
-        @media (max-width: 1199px) and (min-width: 768px) {
-            .top-row {
-                padding: 5px;
-            }
-            .left-panels, .right-panels {
-                min-width: 180px;
-                padding: 5px;
-            }
-            .chip {
-                width: 60px;
-                height: 60px;
-                font-size: 18px;
-            }
-            .panel .value {
-                font-size: 28px;
-                padding: 12px;
-            }
-            .number-box .num {
-                width: 60px;
-                height: 60px;
-                font-size: 24px;
-            }
-        }
-
-        /* Tablet Portrait (576px - 767px) */
-        @media (max-width: 767px) and (min-width: 576px) {
-            .game-app {
-                padding: 5px;
-            }
-            .top-row {
-                flex-direction: column;
-                height: auto;
-                padding: 5px;
-            }
-            .left-panels, .right-panels {
-                flex-direction: row;
-                justify-content: space-around;
-                min-width: auto;
-                padding: 5px;
-            }
-            .center-wheel-container {
-                order: -1;
-                margin: 10px 0;
-            }
-            .wheel-wrap {
-                max-width: 400px;
-                max-height: 350px;
-            }
-            .chip {
-                width: 50px;
-                height: 50px;
-                font-size: 16px;
-                border-width: 4px;
-            }
-            .panel {
-                margin: 5px;
-                padding: 10px;
-            }
-            .panel .value {
-                font-size: 24px;
-                padding: 10px;
-            }
-            .number-box .num {
-                width: 50px;
-                height: 50px;
-                font-size: 20px;
-            }
-            .number-box .bet-placed {
-                bottom: 70px;
-                font-size: 14px;
-                padding: 6px 12px;
-            }
-            #cancelSpecific, #cancelAll {
-                top: 10px;
-                width: 70px;
-                height: 30px;
-                font-size: 12px;
-            }
-            #topActions {
-                top: 10px;
-                right: 90px;
-                gap: 10px;
-            }
-            #topActions button {
-                padding: 6px 15px;
-                font-size: 12px;
-            }
-        }
-
-        /* Mobile (576px से कम) */
-        @media (max-width: 575px) {
-            .game-app {
-                padding: 3px;
-                border-radius: 10px;
-            }
-            .top-row {
-                flex-direction: column;
-                height: auto;
-                padding: 3px;
-            }
-            .left-panels, .right-panels {
-                flex-direction: row;
-                flex-wrap: wrap;
-                justify-content: center;
-                padding: 3px;
-            }
-            .center-wheel-container {
-                order: -1;
-                margin: 5px 0;
-            }
-            .wheel-wrap {
-                max-width: 320px;
-                max-height: 280px;
-            }
-            .chip {
-                width: 45px;
-                height: 45px;
-                font-size: 14px;
-                border-width: 3px;
-            }
-            .panel {
-                margin: 3px;
-                padding: 8px;
-                flex: 1;
-                min-width: 140px;
-            }
-            .panel h4 {
-                font-size: 14px;
-            }
-            .panel .value {
-                font-size: 20px;
-                padding: 8px;
-            }
-            .bet-row {
-                margin-bottom: 10px;
-            }
-            .number-box {
-                margin: 0 2px;
-            }
-            .number-box .num {
-                width: 45px;
-                height: 45px;
-                font-size: 18px;
-            }
-            .number-box .bet-placed {
-                bottom: 60px;
-                font-size: 12px;
-                padding: 4px 8px;
-                min-width: 50px;
-            }
-            #cancelSpecific, #cancelAll {
-                position: relative;
-                top: auto;
-                left: auto;
-                right: auto;
-                margin: 5px;
-                width: 100px;
-                height: 35px;
-                font-size: 13px;
-            }
-            #topActions {
-                position: relative;
-                top: auto;
-                right: auto;
-                justify-content: center;
-                margin: 10px 0;
-            }
-            .status-bar {
-                font-size: 18px;
-                padding: 12px;
-                margin: 0 5px;
-            }
-            .progress-container {
-                top: 45%;
-                height: 12px;
-            }
-        }
-
-        /* Very Small Mobile (375px से कम) */
-        @media (max-width: 374px) {
-            .wheel-wrap {
-                max-width: 280px;
-                max-height: 250px;
-            }
-            .chip {
-                width: 40px;
-                height: 40px;
-                font-size: 12px;
-            }
-            .panel .value {
-                font-size: 18px;
-            }
-            .number-box .num {
-                width: 40px;
-                height: 40px;
-                font-size: 16px;
-            }
-            .status-bar {
-                font-size: 16px;
-                padding: 10px;
-            }
-        }
-
-        /* Orientation Specific */
-        @media (max-height: 700px) and (orientation: landscape) {
-            .game-app {
-                padding: 5px;
-            }
-            .top-row {
-                padding: 5px;
-            }
-            .wheel-wrap {
-                max-width: 300px;
-                max-height: 250px;
-            }
-            .chip {
-                width: 45px;
-                height: 45px;
-                font-size: 14px;
-            }
-            .panel .value {
-                font-size: 20px;
-                padding: 10px;
-            }
-            .number-box .num {
-                width: 50px;
-                height: 50px;
-                font-size: 20px;
-            }
-            .progress-container {
-                top: 45%;
-            }
-        }
-
-        /* Touch Device Optimizations */
-        .touch-device .chip:active,
-        .touch-device .number-box:active {
-            transform: scale(0.95);
-            transition: transform 0.1s;
-        }
-
-        /* Prevent text selection on mobile */
-        .touch-device {
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-
-        /* Smooth scrolling for mobile */
-        .game-container-wrap::-webkit-scrollbar {
-            display: none;
-        }
-
-        .game-container-wrap {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
-        /* Prevent zoom on input focus on iOS */
-        @media (max-width: 767px) {
-            input, select, textarea {
-                font-size: 16px !important;
-            }
-        }
-
-        /* Larger tap targets for mobile */
-        @media (max-width: 767px) {
-            .chip,
-            .number-box .num {
-                min-width: 44px !important;
-                min-height: 44px !important;
-            }
-            
-            button {
-                min-height: 44px;
-            }
-        }
-
-        /* Responsive Login Popup */
-        @media (max-width: 575px) {
-            #loginBlock > div {
-                width: 90% !important;
-                max-width: 280px;
-                margin: 20px;
-                padding: 20px !important;
-            }
-            
-            #sendPopup > div {
-                width: 90% !important;
-                max-width: 280px;
-                padding: 15px !important;
-            }
-            
-            input {
-                font-size: 16px !important;
-                padding: 12px !important;
-            }
-            
-            button {
-                padding: 12px !important;
-            }
-        }
+        #topActions button:first-child { background: linear-gradient(180deg,#00c853,#009624); }
+        #topActions button:last-child { background: linear-gradient(180deg,#1e90ff,#003cff); }
     </style>
 </head>
 
 <body>
     <div class="stars"></div>
     <div class="game-container-wrap" id="mainGame">
-        <div class="game-app" id="autoScaleApp">
-            
-            <div class="progress-container" id="progCont">
-                <div class="progress-bar-fill" id="progFill"></div>
-            </div>
-
+        <div class="game-app">
             <div id="topActions">
                 <button onclick="openSendPopup()">SEND</button>
                 <button onclick="logoutUser()">LOGOUT</button>
@@ -811,12 +385,9 @@
                         <div class="chip" data-amt="1" onclick="selectChip(1)">1</div>
                         <div class="chip" data-amt="5" onclick="selectChip(5)">5</div>
                         <div class="chip" data-amt="10" onclick="selectChip(10)">10</div>
-                        <div class="chip" data-amt="100" onclick="selectChip(100)">100</div>
-                        <div class="chip" data-amt="500" onclick="selectChip(500)">500</div>
-                        <div class="chip" data-amt="1000" onclick="selectChip(1000)">1000</div>
                     </div>
                 </div>
-                 
+
                 <div class="center-wheel-container">
                     <div class="wheel-wrap">
                         <div class="pointer-overlay" id="ptrOverlay"></div>
@@ -846,39 +417,18 @@
                     </div>
                     <div class="panel">
                         <h4>History</h4>
-                        <div id="last10" class="value" style="font-size:20px;">Waiting...</div>
+                        <div id="last10" class="value" style="font-size:16px;">Waiting...</div>
                     </div>
                     <div class="chip-container">
-                        <!-- Chips moved to left panel for full width -->
+                        <div class="chip" data-amt="100" onclick="selectChip(100)">100</div>
+                        <div class="chip" data-amt="500" onclick="selectChip(500)">500</div>
+                        <div class="chip" data-amt="1000" onclick="selectChip(1000)">1000</div>
                     </div>
                 </div>
             </div>
 
-            <div class="bottom-section">
-                <div class="bet-row" id="betRow"></div>
-                <div class="status-bar" id="gameStatus">PLEASE LOGIN FIRST</div>
-            </div>
-        </div>
-    </div>
-
-    <div id="loginBlock" style="position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:999999">
-        <div style="background:#111;padding:25px;border-radius:12px;width:280px;text-align:center">
-            <h3>Login Required</h3>
-            <input id="uid" placeholder="UID" style="width:100%;padding:10px;margin:6px 0">
-            <input id="pass" type="password" placeholder="Password" style="width:100%;padding:10px;margin:6px 0">
-            <button onclick="login()" style="width:100%;padding:10px;margin-top:10px;background:#FFEB00;border:none;border-radius:6px;font-weight:bold">LOGIN</button>
-            <div id="loginStatus" style="margin-top:10px;font-size:13px"></div>
-        </div>
-    </div>
-
-    <div id="sendPopup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:999999;align-items:center;justify-content:center">
-        <div style="background:#111;padding:20px;border-radius:12px;width:280px;text-align:center">
-            <h3>Send Coins</h3>
-            <input id="sendUID" placeholder="Receiver UID" style="width:100%;padding:10px;margin:6px 0">
-            <input id="sendAmount" type="number" placeholder="Amount" style="width:100%;padding:10px;margin:6px 0">
-            <button onclick="sendCoins()" style="width:100%;padding:10px;background:#00c853;border:none;border-radius:6px;font-weight:bold">SEND</button>
-            <button onclick="closeSendPopup()" style="width:100%;margin-top:6px;padding:8px;background:#444;color:#fff;border:none;border-radius:6px">CANCEL</button>
-            <div id="sendStatus" style="margin-top:8px;font-size:13px"></div>
+            <div class="bet-row" id="betRow"></div>
+            <div class="status-bar" id="gameStatus">PLEASE LOGIN FIRST</div>
         </div>
     </div>
 
@@ -887,7 +437,22 @@
     </audio>
 
     <script>
-        // FIREBASE CONFIG
+    function adjustLayout() {
+    const app = document.getElementById('autoScaleApp');
+    const screenWidth = window.innerWidth;
+    const targetWidth = 450; 
+
+    if (screenWidth < targetWidth) {
+        const scaleValue = screenWidth / targetWidth;
+        app.style.transform = `scale(${scaleValue})`;
+    } else {
+        app.style.transform = `scale(1)`;
+    }
+}
+
+window.addEventListener('resize', adjustLayout);
+window.addEventListener('load', adjustLayout);
+
         const firebaseConfig = {
             apiKey: "AIzaSyA-KabHNxU7PmQ3sARjqY7XrZ7LI5rSI8E",
             authDomain: "funtop-453ec.firebaseapp.com",
@@ -913,86 +478,13 @@
             selectedAmount: 10,
             spinStarted: false,
             isResetting: false,
-            noBetRounds: 0 
+            noBetRounds: 0 // Counter for auto-logout
         };
 
         let timerInterval = null;
         let spinAnimationFrame = null;
         let serverStartTime = null; 
         const TIMER_DURATION = 60;
-
-        // --- REALTIME HISTORY LISTENER ---
-        function listenToHistory() {
-            const historyRef = rtdb.ref("gameHistory");
-            historyRef.limitToLast(10).on("value", (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    // Convert object to array and reverse (latest first)
-                    const resultsArray = Object.values(data).reverse();
-                    state.last10 = resultsArray;
-                    renderHistoryUI();
-                }
-            });
-        }
-
-        function renderHistoryUI() {
-            const historyBox = document.getElementById('last10');
-            historyBox.innerHTML = ""; 
-            state.last10.forEach((num, index) => {
-                const span = document.createElement('span');
-                span.textContent = num + (index < state.last10.length - 1 ? ", " : "");
-                if (index === 0) span.classList.add('hist-blink');
-                historyBox.appendChild(span);
-            });
-        }
-
-        async function saveResultToFirebase(result) {
-            try {
-                const historyRef = rtdb.ref("gameHistory");
-                await historyRef.push(result);
-                // Keep only last 20 records to save space
-                const snap = await historyRef.once("value");
-                if (snap.numChildren() > 20) {
-                    let count = 0;
-                    const toRemove = snap.numChildren() - 20;
-                    const updates = {};
-                    snap.forEach(child => {
-                        if (count < toRemove) { updates[child.key] = null; count++; }
-                    });
-                    await historyRef.update(updates);
-                }
-            } catch (e) { console.error("History Save Error:", e); }
-        }
-
-        // --- UPDATE TIMER UI ---
-        function updateTimerUI(seconds) {
-            const progCont = document.getElementById('progCont');
-            const progFill = document.getElementById('progFill');
-            
-            document.getElementById("time").innerText = seconds > 0 ? seconds : 0;
-
-            if (seconds <= 10 && seconds > 0) {
-                progCont.style.display = 'block'; 
-                const percentage = (seconds / 10) * 100;
-                progFill.style.width = percentage + "%";
-                
-                if (seconds <= 3) {
-                    progFill.style.background = 'linear-gradient(90deg, #ff0000, #800000)';
-                } else {
-                    progFill.style.background = 'linear-gradient(90deg, #00ff00, #008000)';
-                }
-            } 
-            else if (seconds <= 0) {
-                progFill.style.width = "0%";
-                setTimeout(() => {
-                    progCont.style.display = 'none';
-                    progFill.style.width = "100%";
-                }, 2000);
-            }
-            else {
-                progCont.style.display = 'none'; 
-            }
-        }
 
         async function syncCoinsToDB(newCoinVal) {
             if(!state.uid) return;
@@ -1024,17 +516,19 @@
                 if (serverStartTime !== newServerTime) {
                     serverStartTime = newServerTime;
                     
+                    // --- AUTO LOGOUT CHECK ---
                     if (state.uid) {
                         const totalBetThisRound = state.bets.reduce((a, b) => a + b, 0);
                         if (totalBetThisRound === 0) {
                             state.noBetRounds++;
+                            console.log("No Bet Round: " + state.noBetRounds);
                             if (state.noBetRounds >= 5) {
-                                alert("Logged out for inactivity.");
+                                alert("You have been logged out for inactivity (5 rounds no bet).");
                                 logoutUser();
                                 return;
                             }
                         } else {
-                            state.noBetRounds = 0;
+                            state.noBetRounds = 0; // Reset if bet placed
                         }
                     }
 
@@ -1051,10 +545,8 @@
                 const now = Date.now();
                 const diff = Math.floor((now - serverStartTime) / 1000);
                 let left = TIMER_DURATION - diff;
-                
+                document.getElementById("time").innerText = left > 0 ? left : 0;
                 state.timer = left;
-                updateTimerUI(left);
-
                 if (left === 8 && !state.spinStarted) calculateAndSetResult();
                 if (left <= -5) triggerNewRound();
             }, 1000);
@@ -1078,23 +570,6 @@
             }
             let result = zeroBet.length > 0 ? zeroBet[Math.floor(Math.random() * zeroBet.length)] : minBet[Math.floor(Math.random() * minBet.length)];
             await timerDoc.update({ status: "RESULT", result: result });
-        }
-
-        function runSpinAnimation(winnerNum) {
-            const slider = document.getElementById('slider');
-            slider.style.transition = "transform 8s cubic-bezier(0.1, 0, 0.1, 1)";
-            slider.style.transform = `translateX(${-winnerNum * 10}%)`;
-            const targetRot = (Math.PI * 2 * 12) - (winnerNum * Math.PI * 2 / 10) - (Math.PI * 12 / 20);
-            let start = null;
-            function animate(now) {
-                if (!start) start = now;
-                const progress = Math.min((now - start) / 8000, 1);
-                const eased = 1 - Math.pow(1 - progress, 3);
-                drawWheel(targetRot * eased);
-                if (progress < 1) spinAnimationFrame = requestAnimationFrame(animate);
-                else STOP_SPIN_AND_SHOW_RESULT(winnerNum);
-            }
-            spinAnimationFrame = requestAnimationFrame(animate);
         }
 
         async function START_SPIN_ANIMATION(winnerNum) {
@@ -1121,12 +596,8 @@
                 await syncCoinsToDB(state.coins);
                 updateUI();
             }
-            
-            // Only the logic to update history in database (Admin or primary triggers this)
-            // The listener listenToHistory() will handle the UI update for everyone
-            await saveResultToFirebase(result);
-            
-            document.getElementById('gameStatus').textContent = "WINNER: " + result;
+            updateLast10History(result);
+            document.getElementById('gameStatus').textContent = "WINNER: " + result + " | NEXT ROUND SOON";
         }
 
         function RESET_ROUND_LOCALLY() {
@@ -1144,17 +615,19 @@
         }
 
         async function PLACE_BET_LOCALLY(number, amount) {
-            if (state.betting && state.coins >= amount && state.timer > 10) {
+            if (state.betting && state.coins >= amount) {
                 state.coins -= amount;
                 state.bets[number] += amount;
                 state.betHistory.push({ num: number, amount: amount });
+                
+                // Important: Reset inactivity counter if user places a bet
                 state.noBetRounds = 0; 
+
                 updateUI();
                 await syncCoinsToDB(state.coins);
                 const updateObj = {};
                 updateObj[`bets.${number}`] = firebase.firestore.FieldValue.increment(amount);
                 await timerDoc.update(updateObj);
-                playClickSound();
                 return true;
             }
             return false;
@@ -1168,16 +641,28 @@
             });
         }
 
+        async function updateLast10History(result) {
+            state.last10.unshift(result);
+            if (state.last10.length > 10) state.last10.pop();
+            const historyBox = document.getElementById('last10');
+            historyBox.innerHTML = ""; 
+            state.last10.forEach((num, index) => {
+                const span = document.createElement('span');
+                span.textContent = num + (index < state.last10.length - 1 ? ", " : "");
+                if (index === 0) span.classList.add('hist-blink');
+                historyBox.appendChild(span);
+            });
+        }
+
         function selectChip(amt) {
             state.selectedAmount = amt;
             document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
             const activeChip = document.querySelector(`.chip[data-amt="${amt}"]`);
             if(activeChip) activeChip.classList.add('active');
-            playClickSound();
         }
 
         async function cancelLastBet() {
-            if (state.betHistory.length > 0 && state.betting && state.timer > 10) {
+            if (state.betHistory.length > 0 && state.betting) {
                 const last = state.betHistory.pop();
                 state.coins += last.amount;
                 state.bets[last.num] -= last.amount;
@@ -1191,7 +676,7 @@
         }
 
         async function cancelAllBets() {
-            if (state.betting && state.timer > 10) {
+            if (state.betting) {
                 let totalToRefund = 0;
                 for(let i=0; i<10; i++) {
                     if(state.bets[i] > 0) {
@@ -1212,7 +697,8 @@
 
         function playClickSound() {
             const sound = document.getElementById('clickSound');
-            if(sound) { sound.currentTime = 0; sound.play().catch(() => {}); }
+            sound.currentTime = 0;
+            sound.play().catch(() => {});
         }
 
         function setupBettingUI() {
@@ -1245,130 +731,106 @@
             ctx.restore();
         }
 
-        async function login(){
-            const uid=document.getElementById("uid").value.trim();
-            const pass=document.getElementById("pass").value.trim();
-            const st=document.getElementById("loginStatus");
-            if(!uid||!pass){st.innerText="UID/Password Required"; return;}
-            try{
-                const snap=await firebase.database().ref("users/uid/"+uid).once("value");
-                if(!snap.exists()){st.innerText="User not found"; return;}
-                const d=snap.val();
-                if(String(d.password)!==pass){st.innerText="Wrong Password"; return;}
-                state.uid = uid; state.coins = Number(d.coins) || 0; state.betting = true;
-                updateUI();
-                document.getElementById("loginBlock").style.display="none";
-                adjustLayout();
-            }catch(e){ st.innerText="Error"; }
-        }
-
-        function logoutUser(){
-            state.uid=null; state.coins=0; state.betting=false;
-            updateUI();
-            document.getElementById("loginBlock").style.display="flex";
-        }
-
-        function openSendPopup(){ if(!state.uid) return; document.getElementById("sendPopup").style.display="flex"; }
-        function closeSendPopup(){ document.getElementById("sendPopup").style.display="none"; }
-        
-        async function sendCoins(){
-            const toUID=document.getElementById("sendUID").value.trim();
-            const amt=Number(document.getElementById("sendAmount").value);
-            if(amt>state.coins || amt<=0) return;
-            const toRef=firebase.database().ref("users/uid/"+toUID);
-            const snap=await toRef.once("value");
-            if(!snap.exists()) return;
-            state.coins-=amt;
-            await firebase.database().ref("users/uid/"+state.uid).update({coins:state.coins});
-            await toRef.update({coins:(Number(snap.val().coins)||0)+amt});
-            updateUI();
-            closeSendPopup();
-        }
-
-        // =========================================
-        // RESPONSIVE LAYOUT FUNCTIONS
-        // =========================================
-
-        function adjustLayout() {
-            const app = document.getElementById('autoScaleApp');
-            const container = document.getElementById('mainGame');
-            const sw = window.innerWidth;
-            const sh = window.innerHeight;
-            
-            // Mobile detection
-            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            const isPortrait = sh > sw;
-            
-            // Calculate available height (viewport height minus any browser UI)
-            const safeHeight = sh - (isMobile ? 100 : 50); // Adjust for mobile browser UI
-            
-            if (sw < 576) { // Mobile
-                app.style.height = `${safeHeight}px`;
-                container.style.height = `${safeHeight}px`;
-                
-            } else if (sw < 768) { // Tablet
-                app.style.height = '95vh';
-                container.style.height = '95vh';
-                
-            } else { // Desktop
-                app.style.height = '95vh';
-                container.style.height = '95vh';
+        function runSpinAnimation(winnerNum) {
+            const slider = document.getElementById('slider');
+            slider.style.transition = "transform 8s cubic-bezier(0.1, 0, 0.1, 1)";
+            slider.style.transform = `translateX(${-winnerNum * 10}%)`;
+            const targetRot = (Math.PI * 2 * 12) - (winnerNum * Math.PI * 2 / 10) - (Math.PI * 12 / 20);
+            let start = null;
+            function animate(now) {
+                if (!start) start = now;
+                const progress = Math.min((now - start) / 8000, 1);
+                const eased = 1 - Math.pow(1 - progress, 3);
+                drawWheel(targetRot * eased);
+                if (progress < 1) spinAnimationFrame = requestAnimationFrame(animate);
+                else STOP_SPIN_AND_SHOW_RESULT(winnerNum);
             }
+            spinAnimationFrame = requestAnimationFrame(animate);
         }
 
-        // Enhanced resize handler with debouncing
-        let resizeTimeout;
-        function handleResize() {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(adjustLayout, 100);
-        }
-
-        // Touch device detection and adjustments
-        function detectTouchDevice() {
-            if ('ontouchstart' in window || navigator.maxTouchPoints) {
-                document.body.classList.add('touch-device');
-                
-                // Improve touch interactions
-                document.querySelectorAll('.chip, .number-box').forEach(el => {
-                    el.style.cursor = 'pointer';
-                });
-                
-                // Increase tap target size for mobile
-                if (window.innerWidth < 768) {
-                    const chips = document.querySelectorAll('.chip');
-                    chips.forEach(chip => {
-                        chip.style.minWidth = '44px';
-                        chip.style.minHeight = '44px';
-                    });
-                    
-                    const nums = document.querySelectorAll('.number-box .num');
-                    nums.forEach(num => {
-                        num.style.minWidth = '44px';
-                        num.style.minHeight = '44px';
-                    });
-                }
-            }
-        }
-
-        // Initialize on load
         window.onload = () => {
             setupBettingUI();
             drawWheel(0);
             selectChip(10);
             updateUI();
-            listenToHistory();
-            adjustLayout();
-            detectTouchDevice();
-            
-            // Event Listeners
-            window.addEventListener('resize', handleResize);
-            window.addEventListener('orientationchange', function() {
-                setTimeout(() => {
-                    adjustLayout();
-                    detectTouchDevice();
-                }, 300);
-            });
         };
+
+        // Auth
+        async function login(){
+            const uid=document.getElementById("uid").value.trim();
+            const pass=document.getElementById("pass").value.trim();
+            const st=document.getElementById("loginStatus");
+            if(!uid||!pass){st.style.color="red";st.innerText="UID/Password डालें";return;}
+            st.style.color="#00ccff";st.innerText="Connecting...";
+            try{
+                const snap=await firebase.database().ref("users/uid/"+uid).once("value");
+                if(!snap.exists()){st.style.color="red";st.innerText="UID नहीं मिला";return;}
+                const d=snap.val();
+                if(String(d.password)!==pass){st.style.color="red";st.innerText="Password गलत";return;}
+                if(Number(d.isActive)!==10){st.style.color="red";st.innerText="Account Active नहीं";return;}
+                state.uid = uid; state.coins = Number(d.coins) || 0; state.betting = true;
+                state.noBetRounds = 0; // Reset counter on login
+                sessionStorage.setItem("gk_uid", uid);
+                updateUI();
+                document.getElementById("gameStatus").textContent = "PLACE YOUR BETS";
+                document.getElementById("loginBlock").style.display="none";
+            }catch(e){ st.style.color="red";st.innerText="Firebase Error"; }
+        }
+
+        function logoutUser(){
+            sessionStorage.removeItem("gk_uid");
+            state.uid=null; state.coins=0; state.betting=false; state.noBetRounds = 0;
+            state.bets.fill(0); state.betHistory=[];
+            updateUI();
+            document.getElementById("winner").innerText="-";
+            document.getElementById("gameStatus").innerText="PLEASE LOGIN";
+            document.getElementById("loginBlock").style.display="flex";
+        }
+
+        function openSendPopup(){ if(!state.uid){ alert("Please login"); return; } document.getElementById("sendPopup").style.display="flex"; }
+        function closeSendPopup(){ document.getElementById("sendPopup").style.display="none"; }
+        async function sendCoins(){
+            const toUID=document.getElementById("sendUID").value.trim();
+            const amt=Number(document.getElementById("sendAmount").value);
+            const st=document.getElementById("sendStatus");
+            if(!toUID||amt<=0){st.style.color="red";st.innerText="Invalid Input";return;}
+            if(amt>state.coins){st.style.color="red";st.innerText="Low Balance";return;}
+            const toRef=firebase.database().ref("users/uid/"+toUID);
+            const snap=await toRef.once("value");
+            if(!snap.exists()){st.style.color="red";st.innerText="UID Not Found";return;}
+            state.coins-=amt;
+            await firebase.database().ref("users/uid/"+state.uid).update({coins:state.coins});
+            const rc=Number(snap.val().coins)||0;
+            await toRef.update({coins:rc+amt});
+            updateUI();
+            st.style.color="#00ff88";st.innerText="Transfer Success";
+            setTimeout(closeSendPopup,1200);
+        }
     </script>
+
+    <div id="loginBlock" style="position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:999999">
+        <div style="background:#111;padding:25px;border-radius:12px;width:280px;text-align:center">
+            <h3>Login Required</h3>
+            <input id="uid" placeholder="UID" style="width:100%;padding:10px;margin:6px 0">
+            <input id="pass" type="password" placeholder="Password" style="width:100%;padding:10px;margin:6px 0">
+            <button onclick="login()" style="width:100%;padding:10px;margin-top:10px;background:#FFEB00;border:none;border-radius:6px;font-weight:bold">LOGIN</button>
+            <div id="loginStatus" style="margin-top:10px;font-size:13px"></div>
+        </div>
+    </div>
+
+    <div id="sendPopup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:999999;align-items:center;justify-content:center">
+        <div style="background:#111;padding:20px;border-radius:12px;width:280px;text-align:center">
+            <h3>Send Coins</h3>
+            <input id="sendUID" placeholder="Receiver UID" style="width:100%;padding:10px;margin:6px 0">
+            <input id="sendAmount" type="number" placeholder="Amount" style="width:100%;padding:10px;margin:6px 0">
+            <button onclick="sendCoins()" style="width:100%;padding:10px;background:#00c853;border:none;border-radius:6px;font-weight:bold">SEND</button>
+            <button onclick="closeSendPopup()" style="width:100%;margin-top:6px;padding:8px;background:#444;color:#fff;border:none;border-radius:6px">CANCEL</button>
+            <div id="sendStatus" style="margin-top:8px;font-size:13px"></div>
+        </div>
+    </div>
+    <div class="game-app" id="autoScaleApp">
+    ... गेम का बाकी सामान ...
+</div>
+
 </body>
 </html>
