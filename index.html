@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>FunTarget Spinner - Auto Sync Edition</title>
+    <title>FunTarget - Double Golden Ring Spinner</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore-compat.js"></script>
@@ -29,7 +29,6 @@
             touch-action: none;
             background: black; 
             color: #fff; 
-            touch-action: none; 
         }
 
         .stars { 
@@ -60,7 +59,6 @@
         .game-container-wrap { 
             height: 100vh;
             width: 100%; 
-            height: 100%; 
             display: flex; 
             justify-content: center; 
             align-items: flex-start; 
@@ -71,9 +69,6 @@
         }
 
         .game-app { 
-            padding-bottom: 1;
-            margin-bottom: 0px;
-            env(safe-area-inset-bottom);
             margin: 0px auto; 
             display: flex; 
             flex-direction: column; 
@@ -82,14 +77,12 @@
             background: rgba(0, 0, 0, 0.3); 
             max-width: 1300px; 
             width: 100%; 
-            transform-origin: bottom center;
-            transition: transform 0.3s ease;
         }
 
         #cancelSpecific { 
             background: linear-gradient(180deg, #9c2b2b, #6a1a1a); 
             position: absolute; 
-            top: 193px; 
+            top: 200px; 
             left: 10px; 
             width: 70px; 
             height: 30px; 
@@ -104,7 +97,7 @@
         #cancelAll { 
             background: linear-gradient(180deg, #223b8b, #14255a); 
             position: absolute; 
-            top: 180px; 
+            top: 200px; 
             right: 10px; 
             width: 60px; 
             height: 30px; 
@@ -145,6 +138,55 @@
             font-weight: 700; 
             font-size: 26px; 
         }
+
+        /* --- TIMER BLINK --- */
+        @keyframes timer-bling {
+            0% { box-shadow: 0 0 5px #ff0000; border: 2px solid #ff0000; }
+            50% { box-shadow: 0 0 30px #ff0000, 0 0 50px #ff4500; border: 2px solid #fff; transform: scale(1.05); }
+            100% { box-shadow: 0 0 5px #ff0000; border: 2px solid #ff0000; }
+        }
+        .timer-warning {
+            animation: timer-bling 0.3s infinite !important;
+            background: linear-gradient(0deg, #ff4d4d, #ff0000) !important;
+            color: white !important;
+        }
+
+        /* --- HISTORY BOX STYLE --- */
+        #last10 {
+            background: #000;
+            border: 2px solid #ff4500;
+            box-shadow: 0 0 10px #ff4500, inset 0 0 5px #ff4500;
+            border-radius: 8px;
+            padding: 5px;
+            min-height: 40px;
+            width: 170px; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 5px;
+            text-shadow: 0 0 5px #ff4500;
+        }
+
+        .hist-item {
+            background: #222;
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            border: 1px solid #ff8c00;
+        }
+
+        .hist-last-blink { 
+            animation: fire-pulse 0.5s infinite alternate; 
+            background: #ff4500;
+            color: #fff;
+        }
+
+        @keyframes fire-pulse {
+            from { box-shadow: 0 0 5px #ff4500; transform: scale(1); }
+            to { box-shadow: 0 0 20px #ff0000; transform: scale(1.1); }
+        }
         
         * { -webkit-tap-highlight-color: transparent !important; }
 
@@ -182,6 +224,7 @@
         .chip[data-amt="500"] { background: radial-gradient(circle, #f80759, #bc4e9c); }
         .chip[data-amt="1000"] { background: radial-gradient(circle, #00c6ff, #0072ff); }
 
+        /* --- WHEEL & DOUBLE GOLDEN RING --- */
         .wheel-wrap { 
             width: 390px; 
             height: 310px; 
@@ -189,6 +232,20 @@
             align-items: center; 
             justify-content: center; 
             position: relative; 
+        }
+
+        /* Outer Thin Golden Ring */
+        .wheel-wrap::before {
+            content: "";
+            position: absolute;
+            width: 390px;
+            height: 290px;
+            border-radius: 50%;
+            border: 2px solid #ffd700;
+            box-shadow: 0 0 8px #ffd700, inset 0 0 8px #000;
+            background: transparent;
+            z-index: 10;
+            pointer-events: none;
         }
 
         canvas#wheel { 
@@ -227,8 +284,9 @@
         .pointer-overlay.jiggle { animation: blink-pointer 0.15s steps(1) infinite; }
         @keyframes blink-pointer { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
+        /* Inner Thin Golden Ring */
         .slider-container { 
-            width: 116px; 
+            width: 117px; 
             height: 89px; 
             position: absolute; 
             top: 50%; 
@@ -238,6 +296,8 @@
             border-radius: 50%; 
             background: #FFD700;
             box-shadow: 0 0 25px rgba(255,215,0,0.8), inset 0 0 25px rgba(0,0,0,0.9);
+            z-index: 20;
+            border: 3.5px solid #ffd700;
         }
         
         .slides-inner { 
@@ -284,13 +344,15 @@
             background: linear-gradient(145deg, #000, #333), linear-gradient(145deg, #FFD700, #b8860b);
             background-blend-mode: overlay;
             box-shadow: 0 0 20px rgba(255,215,0,0.8), inset 0 0 20px rgba(0,0,0,0.95);
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         .number-box .bet-placed { 
             position: absolute; 
             left: 50%; 
             transform: translateX(-50%); 
-            bottom: 85px; 
+            bottom: 65px; 
             padding: 2px 15px; 
             border-radius: 20px; 
             display: none; 
@@ -299,7 +361,7 @@
             background: linear-gradient(145deg, #000, #333), linear-gradient(145deg, #FFD700, #b8860b);
             background-blend-mode: overlay;
             box-shadow: 0 0 15px rgba(255,215,0,0.8), inset 0 0 10px rgba(0,0,0,0.9);
-            display: flex; 1;
+            display: flex;
             align-items: center;
             justify-content: center;
         }
@@ -320,28 +382,18 @@
             justify-content: center;
         }
 
-        /* --- BLINK ANIMATION --- */
         @keyframes result-blink {
             0%, 100% { background: linear-gradient(145deg, #000, #333), linear-gradient(145deg, #FFD700, #b8860b); color: #1b1300; }
             50% { background: #0072ff; color: #fff; box-shadow: 0 0 30px #0072ff; }
         }
-        .blink-blue {
-            animation: result-blink 0.4s ease-in-out 10;
-        }
-        
-        @keyframes history-blink {
-            0%, 100% { background: transparent; color: inherit; }
-            50% { background: #0072ff; color: #fff; border-radius: 4px; }
-        }
-        .hist-blink { animation: history-blink 0.4s ease-in-out 10; }
+        .blink-blue { animation: result-blink 0.4s ease-in-out 10; }
 
         #topActions {
             position: absolute;
-            
             top: 10px;
             right: 10px;
             display: flex;
-            gap: 8px;
+            gap: 60px;
             left: 5px;
             z-index: 99999;
         }
@@ -417,7 +469,7 @@
                     </div>
                     <div class="panel">
                         <h4>History</h4>
-                        <div id="last10" class="value" style="font-size:16px;">Waiting...</div>
+                        <div id="last10">Loading...</div>
                     </div>
                     <div class="chip-container">
                         <div class="chip" data-amt="100" onclick="selectChip(100)">100</div>
@@ -437,22 +489,6 @@
     </audio>
 
     <script>
-    function adjustLayout() {
-    const app = document.getElementById('autoScaleApp');
-    const screenWidth = window.innerWidth;
-    const targetWidth = 450; 
-
-    if (screenWidth < targetWidth) {
-        const scaleValue = screenWidth / targetWidth;
-        app.style.transform = `scale(${scaleValue})`;
-    } else {
-        app.style.transform = `scale(1)`;
-    }
-}
-
-window.addEventListener('resize', adjustLayout);
-window.addEventListener('load', adjustLayout);
-
         const firebaseConfig = {
             apiKey: "AIzaSyA-KabHNxU7PmQ3sARjqY7XrZ7LI5rSI8E",
             authDomain: "funtop-453ec.firebaseapp.com",
@@ -465,6 +501,7 @@ window.addEventListener('load', adjustLayout);
         const db = firebase.firestore();
         const rtdb = firebase.database();
         const timerDoc = db.collection("settings").doc("timer");
+        const historyColl = db.collection("history");
 
         const state = {
             uid: null,
@@ -474,17 +511,34 @@ window.addEventListener('load', adjustLayout);
             spinning: false,
             bets: Array(10).fill(0),
             betHistory: [],
-            last10: [],
             selectedAmount: 10,
             spinStarted: false,
             isResetting: false,
-            noBetRounds: 0 // Counter for auto-logout
+            lastResultHandled: null
         };
+
+        // Long Press Logic Variables
+        let betRepeatInterval = null;
 
         let timerInterval = null;
         let spinAnimationFrame = null;
         let serverStartTime = null; 
         const TIMER_DURATION = 60;
+
+        async function loadHistoryFromFirebase() {
+            historyColl.orderBy("timestamp", "asc").limitToLast(5).onSnapshot((snap) => {
+                const historyBox = document.getElementById('last10');
+                historyBox.innerHTML = "";
+                snap.forEach((doc) => {
+                    const data = doc.data();
+                    const span = document.createElement('div');
+                    span.className = 'hist-item';
+                    span.textContent = data.result;
+                    historyBox.appendChild(span);
+                });
+                if(historyBox.lastChild) historyBox.lastChild.classList.add('hist-last-blink');
+            });
+        }
 
         async function syncCoinsToDB(newCoinVal) {
             if(!state.uid) return;
@@ -508,30 +562,18 @@ window.addEventListener('load', adjustLayout);
         timerDoc.onSnapshot((snap) => {
             if (!snap.exists) { triggerNewRound(); return; }
             const data = snap.data();
+            
             if (data.status === "RESULT" && !state.spinning && data.result !== undefined) {
-                START_SPIN_ANIMATION(data.result);
+                if(state.lastResultHandled !== data.timerStartTime?.toMillis()) {
+                    state.lastResultHandled = data.timerStartTime?.toMillis();
+                    START_SPIN_ANIMATION(data.result);
+                }
             }
+
             if (data.timerStartTime) {
                 const newServerTime = data.timerStartTime.toMillis();
                 if (serverStartTime !== newServerTime) {
                     serverStartTime = newServerTime;
-                    
-                    // --- AUTO LOGOUT CHECK ---
-                    if (state.uid) {
-                        const totalBetThisRound = state.bets.reduce((a, b) => a + b, 0);
-                        if (totalBetThisRound === 0) {
-                            state.noBetRounds++;
-                            console.log("No Bet Round: " + state.noBetRounds);
-                            if (state.noBetRounds >= 5) {
-                                alert("You have been logged out for inactivity (5 rounds no bet).");
-                                logoutUser();
-                                return;
-                            }
-                        } else {
-                            state.noBetRounds = 0; // Reset if bet placed
-                        }
-                    }
-
                     RESET_ROUND_LOCALLY();
                     startSyncTimer();
                 }
@@ -545,8 +587,20 @@ window.addEventListener('load', adjustLayout);
                 const now = Date.now();
                 const diff = Math.floor((now - serverStartTime) / 1000);
                 let left = TIMER_DURATION - diff;
-                document.getElementById("time").innerText = left > 0 ? left : 0;
+                
+                const timerEl = document.getElementById("time");
+                timerEl.innerText = left > 0 ? left : 0;
                 state.timer = left;
+
+                if (left <= 15 && left > 0) timerEl.classList.add("timer-warning");
+                else timerEl.classList.remove("timer-warning");
+
+                if (left <= 15) {
+                    state.betting = false;
+                    stopBettingRepeat(); // Stop any long press if time runs out
+                    if(left > 0) document.getElementById('gameStatus').textContent = "WAIT FOR RESULT...";
+                }
+
                 if (left === 8 && !state.spinStarted) calculateAndSetResult();
                 if (left <= -5) triggerNewRound();
             }, 1000);
@@ -574,6 +628,7 @@ window.addEventListener('load', adjustLayout);
 
         async function START_SPIN_ANIMATION(winnerNum) {
             state.spinning = true;
+            state.betting = false; 
             document.getElementById('gameStatus').textContent = "SPINNING...";
             document.getElementById('ptrOverlay').classList.add('jiggle');
             runSpinAnimation(winnerNum);
@@ -590,14 +645,18 @@ window.addEventListener('load', adjustLayout);
                 setTimeout(() => targetBtn.classList.remove('blink-blue'), 4000);
             }
 
+            historyColl.add({
+                result: result,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
             if (state.bets[result] > 0) {
                 const winAmount = state.bets[result] * 9;
                 state.coins += winAmount;
                 await syncCoinsToDB(state.coins);
                 updateUI();
             }
-            updateLast10History(result);
-            document.getElementById('gameStatus').textContent = "WINNER: " + result + " | NEXT ROUND SOON";
+            document.getElementById('gameStatus').textContent = "WINNER: " + result;
         }
 
         function RESET_ROUND_LOCALLY() {
@@ -615,14 +674,15 @@ window.addEventListener('load', adjustLayout);
         }
 
         async function PLACE_BET_LOCALLY(number, amount) {
+            if (state.timer <= 15) {
+                document.getElementById('gameStatus').textContent = "BETTING CLOSED!";
+                return false;
+            }
+
             if (state.betting && state.coins >= amount) {
                 state.coins -= amount;
                 state.bets[number] += amount;
                 state.betHistory.push({ num: number, amount: amount });
-                
-                // Important: Reset inactivity counter if user places a bet
-                state.noBetRounds = 0; 
-
                 updateUI();
                 await syncCoinsToDB(state.coins);
                 const updateObj = {};
@@ -633,24 +693,40 @@ window.addEventListener('load', adjustLayout);
             return false;
         }
 
+        // Long Press Helper Functions
+        function startBettingRepeat(number) {
+            if (state.timer <= 15 || !state.betting) return;
+            
+            // First bet immediately
+            if (PLACE_BET_LOCALLY(number, state.selectedAmount)) playClickSound();
+
+            // Set interval for repeated betting every 200ms
+            if (betRepeatInterval) clearInterval(betRepeatInterval);
+            betRepeatInterval = setInterval(() => {
+                if (state.timer > 15 && state.betting) {
+                    if (PLACE_BET_LOCALLY(number, state.selectedAmount)) {
+                        playClickSound();
+                    } else {
+                        stopBettingRepeat();
+                    }
+                } else {
+                    stopBettingRepeat();
+                }
+            }, 200);
+        }
+
+        function stopBettingRepeat() {
+            if (betRepeatInterval) {
+                clearInterval(betRepeatInterval);
+                betRepeatInterval = null;
+            }
+        }
+
         function updateUI() {
             document.getElementById('coins').textContent = state.coins;
             state.bets.forEach((v, i) => {
                 const el = document.getElementById(`bet-${i}`);
                 if (el) { el.style.display = v > 0 ? 'block' : 'none'; el.textContent = v; }
-            });
-        }
-
-        async function updateLast10History(result) {
-            state.last10.unshift(result);
-            if (state.last10.length > 10) state.last10.pop();
-            const historyBox = document.getElementById('last10');
-            historyBox.innerHTML = ""; 
-            state.last10.forEach((num, index) => {
-                const span = document.createElement('span');
-                span.textContent = num + (index < state.last10.length - 1 ? ", " : "");
-                if (index === 0) span.classList.add('hist-blink');
-                historyBox.appendChild(span);
             });
         }
 
@@ -662,6 +738,7 @@ window.addEventListener('load', adjustLayout);
         }
 
         async function cancelLastBet() {
+            if (state.timer <= 15) return; 
             if (state.betHistory.length > 0 && state.betting) {
                 const last = state.betHistory.pop();
                 state.coins += last.amount;
@@ -676,6 +753,7 @@ window.addEventListener('load', adjustLayout);
         }
 
         async function cancelAllBets() {
+            if (state.timer <= 15) return; 
             if (state.betting) {
                 let totalToRefund = 0;
                 for(let i=0; i<10; i++) {
@@ -708,7 +786,17 @@ window.addEventListener('load', adjustLayout);
                 const box = document.createElement('div');
                 box.className = 'number-box';
                 box.innerHTML = `<div class="num" id="btn-num-${i}">${i}</div><div class="bet-placed" id="bet-${i}">0</div>`;
-                box.onclick = () => { if (PLACE_BET_LOCALLY(i, state.selectedAmount)) playClickSound(); };
+                
+                const numBtn = box.querySelector('.num');
+
+                // Mouse Events
+                numBtn.addEventListener('mousedown', (e) => { e.preventDefault(); startBettingRepeat(i); });
+                window.addEventListener('mouseup', stopBettingRepeat);
+
+                // Touch Events
+                numBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startBettingRepeat(i); });
+                window.addEventListener('touchend', stopBettingRepeat);
+                
                 betRow.appendChild(box);
             }
         }
@@ -753,58 +841,48 @@ window.addEventListener('load', adjustLayout);
             drawWheel(0);
             selectChip(10);
             updateUI();
+            loadHistoryFromFirebase();
         };
 
-        // Auth
         async function login(){
             const uid=document.getElementById("uid").value.trim();
             const pass=document.getElementById("pass").value.trim();
             const st=document.getElementById("loginStatus");
             if(!uid||!pass){st.style.color="red";st.innerText="UID/Password डालें";return;}
-            st.style.color="#00ccff";st.innerText="Connecting...";
             try{
                 const snap=await firebase.database().ref("users/uid/"+uid).once("value");
                 if(!snap.exists()){st.style.color="red";st.innerText="UID नहीं मिला";return;}
                 const d=snap.val();
                 if(String(d.password)!==pass){st.style.color="red";st.innerText="Password गलत";return;}
-                if(Number(d.isActive)!==10){st.style.color="red";st.innerText="Account Active नहीं";return;}
                 state.uid = uid; state.coins = Number(d.coins) || 0; state.betting = true;
-                state.noBetRounds = 0; // Reset counter on login
-                sessionStorage.setItem("gk_uid", uid);
                 updateUI();
                 document.getElementById("gameStatus").textContent = "PLACE YOUR BETS";
                 document.getElementById("loginBlock").style.display="none";
-            }catch(e){ st.style.color="red";st.innerText="Firebase Error"; }
+            }catch(e){ st.style.color="red";st.innerText="Error"; }
         }
 
         function logoutUser(){
-            sessionStorage.removeItem("gk_uid");
-            state.uid=null; state.coins=0; state.betting=false; state.noBetRounds = 0;
-            state.bets.fill(0); state.betHistory=[];
+            state.uid=null; state.coins=0; state.betting=false;
             updateUI();
-            document.getElementById("winner").innerText="-";
             document.getElementById("gameStatus").innerText="PLEASE LOGIN";
             document.getElementById("loginBlock").style.display="flex";
         }
 
-        function openSendPopup(){ if(!state.uid){ alert("Please login"); return; } document.getElementById("sendPopup").style.display="flex"; }
+        function openSendPopup(){ if(!state.uid) return; document.getElementById("sendPopup").style.display="flex"; }
         function closeSendPopup(){ document.getElementById("sendPopup").style.display="none"; }
         async function sendCoins(){
             const toUID=document.getElementById("sendUID").value.trim();
             const amt=Number(document.getElementById("sendAmount").value);
-            const st=document.getElementById("sendStatus");
-            if(!toUID||amt<=0){st.style.color="red";st.innerText="Invalid Input";return;}
-            if(amt>state.coins){st.style.color="red";st.innerText="Low Balance";return;}
+            if(!toUID||amt<=0||amt>state.coins) return;
             const toRef=firebase.database().ref("users/uid/"+toUID);
             const snap=await toRef.once("value");
-            if(!snap.exists()){st.style.color="red";st.innerText="UID Not Found";return;}
+            if(!snap.exists()) return;
             state.coins-=amt;
             await firebase.database().ref("users/uid/"+state.uid).update({coins:state.coins});
             const rc=Number(snap.val().coins)||0;
             await toRef.update({coins:rc+amt});
             updateUI();
-            st.style.color="#00ff88";st.innerText="Transfer Success";
-            setTimeout(closeSendPopup,1200);
+            closeSendPopup();
         }
     </script>
 
@@ -825,12 +903,7 @@ window.addEventListener('load', adjustLayout);
             <input id="sendAmount" type="number" placeholder="Amount" style="width:100%;padding:10px;margin:6px 0">
             <button onclick="sendCoins()" style="width:100%;padding:10px;background:#00c853;border:none;border-radius:6px;font-weight:bold">SEND</button>
             <button onclick="closeSendPopup()" style="width:100%;margin-top:6px;padding:8px;background:#444;color:#fff;border:none;border-radius:6px">CANCEL</button>
-            <div id="sendStatus" style="margin-top:8px;font-size:13px"></div>
         </div>
     </div>
-    <div class="game-app" id="autoScaleApp">
-    ... गेम का बाकी सामान ...
-</div>
-
 </body>
 </html>
