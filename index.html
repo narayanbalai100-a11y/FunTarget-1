@@ -62,8 +62,10 @@
             display: flex; 
             justify-content: center; 
             align-items: flex-start; 
-            background-image: url('https://uploads.onecompiler.io/445tyzay6/448mutbvh/1000053141.png'); 
-            background-size: cover; 
+            background-image: url('https://uploads.onecompiler.io/445tyzay6/448n7h4a3/1000053493.jpg'); 
+            background-size: 100% 100%; 
+            background-position: center;
+            background-repeat: no-repeat;
             z-index: 100; 
             padding-top: 1px; 
         }
@@ -74,9 +76,33 @@
             flex-direction: column; 
             padding: 2px 0px; 
             position: relative; 
-            background: rgba(0, 0, 0, 0.3); 
+            background: rgba(0, 0, 0, 0.2); 
             max-width: 1300px; 
             width: 100%; 
+        }
+
+        /* LOGIN BLOCK UPDATED WITH BACKGROUND IMAGE */
+        #loginBlock {
+            position: fixed;
+            inset: 0;
+            background-image: url('https://uploads.onecompiler.io/445tyzay6/447r2hytz/1000052790.jpg');
+            background-size: 100% 100%;
+            background-position: center;
+            background-repeat: no-repeat;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999999;
+        }
+
+        .login-card {
+            background: rgba(0, 0, 0, 0.85); /* कार्ड को थोड़ा डार्क रखा है ताकि फॉर्म साफ़ दिखे */
+            padding: 25px;
+            border-radius: 12px;
+            width: 280px;
+            text-align: center;
+            border: 2px solid #FFD700;
+            box-shadow: 0 0 20px rgba(0,0,0,1);
         }
 
         #cancelSpecific { 
@@ -484,6 +510,26 @@
         </div>
     </div>
 
+    <div id="loginBlock">
+        <div class="login-card">
+            <h3 style="color:#FFD700; margin-bottom: 10px;">Login Required</h3>
+            <input id="uid" placeholder="UID" style="width:100%;padding:10px;margin:6px 0; border-radius: 6px; border: none;">
+            <input id="pass" type="password" placeholder="Password" style="width:100%;padding:10px;margin:6px 0; border-radius: 6px; border: none;">
+            <button onclick="login()" style="width:100%;padding:10px;margin-top:10px;background: linear-gradient(180deg, #FFEB00, #b8860b);border:none;border-radius:6px;font-weight:bold; cursor: pointer;">LOGIN</button>
+            <div id="loginStatus" style="margin-top:10px;font-size:13px"></div>
+        </div>
+    </div>
+
+    <div id="sendPopup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:999999;align-items:center;justify-content:center">
+        <div style="background:#111;padding:20px;border-radius:12px;width:280px;text-align:center">
+            <h3>Send Coins</h3>
+            <input id="sendUID" placeholder="Receiver UID" style="width:100%;padding:10px;margin:6px 0">
+            <input id="sendAmount" type="number" placeholder="Amount" style="width:100%;padding:10px;margin:6px 0">
+            <button onclick="sendCoins()" style="width:100%;padding:10px;background:#00c853;border:none;border-radius:6px;font-weight:bold">SEND</button>
+            <button onclick="closeSendPopup()" style="width:100%;margin-top:6px;padding:8px;background:#444;color:#fff;border:none;border-radius:6px">CANCEL</button>
+        </div>
+    </div>
+
     <audio id="clickSound" preload="auto">
         <source src="https://assets.mixkit.co/sfx/preview/mixkit-game-click-1114.mp3" type="audio/mpeg">
     </audio>
@@ -517,9 +563,7 @@
             lastResultHandled: null
         };
 
-        // Long Press Logic Variables
         let betRepeatInterval = null;
-
         let timerInterval = null;
         let spinAnimationFrame = null;
         let serverStartTime = null; 
@@ -597,7 +641,7 @@
 
                 if (left <= 15) {
                     state.betting = false;
-                    stopBettingRepeat(); // Stop any long press if time runs out
+                    stopBettingRepeat();
                     if(left > 0) document.getElementById('gameStatus').textContent = "WAIT FOR RESULT...";
                 }
 
@@ -693,14 +737,9 @@
             return false;
         }
 
-        // Long Press Helper Functions
         function startBettingRepeat(number) {
             if (state.timer <= 15 || !state.betting) return;
-            
-            // First bet immediately
             if (PLACE_BET_LOCALLY(number, state.selectedAmount)) playClickSound();
-
-            // Set interval for repeated betting every 200ms
             if (betRepeatInterval) clearInterval(betRepeatInterval);
             betRepeatInterval = setInterval(() => {
                 if (state.timer > 15 && state.betting) {
@@ -786,17 +825,11 @@
                 const box = document.createElement('div');
                 box.className = 'number-box';
                 box.innerHTML = `<div class="num" id="btn-num-${i}">${i}</div><div class="bet-placed" id="bet-${i}">0</div>`;
-                
                 const numBtn = box.querySelector('.num');
-
-                // Mouse Events
                 numBtn.addEventListener('mousedown', (e) => { e.preventDefault(); startBettingRepeat(i); });
                 window.addEventListener('mouseup', stopBettingRepeat);
-
-                // Touch Events
                 numBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startBettingRepeat(i); });
                 window.addEventListener('touchend', stopBettingRepeat);
-                
                 betRow.appendChild(box);
             }
         }
@@ -885,25 +918,5 @@
             closeSendPopup();
         }
     </script>
-
-    <div id="loginBlock" style="position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:999999">
-        <div style="background:#111;padding:25px;border-radius:12px;width:280px;text-align:center">
-            <h3>Login Required</h3>
-            <input id="uid" placeholder="UID" style="width:100%;padding:10px;margin:6px 0">
-            <input id="pass" type="password" placeholder="Password" style="width:100%;padding:10px;margin:6px 0">
-            <button onclick="login()" style="width:100%;padding:10px;margin-top:10px;background:#FFEB00;border:none;border-radius:6px;font-weight:bold">LOGIN</button>
-            <div id="loginStatus" style="margin-top:10px;font-size:13px"></div>
-        </div>
-    </div>
-
-    <div id="sendPopup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:999999;align-items:center;justify-content:center">
-        <div style="background:#111;padding:20px;border-radius:12px;width:280px;text-align:center">
-            <h3>Send Coins</h3>
-            <input id="sendUID" placeholder="Receiver UID" style="width:100%;padding:10px;margin:6px 0">
-            <input id="sendAmount" type="number" placeholder="Amount" style="width:100%;padding:10px;margin:6px 0">
-            <button onclick="sendCoins()" style="width:100%;padding:10px;background:#00c853;border:none;border-radius:6px;font-weight:bold">SEND</button>
-            <button onclick="closeSendPopup()" style="width:100%;margin-top:6px;padding:8px;background:#444;color:#fff;border:none;border-radius:6px">CANCEL</button>
-        </div>
-    </div>
 </body>
 </html>
