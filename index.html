@@ -934,7 +934,7 @@
             spinAnimationFrame = requestAnimationFrame(animate);
         }
 
-        window.onload = () => {
+        Window.onload = () => {
             setupBettingUI();
             drawWheel(0);
             selectChip(10);
@@ -953,7 +953,20 @@
                 const d=snap.val();
                 if(String(d.password)!==pass){st.style.color="red";st.innerText="Password गलत";return;}
                 
-                // लॉगिन बटन पर क्लिक करते ही ऑडियो अनलॉक के लिए कॉल करें
+                // --- Single Device Login Logic ---
+                const newSessionId = Date.now().toString(); // नया यूनिक सेशन आईडी
+                localStorage.setItem("game_session_id", newSessionId);
+                await firebase.database().ref("users/uid/" + uid).update({ sessionId: newSessionId });
+                
+                // रियल-टाइम लिसनर: अगर सेशन आईडी बदलती है तो लॉगआउट करें
+                firebase.database().ref("users/uid/" + uid + "/sessionId").on("value", (s) => {
+                    if (s.val() !== localStorage.getItem("game_session_id")) {
+                        alert("Your account logged in from another device.");
+                        logoutUser();
+                    }
+                });
+                // ---------------------------------
+
                 unlockAudio();
 
                 state.uid = uid; state.coins = Number(d.coins) || 0; state.betting = true;
@@ -961,7 +974,6 @@
                 document.getElementById("gameStatus").textContent = "PLACE YOUR BETS";
                 document.getElementById("loginBlock").style.display="none";
 
-                // LOGIN होने पर बैकग्राउंड म्यूजिक शुरू करें
                 document.getElementById('bgMusic').play().catch(() => {
                     console.log("Autoplay blocked, waiting for user interaction.");
                 });
@@ -969,11 +981,16 @@
         }
 
         function logoutUser(){
+            // लिसनर को हटाना ताकि लूप न बने
+            if(state.uid) {
+                firebase.database().ref("users/uid/" + state.uid + "/sessionId").off();
+            }
             state.uid=null; state.coins=0; state.betting=false;
             updateUI();
             document.getElementById("gameStatus").innerText="PLEASE LOGIN";
             document.getElementById("loginBlock").style.display="flex";
             document.getElementById('bgMusic').pause();
+            localStorage.removeItem("game_session_id");
         }
 
         function openSendPopup(){ if(!state.uid) return; document.getElementById("sendPopup").style.display="flex"; }
