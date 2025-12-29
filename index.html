@@ -683,7 +683,7 @@
                 }
 
                 if (left === 8 && !state.spinStarted) calculateAndSetResult();
-                if (left <= --1) triggerNewRound();
+                if (left <= -1) triggerNewRound();
             }, 1000);
         }
 
