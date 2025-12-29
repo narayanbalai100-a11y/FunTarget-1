@@ -698,8 +698,8 @@
                 }
 
                 if (left === 8 && !state.spinStarted) calculateAndSetResult();
-                if (left <= -10) triggerNewRound();
-            }, 1050);
+                if (left <= -5) triggerNewRound();
+            }, 1000);
         }
 
         async function calculateAndSetResult() {
