@@ -926,21 +926,87 @@
             updateUI();
             loadHistoryFromFirebase();
         };
-
+        
+           // ✅ LOGIN FUNCTION REPLACED WITH NEW VERSION
         async function login(){
-            const uid=document.getElementById("uid").value.trim();
-            const pass=document.getElementById("pass").value.trim();
-            const st=document.getElementById("loginStatus");
-            if(!uid||!pass){st.style.color="red";st.innerText="UID/Password डालें";return;}
-            try{
-                const snap=await firebase.database().ref("users/uid/"+uid).once("value");
-                if(!snap.exists()){st.style.color="red";st.innerText="UID नहीं मिला";return;}
-                const d=snap.val();
-                if(String(d.password)!==pass){st.style.color="red";st.innerText="Password गलत";return;}
-                
-                // लॉगिन बटन पर क्लिक करते ही ऑडियो अनलॉक के लिए कॉल करें
-                unlockAudio();
+            const uid = document.getElementById("uid").value.trim();
+            const pass = document.getElementById("pass").value.trim();
+            const st = document.getElementById("loginStatus");
+            const myDeviceId = getDeviceId(); // ✅
 
+            if(!uid || !pass){
+                st.innerText = "UID / Password डालें";
+                st.style.color = "red";
+                return;
+            }
+
+            try {
+                const ref = firebase.database().ref("users/uid/" + uid); // ✅
+                const snap = await ref.once("value");
+
+                if(!snap.exists()){
+                    st.innerText = "UID नहीं मिला";
+                    st.style.color = "red";
+                    return;
+                }
+
+                const data = snap.val();
+
+                if(String(data.password) !== pass){
+                    st.innerText = "Password गलत है";
+                    st.style.color = "red";
+                    return;
+                }
+
+                // 🔥 MAIN CHECK ✅
+                if(data.loggedIn && data.deviceId !== myDeviceId){
+                    st.innerText = "ID already logged in on another device";
+                    st.style.color = "orange";
+                    return;
+                }
+
+                // ✅ Login allow
+                await ref.update({
+                    loggedIn: true,
+                    deviceId: myDeviceId
+                });
+
+                state.uid = uid; 
+                state.coins = Number(data.coins) || 0; 
+                state.betting = true;
+                
+                updateUI();
+                st.innerText = "Login Successful";
+                st.style.color = "lightgreen";
+                
+                document.getElementById("gameStatus").textContent = "PLACE YOUR BETS";
+                setTimeout(() => {
+                    document.getElementById("loginBlock").style.display="none";
+                }, 1000);
+
+            } catch(e) { 
+                st.style.color="red";
+                st.innerText="Error during login"; 
+            }
+        }
+
+        // ✅ NEW DEVICE ID FUNCTION ADDED
+        function getDeviceId(){
+            let id = localStorage.getItem("deviceId");
+            if(!id){
+                id = "dev_" + Math.random().toString(36).substr(2,9);
+                localStorage.setItem("deviceId", id);
+            }
+            return id;
+        }
+
+        // ✅ LOGOUT UPDATED TO RESET LOGGEDIN STATUS
+        async function logoutUser(){
+            if(state.uid) {
+                await firebase.database().ref("users/uid/" + state.uid).update({
+                    loggedIn: false 
+                });
+             }
                 state.uid = uid; state.coins = Number(d.coins) || 0; state.betting = true;
                 updateUI();
                 document.getElementById("gameStatus").textContent = "PLACE YOUR BETS";
