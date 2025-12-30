@@ -586,105 +586,23 @@
         const rtdb = firebase.database();
         const timerDoc = db.collection("settings").doc("timer");
         const historyColl = db.collection("history");
-       
-              // 3. 🔊 New Master Audio System (Fixed)
-        const sounds = {
-            bgm: new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'),
-            spin: new Audio('https://www.fesliyanstudios.com/play-mp3/651'),
-            win: new Audio('https://www.fesliyanstudios.com/play-mp3/2653'),
-            chip: new Audio('https://www.fesliyanstudios.com/play-mp3/5657'),
-            timer: new Audio('https://www.fesliyanstudios.com/play-mp3/651') // अगर टाइमर की आवाज है
-        };
 
-        // शुरुआत में सबको पूरी तरह म्यूट और पॉज रखें
-        Object.values(sounds).forEach(s => {
-            s.pause();
-            s.muted = true;
-            s.currentTime = 0;
-        });
+        // ✅ Audio Unlock Logic Added
+        let unlocked = false;
 
-        sounds.bgm.loop = true;
-        sounds.bgm.volume = 0.5;
-
-        /**
-         * आवाज़ को कंट्रोल करने का मास्टर फंक्शन
-         */
-        function playSound(type) {
-            // 🛑 सबसे बड़ी सुरक्षा: अगर लॉगिन नहीं है या एलीमेंट नहीं है, तो तुरंत बाहर निकलें
-            if (!state.uid || !sounds[type]) return;
-
-            try {
-                const s = sounds[type];
-                s.muted = false; // प्ले करने से पहले अनम्यूट करें
-
-                if (type === 'bgm') {
-                    if (s.paused) s.play().catch(e => console.log("BGM Error:", e));
-                } else {
-                    s.currentTime = 0;
-                    s.play().catch(e => console.log("Sound Error:", e));
-                }
-            } catch (err) {
-                console.error("Audio Playback Failed", err);
-            }
+        function unlockAudio(){
+          if(unlocked) return;
+          const a = document.getElementById("timerSound");
+          if(!a) return; // सुरक्षा के लिए
+          a.muted = true;
+          a.play().then(()=>{
+            a.pause();
+            a.muted = false;
+            unlocked = true;
+            console.log("Audio unlocked");
+          }).catch(e => console.log("Audio play error", e));
         }
 
-        function stopSound(type) {
-            if (sounds[type]) {
-                sounds[type].pause();
-                sounds[type].muted = true;
-                if (type !== 'bgm') sounds[type].currentTime = 0;
-            }
-        }
-
-        // 4. 🎰 Game Logic Functions
-        function START_SPIN(winnerNum) {
-            if (spinAnimationFrame) return;
-            
-            // लॉगिन होने पर ही आवाज शुरू होगी
-            playSound('spin');
-
-            const start = performance.now();
-            const targetRot = 3600 + (winnerNum * 36);
-
-            function animate(now) {
-                const progress = Math.min((now - start) / 8000, 1);
-                const eased = 1 - Math.pow(1 - progress, 3);
-                drawWheel(targetRot * eased);
-
-                if (progress < 1) {
-                    spinAnimationFrame = requestAnimationFrame(animate);
-                } else {
-                    stopSound('spin'); // स्पिन रुकते ही आवाज बंद
-                    STOP_SPIN_AND_SHOW_RESULT(winnerNum);
-                }
-            }
-            spinAnimationFrame = requestAnimationFrame(animate);
-        }
-
-        // 5. 🔐 Login Function (यही आवाज़ को अनलॉक करेगा)
-        async function login() {
-            const email = document.getElementById("email").value;
-            const pass = document.getElementById("pass").value;
-            if (!email || !pass) return;
-
-            try {
-                const res = await firebase.auth().signInWithEmailAndPassword(email, pass);
-                state.uid = res.user.uid;
-                
-                // UI छुपाएं
-                document.getElementById("authContainer").style.display = "none";
-                document.getElementById("gameContainer").style.display = "block";
-                
-                // ✅ लॉगिन के बाद पहली बार में ही आवाज़ अनलॉक और प्ले करना
-                playSound('bgm'); 
-                
-                fetchUserData();
-                console.log("Login Success: Audio Started");
-            } catch (err) {
-                alert("Login failed: " + err.message);
-            }
-        }
-       
         const state = {
             uid: null,
             coins: 0,
@@ -1017,20 +935,16 @@
             }
             spinAnimationFrame = requestAnimationFrame(animate);
         }
-        
-        firebase.auth().onAuthStateChanged(user => {
-  if (user) {
-    setupBettingUI();
-    drawWheel(0);
-    selectChip(10);
-    updateUI();
-    loadHistoryFromFirebase(); // ✅ अब safe
-  } else {
-    firebase.auth().signInAnonymously();
-  }
-});
-        
-         async function login(){
+
+        Window.onload = () => {
+            setupBettingUI();
+            drawWheel(0);
+            selectChip(10);
+            updateUI();
+            loadHistoryFromFirebase();
+        };
+
+        async function login(){
             const uid=document.getElementById("uid").value.trim();
             const pass=document.getElementById("pass").value.trim();
             const st=document.getElementById("loginStatus");
@@ -1041,11 +955,19 @@
                 const d=snap.val();
                 if(String(d.password)!==pass){st.style.color="red";st.innerText="Password गलत";return;}
                 
-                // --- सिंगल डिवाइस लॉगिन लॉजिक ---
-                const newSessionID = Date.now().toString(); // नया यूनिक सेशन ID
-                localStorage.setItem("sessionID", newSessionID);
-                await firebase.database().ref("users/uid/"+uid).update({ sessionID: newSessionID });
-                // ------------------------------
+                // --- Single Device Login Logic ---
+                const newSessionId = Date.now().toString(); // नया यूनिक सेशन आईडी
+                localStorage.setItem("game_session_id", newSessionId);
+                await firebase.database().ref("users/uid/" + uid).update({ sessionId: newSessionId });
+                
+                // रियल-टाइम लिसनर: अगर सेशन आईडी बदलती है तो लॉगआउट करें
+                firebase.database().ref("users/uid/" + uid + "/sessionId").on("value", (s) => {
+                    if (s.val() !== localStorage.getItem("game_session_id")) {
+                        alert("Your account logged in from another device.");
+                        logoutUser();
+                    }
+                });
+                // ---------------------------------
 
                 unlockAudio();
 
@@ -1057,61 +979,21 @@
                 document.getElementById('bgMusic').play().catch(() => {
                     console.log("Autoplay blocked, waiting for user interaction.");
                 });
-
-                // दूसरे डिवाइस को चेक करने के लिए Listener शुरू करें
-                listenForOtherLogin(uid);
-
             }catch(e){ st.style.color="red";st.innerText="Error"; }
         }
 
-        // यह फंक्शन चेक करेगा कि क्या किसी और ने लॉगिन किया है
-        function listenForOtherLogin(uid) {
-            firebase.database().ref("users/uid/" + uid + "/sessionID").on("value", (snapshot) => {
-                const activeSession = snapshot.val();
-                const mySession = localStorage.getItem("sessionID");
-
-                // अगर डेटाबेस वाला ID मेरे लोकल ID से अलग है, तो मतलब कहीं और लॉगिन हुआ है
-                if (activeSession && mySession && activeSession !== mySession) {
-                    alert("यह अकाउंट किसी दूसरे डिवाइस पर लॉगिन किया गया है।");
-                    firebase.database().ref("users/uid/" + uid + "/sessionID").off(); // Listener बंद करें
-                    logoutUser();
-                }
-            });
-        }
-
         function logoutUser(){
+            // लिसनर को हटाना ताकि लूप न बने
+            if(state.uid) {
+                firebase.database().ref("users/uid/" + state.uid + "/sessionId").off();
+            }
             state.uid=null; state.coins=0; state.betting=false;
-            localStorage.removeItem("sessionID"); // सेशन हटा दें
             updateUI();
             document.getElementById("gameStatus").innerText="PLEASE LOGIN";
             document.getElementById("loginBlock").style.display="flex";
             document.getElementById('bgMusic').pause();
+            localStorage.removeItem("game_session_id");
         }
-
-        function runSpinAnimation(winnerNum) {
-            const slider = document.getElementById('slider');
-            slider.style.transition = "transform 8s cubic-bezier(0.1, 0, 0.1, 1)";
-            slider.style.transform = `translateX(${-winnerNum * 10}%)`;
-            const targetRot = (Math.PI * 2 * 12) - (winnerNum * Math.PI * 2 / 10) - (Math.PI * 12 / 20);
-            let start = null;
-            function animate(now) {
-                if (!start) start = now;
-                const progress = Math.min((now - start) / 8000, 1);
-                const eased = 1 - Math.pow(1 - progress, 3);
-                drawWheel(targetRot * eased);
-                if (progress < 1) spinAnimationFrame = requestAnimationFrame(animate);
-                else STOP_SPIN_AND_SHOW_RESULT(winnerNum);
-            }
-            spinAnimationFrame = requestAnimationFrame(animate);
-        }
-
-        window.onload = () => {
-            setupBettingUI();
-            drawWheel(0);
-            selectChip(10);
-            updateUI();
-            loadHistoryFromFirebase();
-        };
 
         function openSendPopup(){ if(!state.uid) return; document.getElementById("sendPopup").style.display="flex"; }
         function closeSendPopup(){ document.getElementById("sendPopup").style.display="none"; }
@@ -1129,7 +1011,6 @@
             updateUI();
             closeSendPopup();
         }
-</script>
-
+    </script>
 </body>
 </html>
