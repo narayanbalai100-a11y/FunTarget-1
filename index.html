@@ -586,122 +586,105 @@
         const rtdb = firebase.database();
         const timerDoc = db.collection("settings").doc("timer");
         const historyColl = db.collection("history");
-        
-        // =========================================
-// 🔊 AUDIO SYSTEM - संशोधित (Fixed)
-// =========================================
-const sounds = {
-    bgm: new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'),
-    spin: new Audio('https://www.fesliyanstudios.com/play-mp3/651'),
-    win: new Audio('https://www.fesliyanstudios.com/play-mp3/2653'),
-    chip: new Audio('https://www.fesliyanstudios.com/play-mp3/5657')
-};
+       
+              // 3. 🔊 New Master Audio System (Fixed)
+        const sounds = {
+            bgm: new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'),
+            spin: new Audio('https://www.fesliyanstudios.com/play-mp3/651'),
+            win: new Audio('https://www.fesliyanstudios.com/play-mp3/2653'),
+            chip: new Audio('https://www.fesliyanstudios.com/play-mp3/5657'),
+            timer: new Audio('https://www.fesliyanstudios.com/play-mp3/651') // अगर टाइमर की आवाज है
+        };
 
-// शुरुआत में सब बंद रखें
-sounds.bgm.loop = true;
-sounds.bgm.volume = 0.5;
+        // शुरुआत में सबको पूरी तरह म्यूट और पॉज रखें
+        Object.values(sounds).forEach(s => {
+            s.pause();
+            s.muted = true;
+            s.currentTime = 0;
+        });
 
-/**
- * आवाज़ को कंट्रोल करने का मास्टर फंक्शन
- */
-function playSound(type) {
-    // 🛑 सुरक्षा: अगर यूजर लॉगिन नहीं है, तो कोई आवाज नहीं बजेगी
-    if (!state.uid) {
-        console.log("Audio Blocked: User not logged in.");
-        return;
-    }
+        sounds.bgm.loop = true;
+        sounds.bgm.volume = 0.5;
 
-    try {
-        if (type === 'bgm') {
-            if (sounds.bgm.paused) sounds.bgm.play().catch(e => console.log("BGM Error:", e));
-        } else {
-            const s = sounds[type];
-            if (s) {
-                s.currentTime = 0;
-                s.play().catch(e => console.log("Sound Effect Error:", e));
+        /**
+         * आवाज़ को कंट्रोल करने का मास्टर फंक्शन
+         */
+        function playSound(type) {
+            // 🛑 सबसे बड़ी सुरक्षा: अगर लॉगिन नहीं है या एलीमेंट नहीं है, तो तुरंत बाहर निकलें
+            if (!state.uid || !sounds[type]) return;
+
+            try {
+                const s = sounds[type];
+                s.muted = false; // प्ले करने से पहले अनम्यूट करें
+
+                if (type === 'bgm') {
+                    if (s.paused) s.play().catch(e => console.log("BGM Error:", e));
+                } else {
+                    s.currentTime = 0;
+                    s.play().catch(e => console.log("Sound Error:", e));
+                }
+            } catch (err) {
+                console.error("Audio Playback Failed", err);
             }
         }
-    } catch (err) {
-        console.error("Audio Playback Failed", err);
-    }
-}
 
-/**
- * आवाज़ को रोकने के लिए
- */
-function stopSound(type) {
-    if (sounds[type]) {
-        sounds[type].pause();
-        if (type !== 'bgm') sounds[type].currentTime = 0;
-    }
-}
+        function stopSound(type) {
+            if (sounds[type]) {
+                sounds[type].pause();
+                sounds[type].muted = true;
+                if (type !== 'bgm') sounds[type].currentTime = 0;
+            }
+        }
 
-// =========================================
-// 🎰 GAME LOGIC FIXES
-// =========================================
+        // 4. 🎰 Game Logic Functions
+        function START_SPIN(winnerNum) {
+            if (spinAnimationFrame) return;
+            
+            // लॉगिन होने पर ही आवाज शुरू होगी
+            playSound('spin');
 
-// जब स्पिन शुरू हो, तो चेक करें कि क्या लॉगिन है
-function START_SPIN(winnerNum) {
-    if (spinAnimationFrame) return;
-    
-    // लॉगिन होने पर ही स्पिन की आवाज बजाएं
-    if (state.uid) {
-        playSound('spin');
-    }
+            const start = performance.now();
+            const targetRot = 3600 + (winnerNum * 36);
 
-    const start = performance.now();
-    const targetRot = 3600 + (winnerNum * 36);
+            function animate(now) {
+                const progress = Math.min((now - start) / 8000, 1);
+                const eased = 1 - Math.pow(1 - progress, 3);
+                drawWheel(targetRot * eased);
 
-    function animate(now) {
-        const progress = Math.min((now - start) / 8000, 1);
-        const eased = 1 - Math.pow(1 - progress, 3);
-        drawWheel(targetRot * eased);
-
-        if (progress < 1) {
+                if (progress < 1) {
+                    spinAnimationFrame = requestAnimationFrame(animate);
+                } else {
+                    stopSound('spin'); // स्पिन रुकते ही आवाज बंद
+                    STOP_SPIN_AND_SHOW_RESULT(winnerNum);
+                }
+            }
             spinAnimationFrame = requestAnimationFrame(animate);
-        } else {
-            stopSound('spin'); // स्पिन खत्म होते ही आवाज बंद
-            STOP_SPIN_AND_SHOW_RESULT(winnerNum);
-        }
-    }
-    spinAnimationFrame = requestAnimationFrame(animate);
-}
-
-// लॉगिन सफल होने के बाद BGM शुरू करें
-async function login() {
-    const email = document.getElementById("email").value;
-    const pass = document.getElementById("pass").value;
-    if (!email || !pass) return;
-
-    try {
-        const res = await firebase.auth().signInWithEmailAndPassword(email, pass);
-        state.uid = res.user.uid;
-        document.getElementById("authContainer").style.display = "none";
-        
-        // ✅ लॉगिन होते ही म्यूजिक शुरू करें
-        playSound('bgm'); 
-        
-        fetchUserData();
-    } catch (err) {
-        alert("Login failed: " + err.message);
-    }
-}
-        // ✅ Audio Unlock Logic Added
-        let unlocked = false;
-
-        function unlockAudio(){
-          if(unlocked) return;
-          const a = document.getElementById("timerSound");
-          if(!a) return; // सुरक्षा के लिए
-          a.muted = true;
-          a.play().then(()=>{
-            a.pause();
-            a.muted = false;
-            unlocked = true;
-            console.log("Audio unlocked");
-          }).catch(e => console.log("Audio play error", e));
         }
 
+        // 5. 🔐 Login Function (यही आवाज़ को अनलॉक करेगा)
+        async function login() {
+            const email = document.getElementById("email").value;
+            const pass = document.getElementById("pass").value;
+            if (!email || !pass) return;
+
+            try {
+                const res = await firebase.auth().signInWithEmailAndPassword(email, pass);
+                state.uid = res.user.uid;
+                
+                // UI छुपाएं
+                document.getElementById("authContainer").style.display = "none";
+                document.getElementById("gameContainer").style.display = "block";
+                
+                // ✅ लॉगिन के बाद पहली बार में ही आवाज़ अनलॉक और प्ले करना
+                playSound('bgm'); 
+                
+                fetchUserData();
+                console.log("Login Success: Audio Started");
+            } catch (err) {
+                alert("Login failed: " + err.message);
+            }
+        }
+       
         const state = {
             uid: null,
             coins: 0,
