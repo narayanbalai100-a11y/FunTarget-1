@@ -300,6 +300,8 @@
             width: 260%; 
             height: 95%;
             border-radius: 50%; 
+            transform: translateZ(0); 
+            will-change: transform;
         }
 
         .pointer-overlay { 
@@ -597,6 +599,10 @@
             a.pause();
             a.muted = false;
             unlocked = true;
+            const spinSnd = document.getElementById('spinSound');
+spinSnd.pause();
+spinSnd.currentTime = 0;
+spinSnd.loop = false;
             console.log("Audio unlocked");
           }).catch(e => console.log("Audio play error", e));
         }
@@ -933,7 +939,13 @@
             }
             spinAnimationFrame = requestAnimationFrame(animate);
         }
-
+        firebase.auth().onAuthStateChanged(users => {
+           if (users) {
+           console.log("AUTH OK", users.uid);
+           initAfterAuth();
+           } else {
+           firebase.auth().signInAnonymously();
+       }
         window.onload = () => {
             setupBettingUI();
             drawWheel(0);
@@ -951,7 +963,20 @@
                 const snap=await firebase.database().ref("users/uid/"+uid).once("value");
                 if(!snap.exists()){st.style.color="red";st.innerText="UID नहीं मिला";return;}
                 const d=snap.val();
-                if(String(d.password)!==pass){st.style.color="red";st.innerText="Password गलत";return;}
+                if(String(d.password)!==pass){st.style.color="red";st.innerText="Password गलत";return;}                        // --- Single Device Login Logic ---
+                const newSessionId = Date.now().toString(); // नया यूनिक सेशन आईडी
+                localStorage.setItem("game_session_id", newSessionId);
+                await firebase.database().ref("users/uid/" + uid).update({ sessionId: newSessionId });
+                
+                // रियल-टाइम लिसनर: अगर सेशन आईडी बदलती है तो लॉगआउट करें
+                firebase.database().ref("users/uid/" + uid + "/sessionId").on("value", (s) => {
+                    if (s.val() !== localStorage.getItem("game_session_id")) {
+                        alert("Your account logged in from another device.");
+                        logoutUser();
+                    }
+                });
+                // ---------------------------------
+
                 
                 // लॉगिन बटन पर क्लिक करते ही ऑडियो अनलॉक के लिए कॉल करें
                 unlockAudio();
@@ -969,11 +994,16 @@
         }
 
         function logoutUser(){
+           // लिसनर को हटाना ताकि लूप न बने
+            if(state.uid) {
+                firebase.database().ref("users/uid/" + state.uid + "/sessionId").off();
+            }
             state.uid=null; state.coins=0; state.betting=false;
             updateUI();
             document.getElementById("gameStatus").innerText="PLEASE LOGIN";
             document.getElementById("loginBlock").style.display="flex";
             document.getElementById('bgMusic').pause();
+            localStorage.removeItem("game_session_id");
         }
 
         function openSendPopup(){ if(!state.uid) return; document.getElementById("sendPopup").style.display="flex"; }
