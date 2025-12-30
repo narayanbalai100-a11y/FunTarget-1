@@ -586,7 +586,106 @@
         const rtdb = firebase.database();
         const timerDoc = db.collection("settings").doc("timer");
         const historyColl = db.collection("history");
+        
+        // =========================================
+// 🔊 AUDIO SYSTEM - संशोधित (Fixed)
+// =========================================
+const sounds = {
+    bgm: new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'),
+    spin: new Audio('https://www.fesliyanstudios.com/play-mp3/651'),
+    win: new Audio('https://www.fesliyanstudios.com/play-mp3/2653'),
+    chip: new Audio('https://www.fesliyanstudios.com/play-mp3/5657')
+};
 
+// शुरुआत में सब बंद रखें
+sounds.bgm.loop = true;
+sounds.bgm.volume = 0.5;
+
+/**
+ * आवाज़ को कंट्रोल करने का मास्टर फंक्शन
+ */
+function playSound(type) {
+    // 🛑 सुरक्षा: अगर यूजर लॉगिन नहीं है, तो कोई आवाज नहीं बजेगी
+    if (!state.uid) {
+        console.log("Audio Blocked: User not logged in.");
+        return;
+    }
+
+    try {
+        if (type === 'bgm') {
+            if (sounds.bgm.paused) sounds.bgm.play().catch(e => console.log("BGM Error:", e));
+        } else {
+            const s = sounds[type];
+            if (s) {
+                s.currentTime = 0;
+                s.play().catch(e => console.log("Sound Effect Error:", e));
+            }
+        }
+    } catch (err) {
+        console.error("Audio Playback Failed", err);
+    }
+}
+
+/**
+ * आवाज़ को रोकने के लिए
+ */
+function stopSound(type) {
+    if (sounds[type]) {
+        sounds[type].pause();
+        if (type !== 'bgm') sounds[type].currentTime = 0;
+    }
+}
+
+// =========================================
+// 🎰 GAME LOGIC FIXES
+// =========================================
+
+// जब स्पिन शुरू हो, तो चेक करें कि क्या लॉगिन है
+function START_SPIN(winnerNum) {
+    if (spinAnimationFrame) return;
+    
+    // लॉगिन होने पर ही स्पिन की आवाज बजाएं
+    if (state.uid) {
+        playSound('spin');
+    }
+
+    const start = performance.now();
+    const targetRot = 3600 + (winnerNum * 36);
+
+    function animate(now) {
+        const progress = Math.min((now - start) / 8000, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        drawWheel(targetRot * eased);
+
+        if (progress < 1) {
+            spinAnimationFrame = requestAnimationFrame(animate);
+        } else {
+            stopSound('spin'); // स्पिन खत्म होते ही आवाज बंद
+            STOP_SPIN_AND_SHOW_RESULT(winnerNum);
+        }
+    }
+    spinAnimationFrame = requestAnimationFrame(animate);
+}
+
+// लॉगिन सफल होने के बाद BGM शुरू करें
+async function login() {
+    const email = document.getElementById("email").value;
+    const pass = document.getElementById("pass").value;
+    if (!email || !pass) return;
+
+    try {
+        const res = await firebase.auth().signInWithEmailAndPassword(email, pass);
+        state.uid = res.user.uid;
+        document.getElementById("authContainer").style.display = "none";
+        
+        // ✅ लॉगिन होते ही म्यूजिक शुरू करें
+        playSound('bgm'); 
+        
+        fetchUserData();
+    } catch (err) {
+        alert("Login failed: " + err.message);
+    }
+}
         // ✅ Audio Unlock Logic Added
         let unlocked = false;
 
