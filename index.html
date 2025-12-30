@@ -1018,13 +1018,17 @@
             spinAnimationFrame = requestAnimationFrame(animate);
         }
         
-        window.onload = () => {
-            setupBettingUI();
-            drawWheel(0);
-            selectChip(10);
-            updateUI();
-            loadHistoryFromFirebase();
-        };
+        firebase.auth().onAuthStateChanged(user => {
+  if (user) {
+    setupBettingUI();
+    drawWheel(0);
+    selectChip(10);
+    updateUI();
+    loadHistoryFromFirebase(); // ✅ अब safe
+  } else {
+    firebase.auth().signInAnonymously();
+  }
+});
         
          async function login(){
             const uid=document.getElementById("uid").value.trim();
