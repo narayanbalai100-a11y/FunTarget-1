@@ -939,13 +939,6 @@ spinSnd.loop = false;
             }
             spinAnimationFrame = requestAnimationFrame(animate);
         }
-        firebase.auth().onAuthStateChanged(users => {
-           if (users) {
-           console.log("AUTH OK", users.uid);
-           initAfterAuth();
-           } else {
-           firebase.auth().signInAnonymously();
-       }
         window.onload = () => {
             setupBettingUI();
             drawWheel(0);
