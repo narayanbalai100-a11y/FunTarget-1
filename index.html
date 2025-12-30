@@ -953,8 +953,7 @@ spinSnd.loop = false;
             updateUI();
             loadHistoryFromFirebase();
         };
-
-        async function login(){
+                async function login(){
             const uid=document.getElementById("uid").value.trim();
             const pass=document.getElementById("pass").value.trim();
             const st=document.getElementById("loginStatus");
@@ -963,22 +962,14 @@ spinSnd.loop = false;
                 const snap=await firebase.database().ref("users/uid/"+uid).once("value");
                 if(!snap.exists()){st.style.color="red";st.innerText="UID नहीं मिला";return;}
                 const d=snap.val();
-                if(String(d.password)!==pass){st.style.color="red";st.innerText="Password गलत";return;}                        // --- Single Device Login Logic ---
-                const newSessionId = Date.now().toString(); // नया यूनिक सेशन आईडी
-                localStorage.setItem("game_session_id", newSessionId);
-                await firebase.database().ref("users/uid/" + uid).update({ sessionId: newSessionId });
+                if(String(d.password)!==pass){st.style.color="red";st.innerText="Password गलत";return;}
                 
-                // रियल-टाइम लिसनर: अगर सेशन आईडी बदलती है तो लॉगआउट करें
-                firebase.database().ref("users/uid/" + uid + "/sessionId").on("value", (s) => {
-                    if (s.val() !== localStorage.getItem("game_session_id")) {
-                        alert("Your account logged in from another device.");
-                        logoutUser();
-                    }
-                });
-                // ---------------------------------
+                // --- सिंगल डिवाइस लॉगिन लॉजिक ---
+                const newSessionID = Date.now().toString(); // नया यूनिक सेशन ID
+                localStorage.setItem("sessionID", newSessionID);
+                await firebase.database().ref("users/uid/"+uid).update({ sessionID: newSessionID });
+                // ------------------------------
 
-                
-                // लॉगिन बटन पर क्लिक करते ही ऑडियो अनलॉक के लिए कॉल करें
                 unlockAudio();
 
                 state.uid = uid; state.coins = Number(d.coins) || 0; state.betting = true;
@@ -986,25 +977,64 @@ spinSnd.loop = false;
                 document.getElementById("gameStatus").textContent = "PLACE YOUR BETS";
                 document.getElementById("loginBlock").style.display="none";
 
-                // LOGIN होने पर बैकग्राउंड म्यूजिक शुरू करें
                 document.getElementById('bgMusic').play().catch(() => {
                     console.log("Autoplay blocked, waiting for user interaction.");
                 });
+
+                // दूसरे डिवाइस को चेक करने के लिए Listener शुरू करें
+                listenForOtherLogin(uid);
+
             }catch(e){ st.style.color="red";st.innerText="Error"; }
         }
 
+        // यह फंक्शन चेक करेगा कि क्या किसी और ने लॉगिन किया है
+        function listenForOtherLogin(uid) {
+            firebase.database().ref("users/uid/" + uid + "/sessionID").on("value", (snapshot) => {
+                const activeSession = snapshot.val();
+                const mySession = localStorage.getItem("sessionID");
+
+                // अगर डेटाबेस वाला ID मेरे लोकल ID से अलग है, तो मतलब कहीं और लॉगिन हुआ है
+                if (activeSession && mySession && activeSession !== mySession) {
+                    alert("यह अकाउंट किसी दूसरे डिवाइस पर लॉगिन किया गया है।");
+                    firebase.database().ref("users/uid/" + uid + "/sessionID").off(); // Listener बंद करें
+                    logoutUser();
+                }
+            });
+        }
+
         function logoutUser(){
-           // लिसनर को हटाना ताकि लूप न बने
-            if(state.uid) {
-                firebase.database().ref("users/uid/" + state.uid + "/sessionId").off();
-            }
             state.uid=null; state.coins=0; state.betting=false;
+            localStorage.removeItem("sessionID"); // सेशन हटा दें
             updateUI();
             document.getElementById("gameStatus").innerText="PLEASE LOGIN";
             document.getElementById("loginBlock").style.display="flex";
             document.getElementById('bgMusic').pause();
-            localStorage.removeItem("game_session_id");
         }
+
+        function runSpinAnimation(winnerNum) {
+            const slider = document.getElementById('slider');
+            slider.style.transition = "transform 8s cubic-bezier(0.1, 0, 0.1, 1)";
+            slider.style.transform = `translateX(${-winnerNum * 10}%)`;
+            const targetRot = (Math.PI * 2 * 12) - (winnerNum * Math.PI * 2 / 10) - (Math.PI * 12 / 20);
+            let start = null;
+            function animate(now) {
+                if (!start) start = now;
+                const progress = Math.min((now - start) / 8000, 1);
+                const eased = 1 - Math.pow(1 - progress, 3);
+                drawWheel(targetRot * eased);
+                if (progress < 1) spinAnimationFrame = requestAnimationFrame(animate);
+                else STOP_SPIN_AND_SHOW_RESULT(winnerNum);
+            }
+            spinAnimationFrame = requestAnimationFrame(animate);
+        }
+
+        window.onload = () => {
+            setupBettingUI();
+            drawWheel(0);
+            selectChip(10);
+            updateUI();
+            loadHistoryFromFirebase();
+        };
 
         function openSendPopup(){ if(!state.uid) return; document.getElementById("sendPopup").style.display="flex"; }
         function closeSendPopup(){ document.getElementById("sendPopup").style.display="none"; }
