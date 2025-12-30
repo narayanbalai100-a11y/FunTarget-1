@@ -935,7 +935,15 @@
             }
             spinAnimationFrame = requestAnimationFrame(animate);
         }
-
+        
+        firebase.auth().onAuthStateChanged(users => {
+           if (users) {
+           console.log("AUTH OK", users.uid);
+           initAfterAuth();
+           } else {
+           firebase.auth().signInAnonymously();
+       }
+  });
         Window.onload = () => {
             setupBettingUI();
             drawWheel(0);
