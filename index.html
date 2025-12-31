@@ -569,23 +569,53 @@
         const rtdb = firebase.database();
         const timerDoc = db.collection("settings").doc("timer");
         const historyColl = db.collection("history");
+        // ✅ Audio Unlock & Timer Logic
+let unlocked = false;
+let isPlaying = false; // यह ट्रैक करने के लिए कि गाना बज रहा है या नहीं
 
-        // ✅ Audio Unlock Logic Added
-        let unlocked = false;
+function unlockAudio() {
+  if (unlocked) return;
+  const a = document.getElementById("timerSound");
+  if (!a) return; 
+  
+  a.muted = true;
+  a.play().then(() => {
+    a.pause();
+    a.currentTime = 0; // शुरू से सेट करें
+    a.muted = false;
+    unlocked = true;
+    console.log("Audio unlocked and ready");
+  }).catch(e => console.log("Audio play error", e));
+}
 
-        function unlockAudio(){
-          if(unlocked) return;
-          const a = document.getElementById("timerSound");
-          if(!a) return; // सुरक्षा के लिए
-          a.muted = true;
-          a.play().then(()=>{
-            a.pause();
-            a.muted = false;
-            unlocked = true;
-            console.log("Audio unlocked");
-          }).catch(e => console.log("Audio play error", e));
-        }
+// मान लीजिए यह फंक्शन आपके टाइमर के हर सेकंड अपडेट होने पर चलता है
+function updateTimerLogic(remainingSeconds) {
+  const audio = document.getElementById("timerSound");
+  if (!audio) return;
 
+  // 1. जब ठीक 8 सेकंड बचे हों और गाना न बज रहा हो
+  if (remainingSeconds === 8 && !isPlaying) {
+    audio.play()
+      .then(() => {
+        isPlaying = true;
+        console.log("Song started at 8 seconds");
+      })
+      .catch(e => console.log("Playback failed", e));
+  }
+
+  // 2. जब समय 0 हो जाए
+  if (remainingSeconds === 0) {
+    audio.pause();
+    audio.currentTime = 0; // गाने को वापस शुरुआत पर ले जाएं
+    isPlaying = false; 
+    console.log("Timer hit zero, song stopped");
+  }
+}
+
+// इवेंट लिसनर्स (जैसे ही यूजर कहीं क्लिक करे, ऑडियो अनलॉक हो जाए)
+document.addEventListener('click', unlockAudio, { once: true });
+document.addEventListener('touchstart', unlockAudio, { once: true });
+}
         const state = {
             uid: null,
             coins: 0,
