@@ -20,24 +20,16 @@
             font-family: 'Segoe UI', Roboto, Arial, sans-serif; 
         }
 
-        html,
-           body { 
+        html, 
+        body { 
             height: 100%; 
             width: 100%;
             overflow: hidden; 
             position: fixed;
-            touch-action: manipulation;   /* ⬅️ none की जगह manipulation */
+            touch-action: none;
             background: black; 
-            color: #fff;
-
-            /* 🔒 Android long-press block */
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
+            color: #fff; 
         }
-  
 
         .stars { 
             width: 100%; 
@@ -237,9 +229,6 @@
             gap: 10px; 
             justify-content: center; 
             flex-wrap: wrap; 
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            user-select: none;
         }
 
         .chip { 
@@ -254,9 +243,6 @@
             cursor: pointer; 
             transition: 0.2s; 
             background: radial-gradient(circle, #444, #000); 
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            user-select: none;
         }
 
         .chip.active { 
@@ -300,8 +286,6 @@
             width: 260%; 
             height: 95%;
             border-radius: 50%; 
-            transform: translateZ(0); 
-            will-change: transform;
         }
 
         .pointer-overlay { 
@@ -446,7 +430,6 @@
             gap: 60px;
             left: 5px;
             z-index: 99999;
-            
         }
         #topActions button {
             padding: 1px 14px;
@@ -572,40 +555,61 @@
   " type="audio/mpeg">
     </audio>
 
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyA-KabHNxU7PmQ3sARjqY7XrZ7LI5rSI8E",
-            authDomain: "funtop-453ec.firebaseapp.com",
-            databaseURL: "https://funtop-453ec-default-rtdb.firebaseio.com",
-            projectId: "funtop-453ec",
-            appId: "1:711635468186:web:3a8170c59cf9daa8c34423"
-        };
-        
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const rtdb = firebase.database();
-        const timerDoc = db.collection("settings").doc("timer");
-        const historyColl = db.collection("history");
+    <audio id="spinSound" preload="auto">
+    <source src="data:audio/mpeg;base64,XXXX" type="audio/mpeg">
+</audio>
 
-        // ✅ Audio Unlock Logic Added
-        let unlocked = false;
+<script>
+/* ================= FIREBASE ================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyA-...",
+  authDomain: "funtop-453ec.firebaseapp.com",
+  databaseURL: "https://funtop-453ec-default-rtdb.firebaseio.com",
+  projectId: "funtop-453ec",
+  appId: "1:711635468186:web:3a8170c59cf9daa8c34423"
+};
 
-        function unlockAudio(){
-          if(unlocked) return;
-          const a = document.getElementById("timerSound");
-          if(!a) return; // सुरक्षा के लिए
-          a.muted = true;
-          a.play().then(()=>{
-            a.pause();
-            a.muted = false;
-            unlocked = true;
-            const spinSnd = document.getElementById('spinSound');
-spinSnd.pause();
-spinSnd.currentTime = 0;
-spinSnd.loop = false;
-            console.log("Audio unlocked");
-          }).catch(e => console.log("Audio play error", e));
-        }
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.firestore();
+const rtdb = firebase.database();
+const timerDoc = db.collection("settings").doc("timer");
+const historyColl = db.collection("history");
+
+/* ================= AUDIO CONTROL ================= */
+let spinAudio = document.getElementById("spinSound");
+
+function playSpin() {
+  if (!spinAudio) return;
+  spinAudio.pause();          // safety
+  spinAudio.currentTime = 0;
+  spinAudio.loop = true;
+  spinAudio.play().catch(()=>{});
+}
+
+function stopSpin() {
+  if (!spinAudio) return;
+  spinAudio.pause();
+  spinAudio.currentTime = 0;
+  spinAudio.loop = false;
+}
+
+/* ================= AUTO STOP EVENTS ================= */
+
+// Page background / app background
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) stopSpin();
+});
+
+// Page destroy
+window.addEventListener("pagehide", stopSpin);
+window.addEventListener("beforeunload", stopSpin);
+
+// Cordova / Android lifecycle
+document.addEventListener("pause", stopSpin, false);
+document.addEventListener("resume", stopSpin, false);
+
+</script>
 
         const state = {
             uid: null,
@@ -939,6 +943,7 @@ spinSnd.loop = false;
             }
             spinAnimationFrame = requestAnimationFrame(animate);
         }
+
         window.onload = () => {
             setupBettingUI();
             drawWheel(0);
@@ -946,7 +951,8 @@ spinSnd.loop = false;
             updateUI();
             loadHistoryFromFirebase();
         };
-                async function login(){
+
+        async function login(){
             const uid=document.getElementById("uid").value.trim();
             const pass=document.getElementById("pass").value.trim();
             const st=document.getElementById("loginStatus");
@@ -957,12 +963,7 @@ spinSnd.loop = false;
                 const d=snap.val();
                 if(String(d.password)!==pass){st.style.color="red";st.innerText="Password गलत";return;}
                 
-                // --- सिंगल डिवाइस लॉगिन लॉजिक ---
-                const newSessionID = Date.now().toString(); // नया यूनिक सेशन ID
-                localStorage.setItem("sessionID", newSessionID);
-                await firebase.database().ref("users/uid/"+uid).update({ sessionID: newSessionID });
-                // ------------------------------
-
+                // लॉगिन बटन पर क्लिक करते ही ऑडियो अनलॉक के लिए कॉल करें
                 unlockAudio();
 
                 state.uid = uid; state.coins = Number(d.coins) || 0; state.betting = true;
@@ -970,64 +971,20 @@ spinSnd.loop = false;
                 document.getElementById("gameStatus").textContent = "PLACE YOUR BETS";
                 document.getElementById("loginBlock").style.display="none";
 
+                // LOGIN होने पर बैकग्राउंड म्यूजिक शुरू करें
                 document.getElementById('bgMusic').play().catch(() => {
                     console.log("Autoplay blocked, waiting for user interaction.");
                 });
-
-                // दूसरे डिवाइस को चेक करने के लिए Listener शुरू करें
-                listenForOtherLogin(uid);
-
             }catch(e){ st.style.color="red";st.innerText="Error"; }
-        }
-
-        // यह फंक्शन चेक करेगा कि क्या किसी और ने लॉगिन किया है
-        function listenForOtherLogin(uid) {
-            firebase.database().ref("users/uid/" + uid + "/sessionID").on("value", (snapshot) => {
-                const activeSession = snapshot.val();
-                const mySession = localStorage.getItem("sessionID");
-
-                // अगर डेटाबेस वाला ID मेरे लोकल ID से अलग है, तो मतलब कहीं और लॉगिन हुआ है
-                if (activeSession && mySession && activeSession !== mySession) {
-                    alert("यह अकाउंट किसी दूसरे डिवाइस पर लॉगिन किया गया है।");
-                    firebase.database().ref("users/uid/" + uid + "/sessionID").off(); // Listener बंद करें
-                    logoutUser();
-                }
-            });
         }
 
         function logoutUser(){
             state.uid=null; state.coins=0; state.betting=false;
-            localStorage.removeItem("sessionID"); // सेशन हटा दें
             updateUI();
             document.getElementById("gameStatus").innerText="PLEASE LOGIN";
             document.getElementById("loginBlock").style.display="flex";
             document.getElementById('bgMusic').pause();
         }
-
-        function runSpinAnimation(winnerNum) {
-            const slider = document.getElementById('slider');
-            slider.style.transition = "transform 8s cubic-bezier(0.1, 0, 0.1, 1)";
-            slider.style.transform = `translateX(${-winnerNum * 10}%)`;
-            const targetRot = (Math.PI * 2 * 12) - (winnerNum * Math.PI * 2 / 10) - (Math.PI * 12 / 20);
-            let start = null;
-            function animate(now) {
-                if (!start) start = now;
-                const progress = Math.min((now - start) / 8000, 1);
-                const eased = 1 - Math.pow(1 - progress, 3);
-                drawWheel(targetRot * eased);
-                if (progress < 1) spinAnimationFrame = requestAnimationFrame(animate);
-                else STOP_SPIN_AND_SHOW_RESULT(winnerNum);
-            }
-            spinAnimationFrame = requestAnimationFrame(animate);
-        }
-
-        window.onload = () => {
-            setupBettingUI();
-            drawWheel(0);
-            selectChip(10);
-            updateUI();
-            loadHistoryFromFirebase();
-        };
 
         function openSendPopup(){ if(!state.uid) return; document.getElementById("sendPopup").style.display="flex"; }
         function closeSendPopup(){ document.getElementById("sendPopup").style.display="none"; }
