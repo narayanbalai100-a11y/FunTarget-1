@@ -20,16 +20,24 @@
             font-family: 'Segoe UI', Roboto, Arial, sans-serif; 
         }
 
-        html, 
-        body { 
+        html,
+           body { 
             height: 100%; 
             width: 100%;
             overflow: hidden; 
             position: fixed;
-            touch-action: none;
+            touch-action: manipulation;   /* ⬅️ none की जगह manipulation */
             background: black; 
-            color: #fff; 
+            color: #fff;
+
+            /* 🔒 Android long-press block */
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
+  
 
         .stars { 
             width: 100%; 
@@ -229,6 +237,9 @@
             gap: 10px; 
             justify-content: center; 
             flex-wrap: wrap; 
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
 
         .chip { 
@@ -243,6 +254,9 @@
             cursor: pointer; 
             transition: 0.2s; 
             background: radial-gradient(circle, #444, #000); 
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
 
         .chip.active { 
@@ -430,6 +444,7 @@
             gap: 60px;
             left: 5px;
             z-index: 99999;
+            
         }
         #topActions button {
             padding: 1px 14px;
@@ -569,52 +584,23 @@
         const rtdb = firebase.database();
         const timerDoc = db.collection("settings").doc("timer");
         const historyColl = db.collection("history");
-        // ✅ Audio Unlock & Timer Logic
-let unlocked = false;
-let isPlaying = false; // यह ट्रैक करने के लिए कि गाना बज रहा है या नहीं
 
-function unlockAudio() {
-  if (unlocked) return;
-  const a = document.getElementById("timerSound");
-  if (!a) return; 
-  
-  a.muted = true;
-  a.play().then(() => {
-    a.pause();
-    a.currentTime = 0; // शुरू से सेट करें
-    a.muted = false;
-    unlocked = true;
-    console.log("Audio unlocked and ready");
-  }).catch(e => console.log("Audio play error", e));
-}
+        // ✅ Audio Unlock Logic Added
+        let unlocked = false;
 
-// मान लीजिए यह फंक्शन आपके टाइमर के हर सेकंड अपडेट होने पर चलता है
-function updateTimerLogic(remainingSeconds) {
-  const audio = document.getElementById("timerSound");
-  if (!audio) return;
+        function unlockAudio(){
+          if(unlocked) return;
+          const a = document.getElementById("timerSound");
+          if(!a) return; // सुरक्षा के लिए
+          a.muted = true;
+          a.play().then(()=>{
+            a.pause();
+            a.muted = false;
+            unlocked = true;
+            console.log("Audio unlocked");
+          }).catch(e => console.log("Audio play error", e));
+        }
 
-  // 1. जब ठीक 8 सेकंड बचे हों और गाना न बज रहा हो
-  if (remainingSeconds === 8 && !isPlaying) {
-    audio.play()
-      .then(() => {
-        isPlaying = true;
-        console.log("Song started at 8 seconds");
-      })
-      .catch(e => console.log("Playback failed", e));
-  }
-
-  // 2. जब समय 0 हो जाए
-  if (remainingSeconds === 0) {
-    audio.pause();
-    audio.currentTime = 0; // गाने को वापस शुरुआत पर ले जाएं
-    isPlaying = false; 
-    console.log("Timer hit zero, song stopped");
-  }
-}
-
-// इवेंट लिसनर्स (जैसे ही यूजर कहीं क्लिक करे, ऑडियो अनलॉक हो जाए)
-document.addEventListener('click', unlockAudio, { once: true });
-document.addEventListener('touchstart', unlockAudio, { once: true });
         const state = {
             uid: null,
             coins: 0,
@@ -917,7 +903,8 @@ document.addEventListener('touchstart', unlockAudio, { once: true });
         const ctx = canvas.getContext('2d');
         const W = canvas.width, R = W / 2 - 10;
         const overlayImg = new Image();
-        overlayImg.src = 'index.js);
+        overlayImg.src = 'data:image/png;base64,<
+
         function drawWheel(rot = 0) {
             ctx.clearRect(0, 0, W, W);
             ctx.save(); ctx.translate(W / 2, W / 2); ctx.rotate(rot);
