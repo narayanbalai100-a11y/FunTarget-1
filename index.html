@@ -439,14 +439,16 @@
         .blink-blue { animation: result-blink 0.4s ease-in-out 10; }
         }
 
-               #topActions {
-            position: absolute;
-            top: 2px;
-            right: 10px;
-            display: flex;
-            gap: 8px;
-            z-index: 99999;
+             /* 🔧 AUTO + SAFE AREA */
+#topActions {
+    position: fixed;
+    top: calc(env(safe-area-inset-top, 0px) + clamp(4px, 1.2vh, 10px));
+    right: calc(env(safe-area-inset-right, 0px) + clamp(6px, 2vw, 14px));
+    display: flex;
+    gap: 8px;
+    z-index: 99999;
         }
+        
         #topActions button {
             padding: 6px 14px;
             font-size: 12px;
