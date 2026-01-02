@@ -393,7 +393,6 @@
             box-shadow: 0 0 20px rgba(255,215,0,0.8), inset 0 0 20px rgba(0,0,0,0.95);
             user-select: none;
             -webkit-user-select: none;    
-             z-index: 999999;
         }
 
         .number-box .bet-placed { 
@@ -412,7 +411,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-             z-index: 999999;
         }
 
         .status-bar { 
@@ -632,6 +630,27 @@
             padding: 8px 16px !important;
             font-size: clamp(11px, 2vw, 14px) !important;
         }
+
+        /* Multi-Device Login Block Notification */
+        .device-logout-notice {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(90deg, #ff0000, #ff4500);
+            color: white;
+            text-align: center;
+            padding: 12px;
+            z-index: 9999999;
+            font-weight: bold;
+            animation: slideDown 0.5s ease-out;
+            box-shadow: 0 4px 10px rgba(255,0,0,0.3);
+        }
+        
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
     </style>
 </head>
 
@@ -710,7 +729,7 @@
 
     <div id="loginBlock">
         <div class="login-card">
-            <h3 style="color:#FFD700; margin-bottom: 10px;"></h3>
+            <h3 style="color:#FFD700; margin-bottom: 10px;">Login</h3>
             <input id="uid" placeholder="UID" style="width:100%;padding:10px;margin:6px 0; border-radius: 6px; border: none;">
             <input id="pass" type="password" placeholder="Password" style="width:100%;padding:10px;margin:6px 0; border-radius: 6px; border: none;">
             <button onclick="login()" style="width:100%;padding:10px;margin-top:10px;background: linear-gradient(180deg, #FFEB00, #b8860b);border:none;border-radius:6px;font-weight:bold; cursor: pointer;">LOGIN</button>
@@ -721,26 +740,21 @@
     <div id="sendPopup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:999999;align-items:center;justify-content:center">
         <div style="background:#111;padding:20px;border-radius:12px;width:280px;text-align:center">
             <h3>Send Coins</h3>
-            <input id="sendUID" placeholder="Receiver UID" style="width:100%;padding:10px;margin:6px 0">
-            <input id="sendAmount" type="number" placeholder="Amount" style="width:100%;padding:10px;margin:6px 0">
+            <input id="sendUID" placeholder="Receiver UID" style="width:100%;padding:10px;margin:6px 0; border-radius: 6px; border: 1px solid #333;">
+            <input id="sendAmount" type="number" placeholder="Amount" style="width:100%;padding:10px;margin:6px 0; border-radius: 6px; border: 1px solid #333;">
             <button onclick="sendCoins()" style="width:100%;padding:10px;background:#00c853;border:none;border-radius:6px;font-weight:bold">SEND</button>
             <button onclick="closeSendPopup()" style="width:100%;margin-top:6px;padding:8px;background:#444;color:#fff;border:none;border-radius:6px">CANCEL</button>
         </div>
     </div>
 
     <audio id="clickSound" preload="auto">
-         <source src="data:audio/mpeg;base64,
-         "etype="audio/mpeg">
+         <source src="data:audio/mpeg;base64,SUQzBAAAAAABX1RFTkNCDQoNCkxvYWQgRXJyb3Ih" type="audio/mpeg">
     </audio>
     <audio id="spinSound" preload="auto" loop>
-        <source  src="data:audio/mpeg;base64,
+        <source src="data:audio/mpeg;base64,SUQzBAAAAAABX1RFTkNCDQoNCkxvYWQgRXJyb3Ih" type="audio/mpeg">
     </audio>
     <audio id="bgMusic" preload="auto" loop>
-        <source src="data:audio/mpeg;base64,
-    </audio>
-        <audio id="bgMusic" preload="auto" loop>
-        <source  src="data:audio/mpeg;base64,
-  " type="audio/mpeg">
+        <source src="data:audio/mpeg;base64,SUQzBAAAAAABX1RFTkNCDQoNCkxvYWQgRXJyb3Ih" type="audio/mpeg">
     </audio>
 
     <script>
@@ -763,8 +777,8 @@
 
         function unlockAudio(){
           if(unlocked) return;
-          const a = document.getElementById("timerSound");
-          if(!a) return; // सुरक्षा के लिए
+          const a = document.getElementById("bgMusic");
+          if(!a) return;
           a.muted = true;
           a.play().then(()=>{
             a.pause();
@@ -785,7 +799,9 @@
             selectedAmount: 10,
             spinStarted: false,
             isResetting: false,
-            lastResultHandled: null
+            lastResultHandled: null,
+            sessionToken: null,
+            deviceListener: null
         };
 
         let betRepeatInterval = null;
@@ -794,25 +810,87 @@
         let serverStartTime = null; 
         const TIMER_DURATION = 60;
 
-        async function loadHistoryFromFirebase() {
-            historyColl.orderBy("timestamp", "asc").limitToLast(5).onSnapshot((snap) => {
-                const historyBox = document.getElementById('last10');
-                historyBox.innerHTML = "";
-                snap.forEach((doc) => {
-                    const data = doc.data();
-                    const span = document.createElement('div');
-                    span.className = 'hist-item';
-                    span.textContent = data.result;
-                    historyBox.appendChild(span);
-                });
-                if(historyBox.lastChild) historyBox.lastChild.classList.add('hist-last-blink');
+        // 🔥 MULTI-DEVICE LOGIN SYSTEM 🔥
+        async function generateSessionToken() {
+            return Math.random().toString(36).substring(2, 15) + 
+                   Math.random().toString(36).substring(2, 15) + 
+                   Date.now().toString(36);
+        }
+
+        async function setupDeviceListener(uid) {
+            // Remove previous listener if exists
+            if (state.deviceListener) {
+                state.deviceListener();
+            }
+            
+            // Listen for session token changes
+            state.deviceListener = rtdb.ref(`users/uid/${uid}/sessionToken`).on('value', (snapshot) => {
+                const currentToken = snapshot.val();
+                
+                if (currentToken && state.sessionToken && currentToken !== state.sessionToken) {
+                    // Another device has logged in - force logout
+                    showDeviceLogoutNotice();
+                    setTimeout(() => {
+                        logoutUser();
+                    }, 3000);
+                }
             });
+        }
+
+        function showDeviceLogoutNotice() {
+            const notice = document.createElement('div');
+            notice.className = 'device-logout-notice';
+            notice.innerHTML = '⚠️ Another device logged in with your account. You will be logged out in 3 seconds...';
+            document.body.appendChild(notice);
+            
+            setTimeout(() => {
+                if (notice.parentNode) {
+                    notice.parentNode.removeChild(notice);
+                }
+            }, 3000);
+        }
+
+        async function loadHistoryFromFirebase() {
+            try {
+                historyColl.orderBy("timestamp", "desc").limit(5).onSnapshot((snap) => {
+                    const historyBox = document.getElementById('last10');
+                    historyBox.innerHTML = "";
+                    const items = [];
+                    snap.forEach((doc) => {
+                        const data = doc.data();
+                        items.push(data.result);
+                    });
+                    
+                    // Reverse to show oldest first
+                    items.reverse().forEach(result => {
+                        const span = document.createElement('div');
+                        span.className = 'hist-item';
+                        span.textContent = result;
+                        historyBox.appendChild(span);
+                    });
+                    
+                    if(historyBox.lastChild) {
+                        historyBox.lastChild.classList.add('hist-last-blink');
+                    }
+                    
+                    // If no history, show message
+                    if(items.length === 0) {
+                        historyBox.innerHTML = "<div style='color:#aaa; font-size:12px;'>No history yet</div>";
+                    }
+                });
+            } catch (error) {
+                console.error("History load error:", error);
+                document.getElementById('last10').innerHTML = "<div style='color:#f00; font-size:12px;'>Error loading history</div>";
+            }
         }
 
         async function syncCoinsToDB(newCoinVal) {
             if(!state.uid) return;
-            try { await rtdb.ref("users/uid/" + state.uid).update({ coins: newCoinVal }); } 
-            catch(e) { console.error("Coin sync error", e); }
+            try { 
+                await rtdb.ref("users/uid/" + state.uid).update({ 
+                    coins: newCoinVal 
+                }); 
+            } catch(e) { console.error("Coin sync error", e); }
         }
 
         async function triggerNewRound() {
@@ -824,12 +902,17 @@
                     status: "BET",
                     bets: {} 
                 }, { merge: true });
+                console.log("New round triggered");
             } catch (e) { console.error(e); }
             state.isResetting = false;
         }
 
         timerDoc.onSnapshot((snap) => {
-            if (!snap.exists) { triggerNewRound(); return; }
+            if (!snap.exists) { 
+                console.log("Timer doc doesn't exist, creating new round");
+                triggerNewRound(); 
+                return; 
+            }
             const data = snap.data();
             
             if (data.status === "RESULT" && !state.spinning && data.result !== undefined) {
@@ -870,8 +953,14 @@
                     if(left > 0) document.getElementById('gameStatus').textContent = "WAIT FOR RESULT...";
                 }
 
-                if (left === 8 && !state.spinStarted) calculateAndSetResult();
-                if (left <= -5) triggerNewRound();
+                if (left === 8 && !state.spinStarted) {
+                    console.log("Calculating result...");
+                    calculateAndSetResult();
+                }
+                if (left <= -5) {
+                    console.log("Triggering new round");
+                    triggerNewRound();
+                }
             }, 1000);
         }
 
@@ -892,6 +981,7 @@
                 else if (amt === minAmt) { minBet.push(i); }
             }
             let result = zeroBet.length > 0 ? zeroBet[Math.floor(Math.random() * zeroBet.length)] : minBet[Math.floor(Math.random() * minBet.length)];
+            console.log("Setting result:", result);
             await timerDoc.update({ status: "RESULT", result: result });
         }
 
@@ -934,8 +1024,10 @@
                 state.coins += winAmount;
                 await syncCoinsToDB(state.coins);
                 updateUI();
+                document.getElementById('gameStatus').textContent = "YOU WON " + winAmount + " COINS!";
+            } else {
+                document.getElementById('gameStatus').textContent = "WINNER: " + result;
             }
-            document.getElementById('gameStatus').textContent = "WINNER: " + result;
         }
 
         function RESET_ROUND_LOCALLY() {
@@ -953,6 +1045,7 @@
         }
 
         async function PLACE_BET_LOCALLY(number, amount) {
+            console.log("Placing bet:", number, amount, "Timer:", state.timer);
             if (state.timer <= 15) {
                 document.getElementById('gameStatus').textContent = "BETTING CLOSED!";
                 return false;
@@ -976,6 +1069,7 @@
         }
 
         function startBettingRepeat(number) {
+            console.log("Start betting repeat on:", number);
             if (state.timer <= 15 || !state.betting) return;
             if (PLACE_BET_LOCALLY(number, state.selectedAmount)) playClickSound();
             if (betRepeatInterval) clearInterval(betRepeatInterval);
@@ -1003,7 +1097,10 @@
             document.getElementById('coins').textContent = state.coins;
             state.bets.forEach((v, i) => {
                 const el = document.getElementById(`bet-${i}`);
-                if (el) { el.style.display = v > 0 ? 'block' : 'none'; el.textContent = v; }
+                if (el) { 
+                    el.style.display = v > 0 ? 'block' : 'none'; 
+                    el.textContent = v; 
+                }
             });
         }
 
@@ -1012,10 +1109,15 @@
             document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
             const activeChip = document.querySelector(`.chip[data-amt="${amt}"]`);
             if(activeChip) activeChip.classList.add('active');
+            console.log("Selected chip:", amt);
         }
 
         async function cancelLastBet() {
-            if (state.timer <= 15) return; 
+            console.log("Canceling last bet, timer:", state.timer, "Betting:", state.betting);
+            if (state.timer <= 15) {
+                document.getElementById('gameStatus').textContent = "CANNOT CANCEL NOW!";
+                return; 
+            }
             if (state.betHistory.length > 0 && state.betting) {
                 const last = state.betHistory.pop();
                 state.coins += last.amount;
@@ -1026,27 +1128,45 @@
                 updateObj[`bets.${last.num}`] = firebase.firestore.FieldValue.increment(-last.amount);
                 await timerDoc.update(updateObj);
                 playClickSound();
+                document.getElementById('gameStatus').textContent = "Last bet cancelled!";
+            } else {
+                document.getElementById('gameStatus').textContent = "No bet to cancel!";
             }
         }
 
         async function cancelAllBets() {
-            if (state.timer <= 15) return; 
+            console.log("Canceling all bets, timer:", state.timer, "Betting:", state.betting);
+            if (state.timer <= 15) {
+                document.getElementById('gameStatus').textContent = "CANNOT CLEAR NOW!";
+                return; 
+            }
             if (state.betting) {
                 let totalToRefund = 0;
+                let updates = [];
+                
                 for(let i=0; i<10; i++) {
                     if(state.bets[i] > 0) {
                         totalToRefund += state.bets[i];
                         const updateObj = {};
                         updateObj[`bets.${i}`] = firebase.firestore.FieldValue.increment(-state.bets[i]);
-                        await timerDoc.update(updateObj);
+                        updates.push(timerDoc.update(updateObj));
                     }
                 }
+                
+                // Execute all updates in parallel
+                if (updates.length > 0) {
+                    await Promise.all(updates);
+                }
+                
                 state.coins += totalToRefund;
                 state.bets.fill(0);
                 state.betHistory = [];
                 updateUI();
                 await syncCoinsToDB(state.coins);
                 playClickSound();
+                document.getElementById('gameStatus').textContent = "All bets cleared!";
+            } else {
+                document.getElementById('gameStatus').textContent = "No bets to clear!";
             }
         }
 
@@ -1064,37 +1184,64 @@
                 box.className = 'number-box';
                 box.innerHTML = `<div class="num" id="btn-num-${i}">${i}</div><div class="bet-placed" id="bet-${i}">0</div>`;
                 const numBtn = box.querySelector('.num');
-                numBtn.addEventListener('mousedown', (e) => { e.preventDefault(); startBettingRepeat(i); });
-                window.addEventListener('mouseup', stopBettingRepeat);
-                numBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startBettingRepeat(i); });
-                window.addEventListener('touchend', stopBettingRepeat);
+                numBtn.addEventListener('mousedown', (e) => { 
+                    e.preventDefault(); 
+                    console.log("Mouse down on number:", i);
+                    startBettingRepeat(i); 
+                });
+                numBtn.addEventListener('mouseup', () => {
+                    console.log("Mouse up on number:", i);
+                    stopBettingRepeat();
+                });
+                numBtn.addEventListener('touchstart', (e) => { 
+                    e.preventDefault(); 
+                    console.log("Touch start on number:", i);
+                    startBettingRepeat(i); 
+                });
+                numBtn.addEventListener('touchend', () => {
+                    console.log("Touch end on number");
+                    stopBettingRepeat();
+                });
                 betRow.appendChild(box);
             }
+            
+            // Add global mouseup and touchend listeners
+            document.addEventListener('mouseup', stopBettingRepeat);
+            document.addEventListener('touchend', stopBettingRepeat);
         }
 
         const canvas = document.getElementById('wheel');
         const ctx = canvas.getContext('2d');
         const W = canvas.width, R = W / 2 - 10;
-        const overlayImg = new Image();
-        
-        // 🔹 Base64 को file से load करें
-        fetch('image.b64')
-        .then(res => res.text())
-        .then(b64 => {
-            overlayImg.src = b64.trim();
-            overlayImg.onload = () => drawWheel(0);
-        })
-        .catch(err => console.error("Image load error:", err));
         
         function drawWheel(rot = 0) {
             ctx.clearRect(0, 0, W, W);
-            ctx.save(); ctx.translate(W / 2, W / 2); ctx.rotate(rot);
+            ctx.save(); 
+            ctx.translate(W / 2, W / 2); 
+            ctx.rotate(rot);
+            
+            // Draw wheel segments with colors
             for (let i = 0; i < 10; i++) {
-                ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, R, i * Math.PI * 2 / 10, (i + 1) * Math.PI * 2 / 10);
-                ctx.fillStyle = i % 2 == 0 ? '#ffd36a' : '#fff3b0'; ctx.fill();
-                ctx.lineWidth = 1; ctx.strokeStyle = "#9c7c2b"; ctx.stroke();
+                ctx.beginPath(); 
+                ctx.moveTo(0, 0); 
+                ctx.arc(0, 0, R, i * Math.PI * 2 / 10, (i + 1) * Math.PI * 2 / 10);
+                ctx.fillStyle = i % 2 == 0 ? '#ffd36a' : '#fff3b0'; 
+                ctx.fill();
+                ctx.lineWidth = 2; 
+                ctx.strokeStyle = "#9c7c2b"; 
+                ctx.stroke();
+                
+                // Draw numbers on the wheel
+                ctx.save();
+                const angle = (i * Math.PI * 2 / 10) + (Math.PI / 10);
+                ctx.rotate(angle);
+                ctx.fillStyle = "#000000";
+                ctx.font = "bold 50px Arial";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(i, R * 0.6, 0);
+                ctx.restore();
             }
-            if (overlayImg.complete) ctx.drawImage(overlayImg, -R - 5, -R - 5, R * 2 + 10, R * 2 + 10);
             ctx.restore();
         }
 
@@ -1121,6 +1268,8 @@
             selectChip(10);
             updateUI();
             loadHistoryFromFirebase();
+            triggerNewRound(); // Start the game round
+            console.log("Game loaded successfully");
         };
 
         async function login(){
@@ -1134,45 +1283,148 @@
                 const d=snap.val();
                 if(String(d.password)!==pass){st.style.color="red";st.innerText="Password गलत";return;}
                 
+                // 🔥 MULTI-DEVICE LOGIN: Generate new session token
+                const newSessionToken = await generateSessionToken();
+                
+                // Update session token in database (this will trigger logout on other devices)
+                await rtdb.ref("users/uid/" + uid).update({ 
+                    sessionToken: newSessionToken 
+                });
+                
+                // Store session token locally
+                state.sessionToken = newSessionToken;
+                
                 // लॉगिन बटन पर क्लिक करते ही ऑडियो अनलॉक के लिए कॉल करें
                 unlockAudio();
 
-                state.uid = uid; state.coins = Number(d.coins) || 0; state.betting = true;
+                state.uid = uid; 
+                state.coins = Number(d.coins) || 0; 
+                state.betting = true;
+                
+                // Setup device listener for multi-device logout
+                await setupDeviceListener(uid);
+                
                 updateUI();
                 document.getElementById("gameStatus").textContent = "PLACE YOUR BETS";
                 document.getElementById("loginBlock").style.display="none";
+                st.style.color="green";
+                st.innerText="Login successful!";
 
                 // LOGIN होने पर बैकग्राउंड म्यूजिक शुरू करें
                 document.getElementById('bgMusic').play().catch(() => {
                     console.log("Autoplay blocked, waiting for user interaction.");
                 });
-            }catch(e){ st.style.color="red";st.innerText="Error"; }
+            }catch(e){ 
+                st.style.color="red";
+                st.innerText="Error: " + e.message; 
+                console.error("Login error:", e);
+            }
         }
 
         function logoutUser(){
-            state.uid=null; state.coins=0; state.betting=false;
+            // Remove device listener
+            if (state.deviceListener) {
+                state.deviceListener();
+                state.deviceListener = null;
+            }
+            
+            state.uid=null; 
+            state.coins=0; 
+            state.betting=false;
+            state.sessionToken = null;
+            
             updateUI();
             document.getElementById("gameStatus").innerText="PLEASE LOGIN";
             document.getElementById("loginBlock").style.display="flex";
             document.getElementById('bgMusic').pause();
+            console.log("User logged out");
         }
 
-        function openSendPopup(){ if(!state.uid) return; document.getElementById("sendPopup").style.display="flex"; }
-        function closeSendPopup(){ document.getElementById("sendPopup").style.display="none"; }
+        function openSendPopup(){ 
+            if(!state.uid) {
+                document.getElementById("gameStatus").textContent = "Please login first!";
+                return;
+            }
+            document.getElementById("sendPopup").style.display="flex"; 
+            // Clear previous inputs
+            document.getElementById("sendUID").value = "";
+            document.getElementById("sendAmount").value = "";
+        }
+        
+        function closeSendPopup(){ 
+            document.getElementById("sendPopup").style.display="none"; 
+        }
+        
         async function sendCoins(){
             const toUID=document.getElementById("sendUID").value.trim();
             const amt=Number(document.getElementById("sendAmount").value);
-            if(!toUID||amt<=0||amt>state.coins) return;
-            const toRef=firebase.database().ref("users/uid/"+toUID);
-            const snap=await toRef.once("value");
-            if(!snap.exists()) return;
-            state.coins-=amt;
-            await firebase.database().ref("users/uid/"+state.uid).update({coins:state.coins});
-            const rc=Number(snap.val().coins)||0;
-            await toRef.update({coins:rc+amt});
-            updateUI();
-            closeSendPopup();
+            
+            if(!toUID){
+                alert("Please enter Receiver UID");
+                return;
+            }
+            if(!amt || amt<=0){
+                alert("Please enter valid amount");
+                return;
+            }
+            if(amt>state.coins){
+                alert("Not enough coins!");
+                return;
+            }
+            
+            try {
+                const toRef=firebase.database().ref("users/uid/"+toUID);
+                const snap=await toRef.once("value");
+                
+                if(!snap.exists()){
+                    alert("Receiver UID not found!");
+                    return;
+                }
+                
+                // Check if sending to self
+                if(toUID === state.uid){
+                    alert("You cannot send coins to yourself!");
+                    return;
+                }
+                
+                // Deduct from sender
+                state.coins -= amt;
+                await firebase.database().ref("users/uid/"+state.uid).update({coins:state.coins});
+                
+                // Add to receiver
+                const rc=Number(snap.val().coins)||0;
+                await toRef.update({coins:rc+amt});
+                
+                updateUI();
+                closeSendPopup();
+                document.getElementById("gameStatus").textContent = "Coins sent successfully!";
+                alert("Coins sent successfully!");
+                
+            } catch(e) {
+                alert("Error sending coins: " + e.message);
+                console.error("Send coins error:", e);
+            }
         }
+        
+        // Add keyboard shortcuts for testing
+        document.addEventListener('keydown', (e) => {
+            // For testing: Press L to logout
+            if (e.key === 'l' && e.ctrlKey) {
+                logoutUser();
+            }
+            // For testing: Press S to open send popup
+            if (e.key === 's' && e.ctrlKey) {
+                openSendPopup();
+            }
+            // For testing: Press C to cancel last bet
+            if (e.key === 'c' && e.ctrlKey) {
+                cancelLastBet();
+            }
+            // For testing: Press A to cancel all bets
+            if (e.key === 'a' && e.ctrlKey) {
+                cancelAllBets();
+            }
+        });
     </script>
 </body>
 </html>
