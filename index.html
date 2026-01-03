@@ -20,8 +20,7 @@
             font-family: 'Segoe UI', Roboto, Arial, sans-serif; 
         }
 
-        html,
-           body { 
+        html, body { 
             height: 100%; 
             width: 100%;
             overflow: hidden; 
@@ -29,7 +28,6 @@
             touch-action: manipulation;
             background: black; 
             color: #fff;
-
             -webkit-touch-callout: none;
             -webkit-user-select: none;
             -moz-user-select: none;
@@ -63,38 +61,37 @@
             to { transform: translateY(-200px); } 
         }
 
+        /* MAIN GAME CONTAINER - FIXED 844x390 LANDSCAPE */
         .game-container-wrap { 
-            height: 100vh;
-            width: 100%; 
-            display: flex; 
-            justify-content: center; 
-            align-items: flex-start; 
+            position: fixed;
+            width: 844px;
+            height: 390px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             background-image: url('https://uploads.onecompiler.io/445tyzay6/448n7h4a3/1000053493.jpg'); 
             background-size: 100% 100%; 
             background-position: center;
             background-repeat: no-repeat;
-            z-index: 100; 
-            padding-top: 1px; 
+            z-index: 100;
+            border: 1px solid #333;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
         }
 
         .game-app { 
-            margin: 0px auto; 
+            width: 100%;
+            height: 100%;
             display: flex; 
             flex-direction: column; 
-            padding: 2px 0px; 
             position: relative; 
             background: rgba(0, 0, 0, 0.2); 
-            max-width: 1300px; 
-            width: 100%; 
         }
 
-        /* LOGIN BLOCK UPDATED WITH BACKGROUND IMAGE */
+        /* LOGIN BLOCK */
         #loginBlock {
             position: fixed;
             inset: 0;
-            background-image: url(data:image/jpeg;base64,
-            background-position: center;
-            background-repeat: no-repeat;
+            background: rgba(0, 0, 0, 0.95);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -102,24 +99,15 @@
         }
 
         .login-card {
-            top: -100px;
-            padding: -10px;
+            background: #111;
+            padding: 20px;
             border-radius: 12px;
-            width: 200px;
+            width: 250px;
             text-align: center;
-            border: 0px solid #FFD700;
-            box-shadow: 0 0 20px rgba(0,0,0,0);
+            border: 2px solid #FFD700;
+            box-shadow: 0 0 20px rgba(255,215,0,0.5);
         }
         
-        .login-card  {
-            width: 100px; 
-            height: 100px; 
-            position: absolute; 
-            top: 52%; 
-            left: 52%; 
-            transform: translate(-50%, -50%); 
-        }
-
         #cancelSpecific { 
             background: linear-gradient(180deg, #9c2b2b, #6a1a1a); 
             position: absolute; 
@@ -154,20 +142,25 @@
             display: flex; 
             justify-content: space-between; 
             align-items: flex-start; 
+            padding: 5px 10px;
+            height: 300px;
+            top: 100px;
         }
 
         .panel { 
-            background: rgba(0, 0, 0, 0.0); 
+            background: rgba(0, 0, 0, 0.6); 
             border-radius: 12px; 
             padding: 5px; 
-            min-width: 160px; 
+            min-width: 140px; 
             margin-bottom: 5px; 
+            border: 1px solid #ffd700;
         }
 
         .panel h4 { 
             font-size: 14px; 
             text-align: center; 
             margin-bottom: 2px; 
+            color: #ffd700;
         }
 
         .panel .value { 
@@ -177,7 +170,7 @@
             border-radius: 30px; 
             text-align: center; 
             font-weight: 700; 
-            font-size: 26px; 
+            font-size: 22px; 
         }
 
         /* --- TIMER BLINK --- */
@@ -200,7 +193,7 @@
             border-radius: 8px;
             padding: 5px;
             min-height: 40px;
-            width: 170px; 
+            width: 140px; 
             display: flex;
             align-items: center;
             justify-content: center;
@@ -212,10 +205,11 @@
         .hist-item {
             background: #222;
             color: #fff;
-            padding: 2px 8px;
+            padding: 2px 6px;
             border-radius: 4px;
             font-weight: bold;
             border: 1px solid #ff8c00;
+            font-size: 12px;
         }
 
         .hist-last-blink { 
@@ -233,7 +227,7 @@
 
         .chip-container { 
             display: flex; 
-            gap: 10px; 
+            gap: 8px; 
             justify-content: center; 
             flex-wrap: wrap; 
             -webkit-touch-callout: none;
@@ -242,10 +236,10 @@
         }
 
         .chip { 
-            width: 50px; 
-            height: 50px; 
+            width: 40px; 
+            height: 40px; 
             border-radius: 50%; 
-            border: 5px dashed rgba(255, 255, 255, 0.3); 
+            border: 3px dashed rgba(255, 255, 255, 0.3); 
             display: flex; 
             align-items: center; 
             justify-content: center; 
@@ -253,15 +247,16 @@
             cursor: pointer; 
             transition: 0.2s; 
             background: radial-gradient(circle, #444, #000); 
+            font-size: 12px;
             -webkit-touch-callout: none;
             -webkit-user-select: none;
             user-select: none;
         }
 
         .chip.active { 
-            border: 4px solid #ffd36a; 
+            border: 3px solid #ffd36a; 
             transform: scale(1.1); 
-            box-shadow: 0 0 15px #ffd36a; 
+            box-shadow: 0 0 10px #ffd36a; 
         }
 
         .chip[data-amt="1"] { background: radial-gradient(circle, #ff5f6d, #ffc371); }
@@ -273,20 +268,21 @@
 
         /* --- WHEEL & DOUBLE GOLDEN RING --- */
         .wheel-wrap { 
-            width: 390px; 
-            height: 310px; 
+            width: 250px; 
+            height: 200px; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
             position: relative; 
+            margin: 0 auto;
         }
 
         /* Outer Thin Golden Ring */
         .wheel-wrap::before {
             content: "";
             position: absolute;
-            width: 390px;
-            height: 290px;
+            width: 250px;
+            height: 190px;
             border-radius: 50%;
             border: 2px solid #ffd700;
             box-shadow: 0 0 8px #ffd700, inset 0 0 8px #000;
@@ -296,18 +292,18 @@
         }
 
         canvas#wheel { 
-            width: 260%; 
-            height: 95%;
+            width: 240px; 
+            height: 180px;
             border-radius: 50%; 
         }
 
         .pointer-overlay { 
             position: absolute; 
-            top: -62px; 
+            top: -40px; 
             left: 50%; 
-            transform: translateX(-49%); 
-            width: 145px; 
-            height: 145px; 
+            transform: translateX(-50%); 
+            width: 100px; 
+            height: 100px; 
             background-image: url('https://uploads.onecompiler.io/445tyzay6/447a3r3jd/1000038035.png'); 
             background-size: contain; 
             z-index: 100; 
@@ -315,11 +311,11 @@
 
         .pointer-top-image { 
             position: absolute; 
-            top: -62px; 
+            top: -40px; 
             left: 50%; 
-            transform: translateX(-49%); 
-            width: 145px; 
-            height: 145px; 
+            transform: translateX(-50%); 
+            width: 100px; 
+            height: 100px; 
             background-image: url('https://uploads.onecompiler.io/445tyzay6/4479yvh72/1000038029.png'); 
             background-size: contain; 
             background-repeat: no-repeat; 
@@ -333,8 +329,8 @@
 
         /* Inner Thin Golden Ring */
         .slider-container { 
-            width: 117px; 
-            height: 89px; 
+            width: 80px; 
+            height: 60px; 
             position: absolute; 
             top: 50%; 
             left: 50%; 
@@ -342,9 +338,9 @@
             overflow: hidden; 
             border-radius: 50%; 
             background: #FFD700;
-            box-shadow: 0 0 25px rgba(255,215,0,0.8), inset 0 0 25px rgba(0,0,0,0.9);
+            box-shadow: 0 0 15px rgba(255,215,0,0.8), inset 0 0 15px rgba(0,0,0,0.9);
             z-index: 20;
-            border: 3.5px solid #ffd700;
+            border: 2.5px solid #ffd700;
         }
         
         .slides-inner { 
@@ -363,67 +359,74 @@
             margin-top: -9px;
         }
       
-        .slide { width: 70%; height: 70%; object-fit: contain; }
+        .slide { width: 60%; height: 60%; object-fit: contain; }
 
         .bet-row { 
             display: flex; 
             justify-content: space-between; 
             width: 100%; 
-            max-width: 900px; 
-            margin: auto; 
+            padding: 0 10px;
+            margin-top: 10px;
             z-index: 500; 
             position: relative;
-            margin-top: -30px;
         }
 
-        .number-box { flex: 1; text-align: center; position: relative; cursor: pointer; }
+        .number-box { 
+            flex: 1; 
+            text-align: center; 
+            position: relative; 
+            cursor: pointer; 
+        }
 
         .number-box .num { 
-            width: 60px; 
-            height: 60px;
+            width: 45px; 
+            height: 45px;
             border-radius: 50px; 
             display: inline-flex; 
             align-items: center; 
             justify-content: center; 
-            font-weight: 1000; 
+            font-weight: 800; 
+            font-size: 16px;
             color: #1b1300; 
-            transform: translateY(10px); 
             background: linear-gradient(145deg, #000, #333), linear-gradient(145deg, #FFD700, #b8860b);
             background-blend-mode: overlay;
-            box-shadow: 0 0 20px rgba(255,215,0,0.8), inset 0 0 20px rgba(0,0,0,0.95);
+            box-shadow: 0 0 15px rgba(255,215,0,0.8), inset 0 0 15px rgba(0,0,0,0.95);
             user-select: none;
             -webkit-user-select: none;    
+            margin: 0 auto;
         }
 
         .number-box .bet-placed { 
             position: absolute; 
             left: 50%; 
             transform: translateX(-50%); 
-            bottom: 65px; 
-            padding: 2px 15px; 
-            border-radius: 20px; 
-            display: none; 
+            bottom: 50px; 
+            padding: 2px 10px; 
+            border-radius: 15px; 
             color: #111; 
-            font-weight: 800; 
+            font-weight: 700; 
+            font-size: 12px;
             background: linear-gradient(145deg, #000, #333), linear-gradient(145deg, #FFD700, #b8860b);
             background-blend-mode: overlay;
-            box-shadow: 0 0 15px rgba(255,215,0,0.8), inset 0 0 10px rgba(0,0,0,0.9);
+            box-shadow: 0 0 10px rgba(255,215,0,0.8), inset 0 0 8px rgba(0,0,0,0.9);
             display: flex;
             align-items: center;
             justify-content: center;
+            min-width: 40px;
         }
 
         .status-bar { 
             background: rgba(27, 27, 27, 0.85); 
             border-radius: 6px; 
-            padding: 1px; 
+            padding: 8px; 
             text-align: center; 
             color: #eee; 
             font-weight: 800; 
-            margin-top: 20px; 
+            margin: 10px;
+            font-size: 14px;
             background: linear-gradient(145deg, #000, #333), linear-gradient(145deg, #FFD700, #b8860b);
             background-blend-mode: overlay;
-            box-shadow: 0 0 15px rgba(255,215,0,0.8), inset 0 0 10px rgba(0,0,0,0.9);
+            box-shadow: 0 0 10px rgba(255,215,0,0.8), inset 0 0 8px rgba(0,0,0,0.9);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -431,28 +434,26 @@
 
         @keyframes result-blink {
             0%, 100% { background: linear-gradient(145deg, #000, #333), linear-gradient(145deg, #FFD700, #b8860b); color: #1b1300; }
-            50% { background: #0072ff; color: #fff; box-shadow: 0 0 30px #0072ff; }
+            50% { background: #0072ff; color: #fff; box-shadow: 0 0 20px #0072ff; }
         }
         .blink-blue { animation: result-blink 0.4s ease-in-out 10; }
-        }
 
-        /* 🔧 AUTO + SAFE AREA */
+        /* 🔧 TOP ACTION BUTTONS */
         #topActions {
-            position: fixed;
-            top: calc(env(safe-area-inset-top, 0px) + clamp(4px, 1.2vh, 10px));
-            right: calc(env(safe-area-inset-right, 0px) + clamp(6px, 2vw, 14px));
+            position: absolute;
+            top: 0px;
+            right: 0px;
             display: flex;
             gap: 8px;
             z-index: 99999;
-            top: 40px !important;
         }
         
         #topActions button {
-            padding: 6px 14px;
-            font-size: 12px;
+            padding: 6px 12px;
+            font-size: 11px;
             font-weight: bold;
             border: none;
-            border-radius: 6px;
+            border-radius: 4px;
             cursor: pointer;
             color: #fff;
         }
@@ -460,175 +461,35 @@
         #topActions button:first-child { background: linear-gradient(180deg,#00c853,#009624); }
         #topActions button:last-child { background: linear-gradient(180deg,#1e90ff,#003cff); }
 
-        /* =========================================
-           RESPONSIVE DESIGN FOR 844x390 LANDSCAPE
-           ========================================= */
-
-        /* Base responsive container */
-        .game-container-wrap {
-            max-width: 844px;
-            max-height: 390px;
-            margin: auto;
-            position: relative;
-            overflow: hidden;
-        }
-
-        /* For landscape screens (default) */
-        @media (orientation: landscape) {
+        /* SCALE FOR DIFFERENT SCREEN SIZES */
+        @media (max-height: 400px) {
             .game-container-wrap {
-                width: 100vw;
-                height: 100vh;
-                max-width: 100vw;
-                max-height: 100vh;
-                background-size: cover !important;
-            }
-            
-            .game-app {
-                transform: none;
-                transform-origin: center;
+                transform: translate(-50%, -50%) scale(0.9);
             }
         }
-
-        /* For portrait screens - rotate 90deg and fit */
-        @media (orientation: portrait) {
-            body {
-                overflow: hidden;
-                position: fixed;
-                width: 100vh; /* Swap dimensions */
-                height: 100vw;
-                transform: rotate(90deg);
-                transform-origin: top left;
-                left: 100vw;
-                top: 0;
-            }
-            
+        
+        @media (min-height: 500px) and (max-height: 600px) {
             .game-container-wrap {
-                width: 100vh;
-                height: 100vw;
-                position: absolute;
-                left: 0;
-                top: 0;
-                transform: rotate(-90deg) translateY(-100vh);
-                transform-origin: top left;
-                background-size: cover !important;
-            }
-            
-            /* Adjust font sizes for rotated view */
-            .panel .value {
-                font-size: 22px !important;
-            }
-            
-            .chip {
-                width: 45px !important;
-                height: 45px !important;
-            }
-            
-            /* Adjust wheel size for portrait */
-            .wheel-wrap {
-                width: 340px !important;
-                height: 270px !important;
-            }
-            
-            .wheel-wrap::before {
-                width: 340px !important;
-                height: 250px !important;
-            }
-            
-            .slider-container {
-                width: 100px !important;
-                height: 75px !important;
-            }
-            
-            /* Adjust betting row */
-            .bet-row {
-                max-width: 750px !important;
-                margin-top: -15px !important;
-            }
-            
-            .number-box .num {
-                width: 50px !important;
-                height: 50px !important;
-                font-size: 18px !important;
-            }
-            
-            .number-box .bet-placed {
-                bottom: 55px !important;
-                font-size: 14px !important;
+                transform: translate(-50%, -50%) scale(1);
             }
         }
-
-        /* For very small screens */
-        @media (max-width: 600px) and (orientation: landscape) {
-            .panel .value {
-                font-size: 20px !important;
-            }
-            
-            .chip {
-                width: 40px !important;
-                height: 40px !important;
-                font-size: 14px !important;
-            }
-            
-            .wheel-wrap {
-                width: 300px !important;
-                height: 230px !important;
-            }
-            
-            .wheel-wrap::before {
-                width: 300px !important;
-                height: 220px !important;
-            }
-            
-            .slider-container {
-                width: 85px !important;
-                height: 65px !important;
-            }
-            
-            canvas#wheel {
-                width: 250% !important;
-                height: 90% !important;
+        
+        @media (min-height: 600px) {
+            .game-container-wrap {
+                transform: translate(-50%, -50%) scale(1.1);
             }
         }
-
-        /* Safe area support for notches */
-        @supports (padding: max(0px)) {
-            .top-row {
-                padding-top: max(10px, env(safe-area-inset-top));
-                padding-left: max(10px, env(safe-area-inset-left));
-                padding-right: max(10px, env(safe-area-inset-right));
-            }
-            
-            #topActions {
-                top: max(40px, env(safe-area-inset-top) + 20px) !important;
+        
+        @media (min-height: 700px) {
+            .game-container-wrap {
+                transform: translate(-50%, -50%) scale(1.2);
             }
         }
-
-        /* Prevent zooming on mobile */
-        @media (max-width: 768px) {
-            input, select, textarea {
-                font-size: 16px !important; /* Prevents iOS zoom on focus */
+        
+        @media (min-height: 800px) {
+            .game-container-wrap {
+                transform: translate(-50%, -50%) scale(1.3);
             }
-        }
-
-        /* Ensure game status bar is always visible */
-        .status-bar {
-            min-height: 30px;
-            font-size: clamp(14px, 2vw, 18px);
-            padding: 8px 5px !important;
-        }
-
-        /* Make history box responsive */
-        #last10 {
-            width: auto !important;
-            min-width: 150px;
-            max-width: 200px;
-            margin: 0 auto;
-        }
-
-        /* Responsive top action buttons */
-        #topActions button {
-            padding: 8px 16px !important;
-            font-size: clamp(11px, 2vw, 14px) !important;
         }
 
         /* Multi-Device Login Block Notification */
@@ -730,8 +591,8 @@
     <div id="loginBlock">
         <div class="login-card">
             <h3 style="color:#FFD700; margin-bottom: 10px;">Login</h3>
-            <input id="uid" placeholder="UID" style="width:100%;padding:10px;margin:6px 0; border-radius: 6px; border: none;">
-            <input id="pass" type="password" placeholder="Password" style="width:100%;padding:10px;margin:6px 0; border-radius: 6px; border: none;">
+            <input id="uid" placeholder="UID" style="width:100%;padding:10px;margin:6px 0; border-radius: 6px; border: 1px solid #333;">
+            <input id="pass" type="password" placeholder="Password" style="width:100%;padding:10px;margin:6px 0; border-radius: 6px; border: 1px solid #333;">
             <button onclick="login()" style="width:100%;padding:10px;margin-top:10px;background: linear-gradient(180deg, #FFEB00, #b8860b);border:none;border-radius:6px;font-weight:bold; cursor: pointer;">LOGIN</button>
             <div id="loginStatus" style="margin-top:10px;font-size:13px"></div>
         </div>
@@ -756,6 +617,9 @@
     <audio id="bgMusic" preload="auto" loop>
         <source src="data:audio/mpeg;base64,SUQzBAAAAAABX1RFTkNCDQoNCkxvYWQgRXJyb3Ih" type="audio/mpeg">
     </audio>
+    <audio id="timerSound" preload="auto">
+        <source src="data:audio/mpeg;base64,SUQzBAAAAAABX1RFTkNCDQoNCkxvYWQgRXJyb3Ih" type="audio/mpeg">
+    </audio>
 
     <script>
         const firebaseConfig = {
@@ -772,12 +636,12 @@
         const timerDoc = db.collection("settings").doc("timer");
         const historyColl = db.collection("history");
 
-        // ✅ Audio Unlock Logic Added
+        // ✅ Audio Unlock Logic
         let unlocked = false;
 
         function unlockAudio(){
           if(unlocked) return;
-          const a = document.getElementById("bgMusic");
+          const a = document.getElementById("timerSound");
           if(!a) return;
           a.muted = true;
           a.play().then(()=>{
@@ -818,17 +682,14 @@
         }
 
         async function setupDeviceListener(uid) {
-            // Remove previous listener if exists
             if (state.deviceListener) {
                 state.deviceListener();
             }
             
-            // Listen for session token changes
             state.deviceListener = rtdb.ref(`users/uid/${uid}/sessionToken`).on('value', (snapshot) => {
                 const currentToken = snapshot.val();
                 
                 if (currentToken && state.sessionToken && currentToken !== state.sessionToken) {
-                    // Another device has logged in - force logout
                     showDeviceLogoutNotice();
                     setTimeout(() => {
                         logoutUser();
@@ -861,7 +722,6 @@
                         items.push(data.result);
                     });
                     
-                    // Reverse to show oldest first
                     items.reverse().forEach(result => {
                         const span = document.createElement('div');
                         span.className = 'hist-item';
@@ -873,7 +733,6 @@
                         historyBox.lastChild.classList.add('hist-last-blink');
                     }
                     
-                    // If no history, show message
                     if(items.length === 0) {
                         historyBox.innerHTML = "<div style='color:#aaa; font-size:12px;'>No history yet</div>";
                     }
@@ -944,8 +803,16 @@
                 timerEl.innerText = left > 0 ? left : 0;
                 state.timer = left;
 
-                if (left <= 15 && left > 0) timerEl.classList.add("timer-warning");
-                else timerEl.classList.remove("timer-warning");
+                if (left <= 15 && left > 0) {
+                    timerEl.classList.add("timer-warning");
+                    // Play timer warning sound
+                    const timerSound = document.getElementById("timerSound");
+                    timerSound.currentTime = 0;
+                    timerSound.play().catch(e => console.log("Timer sound error:", e));
+                }
+                else {
+                    timerEl.classList.remove("timer-warning");
+                }
 
                 if (left <= 15) {
                     state.betting = false;
@@ -991,7 +858,6 @@
             document.getElementById('gameStatus').textContent = "SPINNING...";
             document.getElementById('ptrOverlay').classList.add('jiggle');
             
-            // PLAY SPIN SOUND
             const spinSnd = document.getElementById('spinSound');
             spinSnd.currentTime = 0;
             spinSnd.play().catch(e => console.log("Sound error:", e));
@@ -1002,7 +868,6 @@
         async function STOP_SPIN_AND_SHOW_RESULT(result) {
             cancelAnimationFrame(spinAnimationFrame);
             
-            // STOP SPIN SOUND
             document.getElementById('spinSound').pause();
 
             document.getElementById('ptrOverlay').classList.remove('jiggle');
@@ -1025,6 +890,11 @@
                 await syncCoinsToDB(state.coins);
                 updateUI();
                 document.getElementById('gameStatus').textContent = "YOU WON " + winAmount + " COINS!";
+                
+                // Play win sound
+                const winSound = document.getElementById("clickSound");
+                winSound.currentTime = 0;
+                winSound.play().catch(e => console.log("Win sound error:", e));
             } else {
                 document.getElementById('gameStatus').textContent = "WINNER: " + result;
             }
@@ -1045,14 +915,12 @@
         }
 
         async function PLACE_BET_LOCALLY(number, amount) {
-            console.log("Placing bet:", number, amount, "Timer:", state.timer);
             if (state.timer <= 15) {
                 document.getElementById('gameStatus').textContent = "BETTING CLOSED!";
                 return false;
             }
 
             if (state.betting && state.coins >= amount) {
-                // ऑडियो अनलॉक फंक्शन को यूजर इंटरेक्शन पर कॉल करें
                 unlockAudio();
                 
                 state.coins -= amount;
@@ -1069,7 +937,6 @@
         }
 
         function startBettingRepeat(number) {
-            console.log("Start betting repeat on:", number);
             if (state.timer <= 15 || !state.betting) return;
             if (PLACE_BET_LOCALLY(number, state.selectedAmount)) playClickSound();
             if (betRepeatInterval) clearInterval(betRepeatInterval);
@@ -1109,11 +976,9 @@
             document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
             const activeChip = document.querySelector(`.chip[data-amt="${amt}"]`);
             if(activeChip) activeChip.classList.add('active');
-            console.log("Selected chip:", amt);
         }
 
         async function cancelLastBet() {
-            console.log("Canceling last bet, timer:", state.timer, "Betting:", state.betting);
             if (state.timer <= 15) {
                 document.getElementById('gameStatus').textContent = "CANNOT CANCEL NOW!";
                 return; 
@@ -1135,7 +1000,6 @@
         }
 
         async function cancelAllBets() {
-            console.log("Canceling all bets, timer:", state.timer, "Betting:", state.betting);
             if (state.timer <= 15) {
                 document.getElementById('gameStatus').textContent = "CANNOT CLEAR NOW!";
                 return; 
@@ -1153,7 +1017,6 @@
                     }
                 }
                 
-                // Execute all updates in parallel
                 if (updates.length > 0) {
                     await Promise.all(updates);
                 }
@@ -1186,26 +1049,21 @@
                 const numBtn = box.querySelector('.num');
                 numBtn.addEventListener('mousedown', (e) => { 
                     e.preventDefault(); 
-                    console.log("Mouse down on number:", i);
                     startBettingRepeat(i); 
                 });
                 numBtn.addEventListener('mouseup', () => {
-                    console.log("Mouse up on number:", i);
                     stopBettingRepeat();
                 });
                 numBtn.addEventListener('touchstart', (e) => { 
                     e.preventDefault(); 
-                    console.log("Touch start on number:", i);
                     startBettingRepeat(i); 
                 });
                 numBtn.addEventListener('touchend', () => {
-                    console.log("Touch end on number");
                     stopBettingRepeat();
                 });
                 betRow.appendChild(box);
             }
             
-            // Add global mouseup and touchend listeners
             document.addEventListener('mouseup', stopBettingRepeat);
             document.addEventListener('touchend', stopBettingRepeat);
         }
@@ -1213,6 +1071,11 @@
         const canvas = document.getElementById('wheel');
         const ctx = canvas.getContext('2d');
         const W = canvas.width, R = W / 2 - 10;
+        const overlayImg = new Image();
+        
+        // 🔹 Base64 को file से load करें
+        overlayImg.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='; // Placeholder image
+        overlayImg.onload = () => drawWheel(0);
         
         function drawWheel(rot = 0) {
             ctx.clearRect(0, 0, W, W);
@@ -1220,7 +1083,6 @@
             ctx.translate(W / 2, W / 2); 
             ctx.rotate(rot);
             
-            // Draw wheel segments with colors
             for (let i = 0; i < 10; i++) {
                 ctx.beginPath(); 
                 ctx.moveTo(0, 0); 
@@ -1231,16 +1093,20 @@
                 ctx.strokeStyle = "#9c7c2b"; 
                 ctx.stroke();
                 
-                // Draw numbers on the wheel
                 ctx.save();
                 const angle = (i * Math.PI * 2 / 10) + (Math.PI / 10);
                 ctx.rotate(angle);
                 ctx.fillStyle = "#000000";
-                ctx.font = "bold 50px Arial";
+                ctx.font = "bold 40px Arial";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
                 ctx.fillText(i, R * 0.6, 0);
                 ctx.restore();
+            }
+            
+            // Draw overlay image if loaded
+            if (overlayImg.complete && overlayImg.naturalWidth > 0) {
+                ctx.drawImage(overlayImg, -R - 5, -R - 5, R * 2 + 10, R * 2 + 10);
             }
             ctx.restore();
         }
@@ -1268,40 +1134,35 @@
             selectChip(10);
             updateUI();
             loadHistoryFromFirebase();
-            triggerNewRound(); // Start the game round
-            console.log("Game loaded successfully");
+            triggerNewRound();
+            console.log("Game loaded in 844x390 landscape mode");
         };
 
         async function login(){
             const uid=document.getElementById("uid").value.trim();
             const pass=document.getElementById("pass").value.trim();
             const st=document.getElementById("loginStatus");
-            if(!uid||!pass){st.style.color="red";st.innerText="UID/Password डालें";return;}
+            if(!uid||!pass){st.style.color="red";st.innerText="Enter UID/Password";return;}
             try{
                 const snap=await firebase.database().ref("users/uid/"+uid).once("value");
-                if(!snap.exists()){st.style.color="red";st.innerText="UID नहीं मिला";return;}
+                if(!snap.exists()){st.style.color="red";st.innerText="UID not found";return;}
                 const d=snap.val();
-                if(String(d.password)!==pass){st.style.color="red";st.innerText="Password गलत";return;}
+                if(String(d.password)!==pass){st.style.color="red";st.innerText="Wrong password";return;}
                 
-                // 🔥 MULTI-DEVICE LOGIN: Generate new session token
                 const newSessionToken = await generateSessionToken();
                 
-                // Update session token in database (this will trigger logout on other devices)
                 await rtdb.ref("users/uid/" + uid).update({ 
                     sessionToken: newSessionToken 
                 });
                 
-                // Store session token locally
                 state.sessionToken = newSessionToken;
                 
-                // लॉगिन बटन पर क्लिक करते ही ऑडियो अनलॉक के लिए कॉल करें
                 unlockAudio();
 
                 state.uid = uid; 
                 state.coins = Number(d.coins) || 0; 
                 state.betting = true;
                 
-                // Setup device listener for multi-device logout
                 await setupDeviceListener(uid);
                 
                 updateUI();
@@ -1310,19 +1171,17 @@
                 st.style.color="green";
                 st.innerText="Login successful!";
 
-                // LOGIN होने पर बैकग्राउंड म्यूजिक शुरू करें
+                // Start background music
                 document.getElementById('bgMusic').play().catch(() => {
-                    console.log("Autoplay blocked, waiting for user interaction.");
+                    console.log("Autoplay blocked");
                 });
             }catch(e){ 
                 st.style.color="red";
                 st.innerText="Error: " + e.message; 
-                console.error("Login error:", e);
             }
         }
 
         function logoutUser(){
-            // Remove device listener
             if (state.deviceListener) {
                 state.deviceListener();
                 state.deviceListener = null;
@@ -1337,7 +1196,6 @@
             document.getElementById("gameStatus").innerText="PLEASE LOGIN";
             document.getElementById("loginBlock").style.display="flex";
             document.getElementById('bgMusic').pause();
-            console.log("User logged out");
         }
 
         function openSendPopup(){ 
@@ -1346,7 +1204,6 @@
                 return;
             }
             document.getElementById("sendPopup").style.display="flex"; 
-            // Clear previous inputs
             document.getElementById("sendUID").value = "";
             document.getElementById("sendAmount").value = "";
         }
@@ -1381,17 +1238,14 @@
                     return;
                 }
                 
-                // Check if sending to self
                 if(toUID === state.uid){
                     alert("You cannot send coins to yourself!");
                     return;
                 }
                 
-                // Deduct from sender
                 state.coins -= amt;
                 await firebase.database().ref("users/uid/"+state.uid).update({coins:state.coins});
                 
-                // Add to receiver
                 const rc=Number(snap.val().coins)||0;
                 await toRef.update({coins:rc+amt});
                 
@@ -1402,29 +1256,8 @@
                 
             } catch(e) {
                 alert("Error sending coins: " + e.message);
-                console.error("Send coins error:", e);
             }
         }
-        
-        // Add keyboard shortcuts for testing
-        document.addEventListener('keydown', (e) => {
-            // For testing: Press L to logout
-            if (e.key === 'l' && e.ctrlKey) {
-                logoutUser();
-            }
-            // For testing: Press S to open send popup
-            if (e.key === 's' && e.ctrlKey) {
-                openSendPopup();
-            }
-            // For testing: Press C to cancel last bet
-            if (e.key === 'c' && e.ctrlKey) {
-                cancelLastBet();
-            }
-            // For testing: Press A to cancel all bets
-            if (e.key === 'a' && e.ctrlKey) {
-                cancelAllBets();
-            }
-        });
     </script>
 </body>
 </html>
