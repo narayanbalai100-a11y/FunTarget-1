@@ -365,7 +365,7 @@
             justify-content: space-between; 
             width: 100%; 
             padding: 0 10px;
-            margin-top: 100px;
+            margin-top: 10px;
             z-index: 500; 
             position: relative;
         }
@@ -1073,11 +1073,8 @@
         const overlayImg = new Image();
         
         // 🔹 Base64 को file से load करें
-            fetch('image.b64')
-           .then(res => res.text())
-           .then(b64 => {
-            overlayImg.src = b64.trim();
-            overlayImg.onload = () => drawWheel(0);
+        overlayImg.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='; // Placeholder image
+        overlayImg.onload = () => drawWheel(0);
         
         function drawWheel(rot = 0) {
             ctx.clearRect(0, 0, W, W);
