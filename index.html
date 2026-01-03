@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>FunTarget - Double Golden Ring Spinner</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
@@ -11,7 +11,7 @@
 
     <style>
         /* =========================================
-           CSS STYLES
+           CSS STYLES - LANDSCAPE LOCKED
            ========================================= */
         * { 
             box-sizing: border-box; 
@@ -33,8 +33,47 @@
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
+            transform-origin: 0 0;
         }
   
+        /* Portrait Warning */
+        .portrait-warning {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            z-index: 99999999;
+            color: #FFD700;
+            text-align: center;
+            padding: 20% 10%;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+        }
+        
+        .portrait-warning h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+        
+        .portrait-warning p {
+            font-size: 18px;
+            color: #fff;
+        }
+        
+        .rotate-icon {
+            font-size: 60px;
+            margin: 20px 0;
+            display: block;
+            animation: rotateAnimation 2s infinite;
+        }
+        
+        @keyframes rotateAnimation {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(90deg); }
+        }
 
         .stars { 
             width: 100%; 
@@ -76,6 +115,8 @@
             z-index: 100;
             border: 1px solid #333;
             box-shadow: 0 0 20px rgba(0,0,0,0.8);
+            /* Force landscape orientation */
+            transform-origin: center center;
         }
 
         .game-app { 
@@ -460,34 +501,59 @@
         #topActions button:first-child { background: linear-gradient(180deg,#00c853,#009624); }
         #topActions button:last-child { background: linear-gradient(180deg,#1e90ff,#003cff); }
 
-        /* SCALE FOR DIFFERENT SCREEN SIZES */
-        @media (max-height: 400px) {
+        /* LANDSCAPE LOCK - Hide game in portrait, show warning */
+        @media (orientation: portrait) {
+            .game-container-wrap {
+                display: none !important;
+            }
+            .portrait-warning {
+                display: block !important;
+            }
+        }
+        
+        @media (orientation: landscape) {
+            .portrait-warning {
+                display: none !important;
+            }
+            .game-container-wrap {
+                display: block !important;
+            }
+        }
+
+        /* SCALE FOR DIFFERENT SCREEN SIZES - LANDSCAPE ONLY */
+        @media (orientation: landscape) and (max-height: 400px) {
             .game-container-wrap {
                 transform: translate(-50%, -50%) scale(0.9);
             }
         }
         
-        @media (min-height: 500px) and (max-height: 600px) {
+        @media (orientation: landscape) and (min-height: 400px) and (max-height: 500px) {
             .game-container-wrap {
                 transform: translate(-50%, -50%) scale(1);
             }
         }
         
-        @media (min-height: 600px) {
+        @media (orientation: landscape) and (min-height: 500px) and (max-height: 600px) {
             .game-container-wrap {
                 transform: translate(-50%, -50%) scale(1.1);
             }
         }
         
-        @media (min-height: 700px) {
+        @media (orientation: landscape) and (min-height: 600px) and (max-height: 700px) {
             .game-container-wrap {
                 transform: translate(-50%, -50%) scale(1.2);
             }
         }
         
-        @media (min-height: 800px) {
+        @media (orientation: landscape) and (min-height: 700px) and (max-height: 800px) {
             .game-container-wrap {
                 transform: translate(-50%, -50%) scale(1.3);
+            }
+        }
+        
+        @media (orientation: landscape) and (min-height: 800px) {
+            .game-container-wrap {
+                transform: translate(-50%, -50%) scale(1.4);
             }
         }
 
@@ -515,6 +581,14 @@
 </head>
 
 <body>
+    <!-- Portrait Mode Warning -->
+    <div class="portrait-warning">
+        <h2>Please Rotate Your Device</h2>
+        <div class="rotate-icon">↻</div>
+        <p>This game requires landscape mode to play.</p>
+        <p>Please rotate your device to continue.</p>
+    </div>
+    
     <div class="stars"></div>
     <div class="game-container-wrap" id="mainGame">
         <div class="game-app">
@@ -673,6 +747,37 @@
         let serverStartTime = null; 
         const TIMER_DURATION = 60;
 
+        // 🔥 LANDSCAPE ORIENTATION LOCK 🔥
+        function lockOrientation() {
+            // Try to lock orientation to landscape
+            if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock('landscape').catch(error => {
+                    console.log('Orientation lock failed: ', error);
+                });
+            }
+            
+            // Check initial orientation
+            checkOrientation();
+            
+            // Listen for orientation changes
+            window.addEventListener('orientationchange', checkOrientation);
+            window.addEventListener('resize', checkOrientation);
+        }
+        
+        function checkOrientation() {
+            const isPortrait = window.innerHeight > window.innerWidth;
+            const portraitWarning = document.querySelector('.portrait-warning');
+            const gameContainer = document.getElementById('mainGame');
+            
+            if (isPortrait) {
+                if (portraitWarning) portraitWarning.style.display = 'block';
+                if (gameContainer) gameContainer.style.display = 'none';
+            } else {
+                if (portraitWarning) portraitWarning.style.display = 'none';
+                if (gameContainer) gameContainer.style.display = 'block';
+            }
+        }
+        
         // 🔥 MULTI-DEVICE LOGIN SYSTEM 🔥
         async function generateSessionToken() {
             return Math.random().toString(36).substring(2, 15) + 
@@ -1128,6 +1233,7 @@
         }
 
         window.onload = () => {
+            lockOrientation(); // Lock landscape orientation
             setupBettingUI();
             drawWheel(0);
             selectChip(10);
