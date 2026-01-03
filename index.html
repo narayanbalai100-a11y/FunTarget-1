@@ -142,8 +142,8 @@
             display: flex; 
             justify-content: space-between; 
             align-items: flex-start; 
-            padding: 0px 0px;
-            height: 300px;
+            padding: 5px 10px;
+            height: 200px;
         }
 
         .panel { 
@@ -417,13 +417,12 @@
         .status-bar { 
             background: rgba(27, 27, 27, 0.85); 
             border-radius: 6px; 
-            padding: 0px; 
-            
+            padding: 8px; 
             text-align: center; 
             color: #eee; 
             font-weight: 800; 
-            margin: 5px;
-            font-size: 20px;
+            margin: 10px;
+            font-size: 14px;
             background: linear-gradient(145deg, #000, #333), linear-gradient(145deg, #FFD700, #b8860b);
             background-blend-mode: overlay;
             box-shadow: 0 0 10px rgba(255,215,0,0.8), inset 0 0 8px rgba(0,0,0,0.9);
@@ -1069,55 +1068,43 @@
         }
 
         const canvas = document.getElementById('wheel');
-const ctx = canvas.getContext('2d');
-const W = canvas.width;
-const R = W / 2 - 10;
-
-const overlayImg = new Image();
-
-// 🔹 Base64 को file से load करें
-fetch('image.b64')
-  .then(res => res.text())
-  .then(b64 => {
-      overlayImg.src = b64.trim();
-      overlayImg.onload = () => drawWheel(0);
-  })
-  .catch(err => console.error("Image load error:", err));
-
-function drawWheel(rot = 0) {
-    ctx.clearRect(0, 0, W, W);
-    ctx.save();
-    ctx.translate(W / 2, W / 2);
-    ctx.rotate(rot);
-
-    for (let i = 0; i < 10; i++) {
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.arc(
-            0, 0,
-            R,
-            i * Math.PI * 2 / 10,
-            (i + 1) * Math.PI * 2 / 10
-        );
-        ctx.fillStyle = i % 2 === 0 ? '#ffd36a' : '#fff3b0';
-        ctx.fill();
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = "#9c7c2b";
-        ctx.stroke();
-    }
-
-    if (overlayImg.complete) {
-        ctx.drawImage(
-            overlayImg,
-            -R - 5,
-            -R - 5,
-            R * 2 + 10,
-            R * 2 + 10
-        );
-    }
-
-    ctx.restore();
-}
+        const ctx = canvas.getContext('2d');
+        const W = canvas.width, R = W / 2 - 10;
+        const overlayImg = new Image();
+        
+        // 🔹 Base64 को file से load करें
+            fetch('image.b64')
+           .then(res => res.text())
+           .then(b64 => {
+            overlayImg.src = b64.trim();
+            overlayImg.onload = () => drawWheel(0);
+        
+        function drawWheel(rot = 0) {
+            ctx.clearRect(0, 0, W, W);
+            ctx.save(); 
+            ctx.translate(W / 2, W / 2); 
+            ctx.rotate(rot);
+            
+            for (let i = 0; i < 10; i++) {
+                ctx.beginPath(); 
+                ctx.moveTo(0, 0); 
+                ctx.arc(0, 0, R, i * Math.PI * 2 / 10, (i + 1) * Math.PI * 2 / 10);
+                ctx.fillStyle = i % 2 == 0 ? '#ffd36a' : '#fff3b0'; 
+                ctx.fill();
+                ctx.lineWidth = 2; 
+                ctx.strokeStyle = "#9c7c2b"; 
+                ctx.stroke();
+                
+                ctx.save();
+                const angle = (i * Math.PI * 2 / 10) + (Math.PI / 10);
+                ctx.rotate(angle);
+                ctx.fillStyle = "#000000";
+                ctx.font = "bold 40px Arial";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(i, R * 0.6, 0);
+                ctx.restore();
+            }
             
             // Draw overlay image if loaded
             if (overlayImg.complete && overlayImg.naturalWidth > 0) {
