@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>FunTarget - Mobile Edition</title>
+    <title>FunTarget - Double Golden Ring Spinner</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore-compat.js"></script>
@@ -11,7 +11,7 @@
 
     <style>
         /* =========================================
-           CSS STYLES - MOBILE OPTIMIZED
+           CSS STYLES - LANDSCAPE LOCKED
            ========================================= */
         * { 
             box-sizing: border-box; 
@@ -30,7 +30,10 @@
             color: #fff;
             -webkit-touch-callout: none;
             -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
             user-select: none;
+            transform-origin: 0 0;
         }
   
         /* Portrait Warning */
@@ -46,13 +49,20 @@
             color: #FFD700;
             text-align: center;
             padding: 20% 10%;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Arial, sans-serif;
         }
         
-        @media (orientation: portrait) {
-            .game-container-wrap { display: none !important; }
-            .portrait-warning { display: block !important; }
+        .portrait-warning h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
         }
-
+        
+        .portrait-warning p {
+            font-size: 18px;
+            color: #fff;
+        }
+        
         .rotate-icon {
             font-size: 60px;
             margin: 20px 0;
@@ -65,7 +75,32 @@
             100% { transform: rotate(90deg); }
         }
 
-        /* NEW MOBILE SYSTEM ADAPTED */
+        .stars { 
+            width: 100%; 
+            height: 100%; 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            z-index: -1000; 
+            overflow: hidden; 
+        }
+
+        .stars::after { 
+            content: ""; 
+            position: absolute; 
+            width: 200%; 
+            height: 200%; 
+            background: radial-gradient(2px 2px at 20% 30%, #fff, transparent), 
+                        radial-gradient(2px 2px at 80% 60%, #fff, transparent); 
+            animation: moveStars 12s linear infinite; 
+        }
+
+        @keyframes moveStars { 
+            from { transform: translateY(0); } 
+            to { transform: translateY(-200px); } 
+        }
+
+        /* UPDATED MOBILE SYSTEM FOR CONTAINER */
         .game-container-wrap { 
             position: fixed;
             inset: 0;
@@ -76,6 +111,9 @@
             background-position: center;
             background-repeat: no-repeat;
             z-index: 100;
+            border: 1px solid #333;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+            transform-origin: center center;
             overflow: hidden;
         }
 
@@ -92,7 +130,7 @@
         #loginBlock {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.0);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -103,9 +141,10 @@
             background: #111;
             padding: 20px;
             border-radius: 12px;
-            width: 280px;
+            width: 250px;
             text-align: center;
             border: 2px solid #FFD700;
+            box-shadow: 0 0 20px rgba(255,215,0,0.5);
         }
         
         #cancelSpecific { 
@@ -120,6 +159,7 @@
             color: white; 
             border: none; 
             border-radius: 4px; 
+            cursor: pointer; 
         }
 
         #cancelAll { 
@@ -134,75 +174,339 @@
             color: white; 
             border: none; 
             border-radius: 4px; 
+            cursor: pointer; 
         }
         
         .top-row { 
             display: flex; 
             justify-content: space-between; 
             align-items: flex-start; 
-            padding: 10px;
-            height: auto;
+            padding: 0px 0px;
+            height: 300px;
         }
 
         .panel { 
             background: rgba(0, 0, 0, 0.6); 
             border-radius: 12px; 
             padding: 5px; 
-            min-width: 110px; 
+            min-width: 140px; 
             margin-bottom: 5px; 
             border: 1px solid #ffd700;
         }
 
-        .panel h4 { font-size: 12px; text-align: center; color: #ffd700; }
+        .panel h4 { 
+            font-size: 14px; 
+            text-align: center; 
+            margin-bottom: 2px; 
+            color: #ffd700;
+        }
+
         .panel .value { 
             background: linear-gradient(0deg, #fff3b1, #ffd36a); 
             color: #000; 
-            padding: 2px 5px; 
-            border-radius: 20px; 
+            padding: 2px 10px; 
+            border-radius: 30px; 
             text-align: center; 
             font-weight: 700; 
-            font-size: 18px; 
+            font-size: 22px; 
         }
 
-        .chip-container { display: flex; gap: 5px; justify-content: center; }
+        /* --- TIMER BLINK --- */
+        @keyframes timer-bling {
+            0% { box-shadow: 0 0 5px #ff0000; border: 2px solid #ff0000; }
+            50% { box-shadow: 0 0 30px #ff0000, 0 0 50px #ff4500; border: 2px solid #fff; transform: scale(1.05); }
+            100% { box-shadow: 0 0 5px #ff0000; border: 2px solid #ff0000; }
+        }
+        .timer-warning {
+            animation: timer-bling 0.3s infinite !important;
+            background: linear-gradient(0deg, #ff4d4d, #ff0000) !important;
+            color: white !important;
+        }
+
+        /* --- HISTORY BOX STYLE --- */
+        #last10 {
+            background: #000;
+            border: 2px solid #ff4500;
+            box-shadow: 0 0 10px #ff4500, inset 0 0 5px #ff4500;
+            border-radius: 8px;
+            padding: 5px;
+            min-height: 40px;
+            width: 140px; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 5px;
+            text-shadow: 0 0 5px #ff4500;
+        }
+
+        .hist-item {
+            background: #222;
+            color: #fff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            border: 1px solid #ff8c00;
+            font-size: 12px;
+        }
+
+        .hist-last-blink { 
+            animation: fire-pulse 0.5s infinite alternate; 
+            background: #ff4500;
+            color: #fff;
+        }
+
+        @keyframes fire-pulse {
+            from { box-shadow: 0 0 5px #ff4500; transform: scale(1); }
+            to { box-shadow: 0 0 20px #ff0000; transform: scale(1.1); }
+        }
+        
+        * { -webkit-tap-highlight-color: transparent !important; }
+
+        .chip-container { 
+            display: flex; 
+            gap: 8px; 
+            justify-content: center; 
+            flex-wrap: wrap; 
+        }
+
         .chip { 
-            width: 35px; height: 35px; border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; 
-            font-weight: bold; font-size: 10px; background: #444; border: 2px solid #fff;
+            width: 40px; 
+            height: 40px; 
+            border-radius: 50%; 
+            border: 3px dashed rgba(255, 255, 255, 0.3); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: 0.2s; 
+            background: radial-gradient(circle, #444, #000); 
+            font-size: 12px;
         }
-        .chip.active { border: 2px solid #ffd700; transform: scale(1.1); box-shadow: 0 0 10px #ffd700; }
 
-        .wheel-wrap { width: 200px; height: 200px; position: relative; margin: 0 auto; }
-        canvas#wheel { width: 100%; height: 100%; border-radius: 50%; }
+        .chip.active { 
+            border: 3px solid #ffd36a; 
+            transform: scale(1.1); 
+            box-shadow: 0 0 10px #ffd36a; 
+        }
+
+        .chip[data-amt="1"] { background: radial-gradient(circle, #ff5f6d, #ffc371); }
+        .chip[data-amt="5"] { background: radial-gradient(circle, #ff9966, #ff5e62); }
+        .chip[data-amt="10"] { background: radial-gradient(circle, #11998e, #38ef7d); }
+        .chip[data-amt="100"] { background: radial-gradient(circle, #4568dc, #b06ab3); }
+        .chip[data-amt="500"] { background: radial-gradient(circle, #f80759, #bc4e9c); }
+        .chip[data-amt="1000"] { background: radial-gradient(circle, #00c6ff, #0072ff); }
+
+        .wheel-wrap { 
+            width: 250px; 
+            height: 200px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            position: relative; 
+            margin: 0 auto;
+        }
+
+        .wheel-wrap::before {
+            content: "";
+            position: absolute;
+            width: 250px;
+            height: 190px;
+            border-radius: 50%;
+            border: 2px solid #ffd700;
+            box-shadow: 0 0 8px #ffd700, inset 0 0 8px #000;
+            background: transparent;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        canvas#wheel { 
+            width: 240px; 
+            height: 180px;
+            border-radius: 50%; 
+        }
+
+        .pointer-overlay { 
+            position: absolute; 
+            top: -40px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            width: 100px; 
+            height: 100px; 
+            background-image: url('https://uploads.onecompiler.io/445tyzay6/447a3r3jd/1000038035.png'); 
+            background-size: contain; 
+            z-index: 100; 
+        }
+
+        .pointer-top-image { 
+            position: absolute; 
+            top: -40px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            width: 100px; 
+            height: 100px; 
+            background-image: url('https://uploads.onecompiler.io/445tyzay6/4479yvh72/1000038029.png'); 
+            background-size: contain; 
+            background-repeat: no-repeat; 
+            background-position: center; 
+            z-index: 50; 
+            pointer-events: none; 
+        }
+
+        .pointer-overlay.jiggle { animation: blink-pointer 0.15s steps(1) infinite; }
+        @keyframes blink-pointer { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
         .slider-container { 
-            width: 60px; height: 45px; position: absolute; top: 50%; left: 50%; 
-            transform: translate(-50%, -50%); overflow: hidden; border-radius: 50%; 
-            background: #FFD700; z-index: 20; border: 2px solid #ffd700;
+            width: 80px; 
+            height: 60px; 
+            position: absolute; 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%); 
+            overflow: hidden; 
+            border-radius: 50%; 
+            background: #FFD700;
+            box-shadow: 0 0 15px rgba(255,215,0,0.8), inset 0 0 15px rgba(0,0,0,0.9);
+            z-index: 20;
+            border: 2.5px solid #ffd700;
         }
-        .slides-inner { display: flex; width: 1000%; height: 100%; transition: transform 8s cubic-bezier(0.1, 0, 0.1, 1); }
-        .slide-item { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
-        .slide { width: 80%; height: 80%; object-fit: contain; }
+        
+        .slides-inner { 
+            display: flex; 
+            width: 1000%; 
+            height: 150%; 
+            transition: transform 8s cubic-bezier(0.1, 0, 0.1, 1); 
+        }
+
+        .slide-item { 
+            width: 150%;
+            height: 80%; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            margin-top: -9px;
+        }
+      
+        .slide { width: 60%; height: 60%; object-fit: contain; }
 
         .bet-row { 
-            display: flex; justify-content: space-around; width: 100%; 
-            padding: 5px; position: absolute; bottom: 50px;
-        }
-        .number-box { flex: 1; text-align: center; position: relative; }
-        .number-box .num { 
-            width: 35px; height: 35px; border-radius: 50%; display: flex; 
-            align-items: center; justify-content: center; font-weight: 800; 
-            color: #1b1300; background: #FFD700; margin: 0 auto;
-        }
-        .number-box .bet-placed { 
-            position: absolute; top: -20px; left: 50%; transform: translateX(-50%); 
-            font-size: 10px; background: #000; color: #fff; padding: 1px 4px; border-radius: 4px;
+            display: flex; 
+            justify-content: space-between; 
+            width: 100%; 
+            padding: 0 10px;
+            margin-top: 100px;
+            z-index: 500; 
+            position: relative;
         }
 
-        .status-bar { position: absolute; bottom: 5px; width: 100%; text-align: center; font-size: 12px; padding: 5px; background: rgba(0,0,0,0.5); }
+        .number-box { 
+            flex: 1; 
+            text-align: center; 
+            position: relative; 
+            cursor: pointer; 
+        }
+
+        .number-box .num { 
+            width: 45px; 
+            height: 45px;
+            border-radius: 50px; 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: 800; 
+            font-size: 18px;
+            color: #1b1300; 
+            background: linear-gradient(145deg, #000, #333), linear-gradient(145deg, #FFD700, #b8860b);
+            background-blend-mode: overlay;
+            box-shadow: 0 0 15px rgba(255,215,0,0.8), inset 0 0 15px rgba(0,0,0,0.95);
+            margin: 0 auto;
+        }
+
+        .number-box .bet-placed { 
+            position: absolute; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            bottom: 50px; 
+            padding: 2px 10px; 
+            border-radius: 15px; 
+            color: #111; 
+            font-weight: 700; 
+            font-size: 12px;
+            background: linear-gradient(145deg, #000, #333), linear-gradient(145deg, #FFD700, #b8860b);
+            background-blend-mode: overlay;
+            box-shadow: 0 0 10px rgba(255,215,0,0.8), inset 0 0 8px rgba(0,0,0,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            gap: 0px;
+        }
+
+        .status-bar { 
+            background: rgba(27, 27, 27, 0.85); 
+            border-radius: 60px; 
+            padding: 8px; 
+            text-align: center; 
+            color: #eee; 
+            font-weight: 800; 
+            margin: 0px;
+            font-size: 14px;
+            background: linear-gradient(145deg, #000, #333), linear-gradient(145deg, #FFD700, #b8860b);
+            background-blend-mode: overlay;
+            box-shadow: 0 0 10px rgba(255,215,0,0.8), inset 0 0 8px rgba(0,0,0,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes result-blink {
+            0%, 100% { background: linear-gradient(145deg, #000, #333), linear-gradient(145deg, #FFD700, #b8860b); color: #1b1300; }
+            50% { background: #0072ff; color: #fff; box-shadow: 0 0 20px #0072ff; }
+        }
+        .blink-blue { animation: result-blink 0.4s ease-in-out 10; }
+
+        #topActions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 8px;
+            z-index: 99999;
+        }
         
-        #topActions { position: absolute; top: 5px; right: 5px; display: flex; gap: 5px; z-index: 99999; }
-        #topActions button { padding: 4px 8px; font-size: 10px; border-radius: 4px; border: none; color: #fff; background: #333; }
+        #topActions button {
+            padding: 6px 12px;
+            font-size: 11px;
+            font-weight: bold;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #fff;
+        }
+        
+        #topActions button:first-child { background: linear-gradient(180deg,#00c853,#009624); }
+        #topActions button:last-child { background: linear-gradient(180deg,#1e90ff,#003cff); }
+
+        /* DEVICE LOGOUT NOTICE */
+        .device-logout-notice {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(90deg, #ff0000, #ff4500);
+            color: white;
+            text-align: center;
+            padding: 12px;
+            z-index: 9999999;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(255,0,0,0.3);
+        }
+
+        @media (orientation: portrait) {
+            .game-container-wrap { display: none !important; }
+            .portrait-warning { display: block !important; }
+        }
     </style>
 </head>
 
@@ -213,6 +517,7 @@
         <p>This game requires landscape mode to play.</p>
     </div>
     
+    <div class="stars"></div>
     <div class="game-container-wrap" id="mainGame">
         <div class="game-app">
             <div id="topActions">
@@ -225,17 +530,25 @@
 
             <div class="top-row">
                 <div class="left-panels">
-                    <div class="panel"><h4>Coins</h4><div id="coins" class="value">0</div></div>
-                    <div class="panel"><h4>Time</h4><div id="time" class="value">60</div></div>
+                    <div class="panel">
+                        <h4>Coins</h4>
+                        <div id="coins" class="value">0</div>
+                    </div>
+                    <div class="panel">
+                        <h4>Time</h4>
+                        <div id="time" class="value">60</div>
+                    </div>
                     <div class="chip-container">
-                        <div class="chip" onclick="selectChip(1)">1</div>
-                        <div class="chip" onclick="selectChip(5)">5</div>
-                        <div class="chip" onclick="selectChip(10)">10</div>
+                        <div class="chip" data-amt="1" onclick="selectChip(1)">1</div>
+                        <div class="chip" data-amt="5" onclick="selectChip(5)">5</div>
+                        <div class="chip" data-amt="10" onclick="selectChip(10)">10</div>
                     </div>
                 </div>
 
                 <div class="center-wheel-container">
                     <div class="wheel-wrap">
+                        <div class="pointer-overlay" id="ptrOverlay"></div>
+                        <div class="pointer-top-image"></div>
                         <div class="slider-container">
                             <div class="slides-inner" id="slider">
                                 <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/448mfppru/1000053482.png"></div>
@@ -250,17 +563,23 @@
                                 <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/448mfppru/1000053482.png"></div>
                             </div>
                         </div>
-                        <canvas id="wheel" width="400" height="400"></canvas>
+                        <canvas id="wheel" width="600" height="600"></canvas>
                     </div>
                 </div>
 
                 <div class="right-panels">
-                    <div class="panel"><h4>Winner</h4><div id="winner" class="value">-</div></div>
-                    <div class="panel"><h4>History</h4><div id="last10">Loading...</div></div>
+                    <div class="panel">
+                        <h4>Winner</h4>
+                        <div id="winner" class="value">-</div>
+                    </div>
+                    <div class="panel">
+                        <h4>History</h4>
+                        <div id="last10">Loading...</div>
+                    </div>
                     <div class="chip-container">
-                        <div class="chip" onclick="selectChip(100)">100</div>
-                        <div class="chip" onclick="selectChip(500)">500</div>
-                        <div class="chip" onclick="selectChip(1000)">1000</div>
+                        <div class="chip" data-amt="100" onclick="selectChip(100)">100</div>
+                        <div class="chip" data-amt="500" onclick="selectChip(500)">500</div>
+                        <div class="chip" data-amt="1000" onclick="selectChip(1000)">1000</div>
                     </div>
                 </div>
             </div>
@@ -272,16 +591,30 @@
 
     <div id="loginBlock">
         <div class="login-card">
-            <h3>Login</h3>
-            <input id="uid" placeholder="UID" style="width:100%;padding:8px;margin:5px 0;">
-            <input id="pass" type="password" placeholder="Password" style="width:100%;padding:8px;margin:5px 0;">
-            <button onclick="login()" style="width:100%;padding:10px;background:#FFD700;border:none;font-weight:bold;">LOGIN</button>
-            <div id="loginStatus"></div>
+            <h3 style="color:#FFD700; margin-bottom: 10px;">Login</h3>
+            <input id="uid" placeholder="UID" style="width:100%;padding:10px;margin:6px 0;">
+            <input id="pass" type="password" placeholder="Password" style="width:100%;padding:10px;margin:6px 0;">
+            <button onclick="login()" style="width:100%;padding:10px;margin-top:10px;background: linear-gradient(180deg, #FFEB00, #b8860b);border:none;border-radius:6px;font-weight:bold; cursor: pointer;">LOGIN</button>
+            <div id="loginStatus" style="margin-top:10px;font-size:13px"></div>
         </div>
     </div>
 
+    <div id="sendPopup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:999999;align-items:center;justify-content:center">
+        <div style="background:#111;padding:20px;border-radius:12px;width:280px;text-align:center">
+            <h3>Send Coins</h3>
+            <input id="sendUID" placeholder="Receiver UID" style="width:100%;padding:10px;margin:6px 0;">
+            <input id="sendAmount" type="number" placeholder="Amount" style="width:100%;padding:10px;margin:6px 0;">
+            <button onclick="sendCoins()" style="width:100%;padding:10px;background:#00c853;border:none;border-radius:6px;font-weight:bold">SEND</button>
+            <button onclick="closeSendPopup()" style="width:100%;margin-top:6px;padding:8px;background:#444;color:#fff;border:none;border-radius:6px">CANCEL</button>
+        </div>
+    </div>
+
+    <audio id="clickSound" preload="auto"><source src="data:audio/mpeg;base64,SUQzBAAAAAABX1RFTkNCDQoNCkxvYWQgRXJyb3Ih" type="audio/mpeg"></audio>
+    <audio id="spinSound" preload="auto" loop><source src="data:audio/mpeg;base64,SUQzBAAAAAABX1RFTkNCDQoNCkxvYWQgRXJyb3Ih" type="audio/mpeg"></audio>
+    <audio id="bgMusic" preload="auto" loop><source src="data:audio/mpeg;base64,SUQzBAAAAAABX1RFTkNCDQoNCkxvYWQgRXJyb3Ih" type="audio/mpeg"></audio>
+    <audio id="timerSound" preload="auto"><source src="data:audio/mpeg;base64,SUQzBAAAAAABX1RFTkNCDQoNCkxvYWQgRXJyb3Ih" type="audio/mpeg"></audio>
+
     <script>
-        // FIREBASE & STATE (Same as original)
         const firebaseConfig = {
             apiKey: "AIzaSyA-KabHNxU7PmQ3sARjqY7XrZ7LI5rSI8E",
             authDomain: "funtop-453ec.firebaseapp.com",
@@ -296,146 +629,313 @@
         const timerDoc = db.collection("settings").doc("timer");
 
         const state = {
-            uid: null, coins: 0, timer: 60, betting: false, spinning: false,
-            bets: Array(10).fill(0), betHistory: [], selectedAmount: 10,
-            sessionToken: null, lastResultHandled: null
+            uid: null,
+            coins: 0,
+            timer: 60,
+            betting: false,
+            spinning: false,
+            bets: Array(10).fill(0),
+            betHistory: [],
+            selectedAmount: 10,
+            sessionToken: null,
+            deviceListener: null,
+            lastResultHandled: null
         };
 
-        // --- ALL ORIGINAL FUNCTIONS KEPT UNTOUCHED ---
-        
+        let betRepeatInterval = null;
+        let timerInterval = null;
+        let spinAnimationFrame = null;
+        let serverStartTime = null; 
+        const TIMER_DURATION = 60;
+
+        async function generateSessionToken() {
+            return Math.random().toString(36).substring(2) + Date.now().toString(36);
+        }
+
+        async function setupDeviceListener(uid) {
+            if (state.deviceListener) state.deviceListener();
+            state.deviceListener = rtdb.ref(`users/uid/${uid}/sessionToken`).on('value', (snapshot) => {
+                const tokenFromServer = snapshot.val();
+                if (tokenFromServer && state.sessionToken && tokenFromServer !== state.sessionToken) {
+                    showDeviceLogoutNotice();
+                    setTimeout(() => logoutUser(), 3000);
+                }
+            });
+        }
+
+        function showDeviceLogoutNotice() {
+            const notice = document.createElement('div');
+            notice.className = 'device-logout-notice';
+            notice.innerHTML = '⚠️ Account logged in from another device. Logging out...';
+            document.body.appendChild(notice);
+        }
+
         timerDoc.onSnapshot((snap) => {
             if (!snap.exists) return;
             const data = snap.data();
+            
             if (data.status === "RESULT" && !state.spinning && data.result !== undefined) {
                 if(state.lastResultHandled !== data.timerStartTime?.toMillis()) {
                     state.lastResultHandled = data.timerStartTime?.toMillis();
                     START_SPIN_ANIMATION(data.result);
                 }
             }
+
             if (data.timerStartTime) {
-                const newTime = data.timerStartTime.toMillis();
-                if (this.oldTime !== newTime) {
-                    this.oldTime = newTime;
+                const newServerTime = data.timerStartTime.toMillis();
+                if (serverStartTime !== newServerTime) {
+                    serverStartTime = newServerTime;
                     RESET_ROUND_LOCALLY();
-                    startSyncTimer(newTime);
+                    startSyncTimer();
                 }
             }
         });
 
-        function startSyncTimer(serverStart) {
-            clearInterval(window.timerInterval);
-            window.timerInterval = setInterval(() => {
-                let left = 60 - Math.floor((Date.now() - serverStart) / 1000);
-                let display = left > 0 ? left : 0;
-                document.getElementById("time").innerText = display;
-                state.timer = display;
-                if (left <= 15) state.betting = false;
-                if (left === 8 && !state.spinStarted) calculateResult();
+        function startSyncTimer() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (!serverStartTime) return;
+                let left = TIMER_DURATION - Math.floor((Date.now() - serverStartTime) / 1000);
+                let displayTime = left > 0 ? left : 0;
+                document.getElementById("time").innerText = displayTime;
+                state.timer = displayTime;
+
+                if (left <= 15) {
+                    state.betting = false;
+                    stopBettingRepeat();
+                    if(left > 0) document.getElementById('gameStatus').textContent = "WAIT FOR RESULT...";
+                    document.getElementById("time").classList.add("timer-warning");
+                } else {
+                    document.getElementById("time").classList.remove("timer-warning");
+                }
+
+                if (left === 8 && !state.spinStarted) calculateAndSetResult();
                 if (left <= -5) triggerNewRound();
             }, 1000);
         }
 
         async function triggerNewRound() {
-            await timerDoc.set({ timerStartTime: firebase.firestore.FieldValue.serverTimestamp(), status: "BET", bets: {} }, { merge: true });
+            try {
+                await timerDoc.set({
+                    timerStartTime: firebase.firestore.FieldValue.serverTimestamp(),
+                    status: "BET",
+                    bets: {} 
+                }, { merge: true });
+            } catch (e) { console.error(e); }
         }
 
-        async function calculateResult() {
+        async function calculateAndSetResult() {
             state.spinStarted = true;
             const snap = await timerDoc.get();
             const d = snap.data();
+            if (!d || d.status !== "BET") return;
             let bets = d.bets || {};
-            let minBet = []; let minAmt = Infinity;
+            let minBet = [];
+            let minAmt = Infinity;
             for (let i = 0; i < 10; i++) {
                 let amt = bets[i] || 0;
                 if (amt < minAmt) { minAmt = amt; minBet = [i]; } 
                 else if (amt === minAmt) { minBet.push(i); }
             }
-            let res = minBet[Math.floor(Math.random() * minBet.length)];
-            await timerDoc.update({ status: "RESULT", result: res });
+            let result = minBet[Math.floor(Math.random() * minBet.length)];
+            await timerDoc.update({ status: "RESULT", result: result });
         }
 
-        function START_SPIN_ANIMATION(win) {
+        function START_SPIN_ANIMATION(winnerNum) {
             state.spinning = true;
-            document.getElementById('slider').style.transition = "transform 8s cubic-bezier(0.1, 0, 0.1, 1)";
-            document.getElementById('slider').style.transform = `translateX(${-win * 10}%)`;
-            let start = null;
-            function anim(now) {
-                if (!start) start = now;
-                let prog = Math.min((now - start) / 8000, 1);
-                drawWheel(prog * 50); // Just for effect
-                if (prog < 1) requestAnimationFrame(anim);
-                else { state.spinning = false; document.getElementById('winner').textContent = win; checkWin(win); }
-            }
-            requestAnimationFrame(anim);
+            document.getElementById('gameStatus').textContent = "SPINNING...";
+            document.getElementById('ptrOverlay').classList.add('jiggle');
+            document.getElementById('spinSound').play().catch(()=>{});
+            runSpinAnimation(winnerNum);
         }
 
-        function checkWin(res) {
-            if (state.bets[res] > 0) {
-                let win = state.bets[res] * 9;
+        function runSpinAnimation(winnerNum) {
+            const slider = document.getElementById('slider');
+            slider.style.transition = "transform 8s cubic-bezier(0.1, 0, 0.1, 1)";
+            slider.style.transform = `translateX(${-winnerNum * 10}%)`;
+            const targetRot = (Math.PI * 2 * 12) - (winnerNum * Math.PI * 2 / 10) - (Math.PI * 12 / 20);
+            let start = null;
+            function animate(now) {
+                if (!start) start = now;
+                const progress = Math.min((now - start) / 8000, 1);
+                const eased = 1 - Math.pow(1 - progress, 3);
+                drawWheel(targetRot * eased);
+                if (progress < 1) spinAnimationFrame = requestAnimationFrame(animate);
+                else STOP_SPIN_AND_SHOW_RESULT(winnerNum);
+            }
+            spinAnimationFrame = requestAnimationFrame(animate);
+        }
+
+        function STOP_SPIN_AND_SHOW_RESULT(result) {
+            cancelAnimationFrame(spinAnimationFrame);
+            state.spinning = false;
+            document.getElementById('spinSound').pause();
+            document.getElementById('ptrOverlay').classList.remove('jiggle');
+            document.getElementById('winner').textContent = result;
+            
+            const targetBtn = document.getElementById(`btn-num-${result}`);
+            if(targetBtn) targetBtn.classList.add('blink-blue');
+
+            if (state.bets[result] > 0) {
+                const win = state.bets[result] * 9;
                 state.coins += win;
                 syncCoinsToDB(state.coins);
+                document.getElementById('gameStatus').textContent = "WON " + win + " COINS!";
             }
             updateUI();
         }
 
-        async function login(){
-            const u = document.getElementById("uid").value;
-            const p = document.getElementById("pass").value;
-            const snap = await rtdb.ref("users/uid/"+u).once("value");
-            if(snap.exists() && String(snap.val().password) === p) {
-                state.uid = u; state.coins = snap.val().coins || 0;
-                state.betting = true; document.getElementById("loginBlock").style.display="none";
-                updateUI();
-            }
+        function RESET_ROUND_LOCALLY() {
+            state.bets.fill(0);
+            state.betHistory = [];
+            state.betting = !!state.uid;
+            state.spinning = false;
+            state.spinStarted = false;
+            document.getElementById('winner').textContent = "-";
+            document.getElementById('gameStatus').textContent = state.uid ? "PLACE YOUR BETS" : "PLEASE LOGIN";
+            document.getElementById('slider').style.transition = "none";
+            document.getElementById('slider').style.transform = "translateX(0)";
+            document.querySelectorAll('.num').forEach(el => el.classList.remove('blink-blue'));
+            updateUI();
         }
+
+        async function login(){
+            const uid=document.getElementById("uid").value.trim();
+            const pass=document.getElementById("pass").value.trim();
+            const st=document.getElementById("loginStatus");
+            try{
+                const snap=await rtdb.ref("users/uid/"+uid).once("value");
+                if(!snap.exists()){st.innerText="UID not found"; return;}
+                const d=snap.val();
+                if(String(d.password)!==pass){st.innerText="Wrong password"; return;}
+                
+                const newToken = await generateSessionToken();
+                await rtdb.ref("users/uid/" + uid).update({ sessionToken: newToken });
+                
+                state.uid = uid; 
+                state.sessionToken = newToken;
+                state.coins = Number(d.coins) || 0; 
+                state.betting = true;
+                
+                setupDeviceListener(uid);
+                updateUI();
+                document.getElementById("loginBlock").style.display="none";
+                document.getElementById('bgMusic').play().catch(()=>{});
+            }catch(e){ st.innerText="Error: " + e.message; }
+        }
+
+        function logoutUser(){
+            if (state.deviceListener) rtdb.ref(`users/uid/${state.uid}/sessionToken`).off();
+            location.reload(); 
+        }
+
+        const canvas = document.getElementById('wheel');
+        const ctx = canvas.getContext('2d');
+        const W = canvas.width, R = W / 2 - 10;
+        function drawWheel(rot = 0) {
+            ctx.clearRect(0, 0, W, W);
+            ctx.save(); ctx.translate(W/2, W/2); ctx.rotate(rot);
+            for (let i = 0; i < 10; i++) {
+                ctx.beginPath(); ctx.moveTo(0,0);
+                ctx.arc(0,0, R, i*Math.PI*2/10, (i+1)*Math.PI*2/10);
+                ctx.fillStyle = i%2==0 ? '#ffd36a' : '#fff3b0';
+                ctx.fill(); ctx.stroke();
+                ctx.save();
+                ctx.rotate((i*Math.PI*2/10)+(Math.PI/10));
+                ctx.fillStyle="#000"; ctx.font="bold 40px Arial";
+                ctx.fillText(i, R*0.6, 0); ctx.restore();
+            }
+            ctx.restore();
+        }
+
+        function updateUI() {
+            document.getElementById('coins').textContent = state.coins;
+            state.bets.forEach((v, i) => {
+                const el = document.getElementById(`bet-${i}`);
+                if (el) { el.style.display = v > 0 ? 'block' : 'none'; el.textContent = v; }
+            });
+        }
+
+        async function syncCoinsToDB(val) { if(state.uid) rtdb.ref("users/uid/"+state.uid).update({coins:val}); }
+        function selectChip(amt) { state.selectedAmount = amt; document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active')); event.target.classList.add('active'); }
+
+        window.onload = () => {
+            setupBettingUI();
+            drawWheel(0);
+            updateUI();
+            triggerNewRound();
+        };
 
         function setupBettingUI() {
             const row = document.getElementById('betRow');
             for (let i = 0; i < 10; i++) {
                 const box = document.createElement('div');
                 box.className = 'number-box';
-                box.innerHTML = `<div class="num">${i}</div><div class="bet-placed" id="bet-${i}">0</div>`;
-                box.onclick = () => PLACE_BET(i);
+                box.innerHTML = `<div class="num" id="btn-num-${i}">${i}</div><div class="bet-placed" id="bet-${i}">0</div>`;
+                box.onmousedown = () => startBettingRepeat(i);
+                box.ontouchstart = (e) => { e.preventDefault(); startBettingRepeat(i); };
                 row.appendChild(box);
             }
+            document.onmouseup = document.ontouchend = stopBettingRepeat;
         }
 
-        function PLACE_BET(n) {
-            if (state.timer > 15 && state.betting && state.coins >= state.selectedAmount) {
+        function startBettingRepeat(num) {
+            if (state.timer <= 15 || !state.betting) return;
+            PLACE_BET(num);
+            betRepeatInterval = setInterval(() => PLACE_BET(num), 200);
+        }
+        function stopBettingRepeat() { clearInterval(betRepeatInterval); }
+
+        async function PLACE_BET(n) {
+            if (state.timer > 15 && state.coins >= state.selectedAmount) {
                 state.coins -= state.selectedAmount;
                 state.bets[n] += state.selectedAmount;
                 state.betHistory.push({n, amt: state.selectedAmount});
                 updateUI();
                 syncCoinsToDB(state.coins);
                 timerDoc.update({ [`bets.${n}`]: firebase.firestore.FieldValue.increment(state.selectedAmount) });
+                document.getElementById('clickSound').play().catch(()=>{});
             }
         }
 
-        function syncCoinsToDB(v) { if(state.uid) rtdb.ref("users/uid/"+state.uid).update({coins:v}); }
-        function selectChip(a) { state.selectedAmount = a; }
-        function RESET_ROUND_LOCALLY() { state.bets.fill(0); state.betHistory = []; state.spinStarted = false; updateUI(); }
-        function updateUI() {
-            document.getElementById('coins').textContent = state.coins;
-            state.bets.forEach((v, i) => { document.getElementById(`bet-${i}`).textContent = v; });
-        }
-
-        const canvas = document.getElementById('wheel');
-        const ctx = canvas.getContext('2d');
-        function drawWheel(rot = 0) {
-            ctx.clearRect(0, 0, 400, 400);
-            ctx.save(); ctx.translate(200, 200); ctx.rotate(rot);
-            for (let i = 0; i < 10; i++) {
-                ctx.beginPath(); ctx.moveTo(0,0);
-                ctx.arc(0,0, 180, i*Math.PI*2/10, (i+1)*Math.PI*2/10);
-                ctx.fillStyle = i%2==0 ? '#ffd36a' : '#fff3b0';
-                ctx.fill(); ctx.stroke();
-                ctx.save(); ctx.rotate((i*Math.PI*2/10)+(Math.PI/10));
-                ctx.fillStyle="#000"; ctx.fillText(i, 140, 0); ctx.restore();
+        async function cancelLastBet() {
+            if (state.timer > 15 && state.betHistory.length > 0) {
+                const last = state.betHistory.pop();
+                state.coins += last.amt;
+                state.bets[last.n] -= last.amt;
+                updateUI();
+                syncCoinsToDB(state.coins);
+                timerDoc.update({ [`bets.${last.n}`]: firebase.firestore.FieldValue.increment(-last.amt) });
             }
-            ctx.restore();
         }
-
-        window.onload = () => { setupBettingUI(); drawWheel(0); updateUI(); };
+        async function cancelAllBets() {
+            if (state.timer > 15) {
+                let total = state.bets.reduce((a, b) => a + b, 0);
+                if (total > 0) {
+                    state.coins += total;
+                    state.bets.fill(0);
+                    state.betHistory = [];
+                    updateUI();
+                    syncCoinsToDB(state.coins);
+                    triggerNewRound();
+                }
+            }
+        }
+        function openSendPopup() { document.getElementById("sendPopup").style.display="flex"; }
+        function closeSendPopup() { document.getElementById("sendPopup").style.display="none"; }
+        async function sendCoins() {
+            const to = document.getElementById("sendUID").value;
+            const amt = Number(document.getElementById("sendAmount").value);
+            if(amt > 0 && amt <= state.coins) {
+                const snap = await rtdb.ref("users/uid/"+to).once("value");
+                if(snap.exists()) {
+                    state.coins -= amt;
+                    syncCoinsToDB(state.coins);
+                    rtdb.ref("users/uid/"+to).update({ coins: (snap.val().coins || 0) + amt });
+                    alert("Sent!"); closeSendPopup();
+                }
+            }
+        }
     </script>
 </body>
 </html>
