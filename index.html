@@ -224,7 +224,7 @@
         }
 
         /* --- HISTORY BOX STYLE --- */
-        #last10 {
+        #last5 {
             background: #000;
             border: 2px solid #ff4500;
             box-shadow: 0 0 10px #ff4500, inset 0 0 5px #ff4500;
@@ -358,8 +358,8 @@
         @keyframes blink-pointer { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
         .slider-container { 
-            width: 80px; 
-            height: 60px; 
+            width: 130px; 
+            height: 85px; 
             position: absolute; 
             top: 50%; 
             left: 50%; 
@@ -581,7 +581,7 @@
                     </div>
                     <div class="panel">
                         <h4>History</h4>
-                        <div id="last10">Loading...</div>
+                        <div id="last5">Loading...</div>
                     </div>
                     <div class="chip-container">
                         <div class="chip" data-amt="100" onclick="selectChip(100)">100</div>
@@ -681,6 +681,24 @@
             document.body.appendChild(notice);
         }
 
+        // REAL-TIME HISTORY LISTENER
+        rtdb.ref('history').limitToLast(5).on('value', (snapshot) => {
+            const historyBox = document.getElementById('last5');
+            historyBox.innerHTML = '';
+            const data = snapshot.val();
+            if (data) {
+                const results = Object.values(data).reverse(); // Latest first
+                results.forEach((res, index) => {
+                    const span = document.createElement('span');
+                    span.className = 'hist-item' + (index === 0 ? ' hist-last-blink' : '');
+                    span.innerText = res;
+                    historyBox.appendChild(span);
+                });
+            } else {
+                historyBox.innerText = 'No History';
+            }
+        });
+
         timerDoc.onSnapshot((snap) => {
             if (!snap.exists) return;
             const data = snap.data();
@@ -750,6 +768,8 @@
             }
             let result = minBet[Math.floor(Math.random() * minBet.length)];
             await timerDoc.update({ status: "RESULT", result: result });
+            // Add to Realtime Database History
+            rtdb.ref('history').push(result);
         }
 
         function START_SPIN_ANIMATION(winnerNum) {
@@ -843,9 +863,19 @@
         const canvas = document.getElementById('wheel');
         const ctx = canvas.getContext('2d');
         const W = canvas.width, R = W / 2 - 10;
+
+        // ===== IMAGE OBJECT FOR CENTER =====
+        const centerImg = new Image();
+        centerImg.src = "https://uploads.onecompiler.io/445tyzay6/448metr9w/1000053491.png";
+
         function drawWheel(rot = 0) {
             ctx.clearRect(0, 0, W, W);
-            ctx.save(); ctx.translate(W/2, W/2); ctx.rotate(rot);
+            ctx.save(); 
+            // 🔥 LOCKED CENTER POINT: Ensure spinning stays perfectly aligned
+            ctx.translate(300, 300); 
+            ctx.rotate(rot);
+
+            // wheel segments
             for (let i = 0; i < 10; i++) {
                 ctx.beginPath(); ctx.moveTo(0,0);
                 ctx.arc(0,0, R, i*Math.PI*2/10, (i+1)*Math.PI*2/10);
@@ -856,6 +886,11 @@
                 ctx.fillStyle="#000"; ctx.font="bold 40px Arial";
                 ctx.fillText(i, R*0.6, 0); ctx.restore();
             }
+
+            // 🔥 FULL WHEEL IMAGE - LOCKED AT THE CENTER
+            const fullImgSize = R * 2; 
+            ctx.drawImage(centerImg, -fullImgSize/2, -fullImgSize/2, fullImgSize, fullImgSize);
+
             ctx.restore();
         }
 
