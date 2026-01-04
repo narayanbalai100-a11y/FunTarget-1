@@ -184,22 +184,24 @@
             padding: 5px 10px;
             height: 180px;
         }
+        
         .wheel-base-image {
-    position: absolute;
-    width: 1050px;
-    height: 1050px;
-    border-radius: 50%;
-    background-image: url('https://uploads.onecompiler.io/445tyzay6/449m4ev86/1000060656.png');
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
+           position: fixed;              /* 🔒 स्क्रीन पर लॉक */
+           width: 1050px;
+           height: 1050px;
+           border-radius: 50%;
 
-    top: 6%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+          background-image: url('https://uploads.onecompiler.io/445tyzay6/449m4ev86/1000060656.png');
+          background-size: contain;
+          background-repeat: no-repeat;
+          background-position: center;
 
-    z-index: 1000;          /* wheel के नीचे */
-    pointer-events: none;
+          top: 6%;
+          left: 50%;
+          transform: translate(-50%, -50%);   /* बिल्कुल सेंटर */
+
+          z-index: 1000;                 /* wheel के नीचे / ऊपर जैसा चाहिए */
+          pointer-events: none;
 }
 
         .panel { 
