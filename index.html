@@ -650,20 +650,18 @@
     <audio id="clickSound" preload="auto"><source src="data:audio/mpeg;base64,SUQzBAAAAAABX1RFTkNCDQoNCkxvYWQgRXJyb3Ih" type="audio/mpeg"></audio>
     <audio id="spinSound" preload="auto" loop><source src="data:audio/mpeg;base64,SUQzBAAAAAABX1RFTkNCDQoNCkxvYWQgRXJyb3Ih" type="audio/mpeg"></audio>
     <audio id="bgMusic" preload="auto" loop><source src="data:audio/mpeg;base64,SUQzBAAAAAABX1RFTkNCDQoNCkxvYWQgRXJyb3Ih" type="audio/mpeg"></audio>
-    <audio id="timerSound" preload="auto"><source src="data:audio/mpeg;base64,SUQzBAAAAAABX1RFTkNCDQoNCkxvYWQgRXJyb3Ih" type="audio/mpeg"></audio>
+    <audio id="timerSound" preload="auto"><source src="data:audio/mpeg;base64,SUQzBAAAAAABX1RFTkNCDQoNCkxvYWQgRXJyb3Ih" type="audio/mpeg"></
 
-    <script>
-    
-   <div class="game-container-wrap" id="gameWrap"></div>
-
-fetch('image_b64')
+<script>
+fetch('image.b64')
   .then(r => r.text())
   .then(b64 => {
       const wrap = document.getElementById('gameWrap');
       wrap.style.backgroundImage = `url(${b64.trim()})`;
   })
   .catch(err => console.error(err));
-    
+</script>
+    </script>
         const firebaseConfig = {
             apiKey: "AIzaSyA-KabHNxU7PmQ3sARjqY7XrZ7LI5rSI8E",
             authDomain: "funtop-453ec.firebaseapp.com",
