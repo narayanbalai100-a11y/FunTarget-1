@@ -184,6 +184,23 @@
             padding: 5px 10px;
             height: 180px;
         }
+        .wheel-base-image {
+    position: absolute;
+    width: 1050px;
+    height: 1050px;
+    border-radius: 50%;
+    background-image: url('https://uploads.onecompiler.io/445tyzay6/449m4ev86/1000060656.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+
+    top: 6%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    z-index: 1000;          /* wheel के नीचे */
+    pointer-events: none;
+}
 
         .panel { 
             background: rgba(0, 0, 0, 0.0); 
@@ -553,6 +570,7 @@
                 </div>
 
                 <div class="center-wheel-container">
+                <div class="wheel-base-image"></div>
                     <div class="wheel-wrap">
                         <div class="pointer-overlay" id="ptrOverlay"></div>
                         <div class="pointer-top-image"></div>
