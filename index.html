@@ -329,19 +329,19 @@
 
         .pointer-overlay { 
             position: absolute; 
-            top: -40px; 
+            top: -30px; 
             left: 50%; 
             transform: translateX(-50%); 
             width: 100px; 
             height: 100px; 
             background-image: url('https://uploads.onecompiler.io/445tyzay6/447a3r3jd/1000038035.png'); 
             background-size: contain; 
-            z-index: 100; 
+            z-index: 40; 
         }
 
         .pointer-top-image { 
             position: absolute; 
-            top: -40px; 
+            top: -30px; 
             left: 50%; 
             transform: translateX(-50%); 
             width: 100px; 
@@ -350,7 +350,7 @@
             background-size: contain; 
             background-repeat: no-repeat; 
             background-position: center; 
-            z-index: 50; 
+            z-index: 0; 
             pointer-events: none; 
         }
 
@@ -358,17 +358,17 @@
         @keyframes blink-pointer { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
         .slider-container { 
-            width: 130px; 
-            height: 85px; 
+            width: 137px; 
+            height: 87px; 
             position: absolute; 
-            top: 50%; 
+            top: 49%; 
             left: 50%; 
-            transform: translate(-50%, -50%); 
+            transform: translate(-50%, -47%); 
             overflow: hidden; 
             border-radius: 50%; 
             background: #FFD700;
             box-shadow: 0 0 15px rgba(255,215,0,0.8), inset 0 0 15px rgba(0,0,0,0.9);
-            z-index: 20;
+            z-index: 100;
             border: 2.5px solid #ffd700;
         }
         
@@ -866,7 +866,7 @@
 
         // ===== IMAGE OBJECT FOR CENTER =====
         const centerImg = new Image();
-        centerImg.src = "https://uploads.onecompiler.io/445tyzay6/448metr9w/1000053491.png";
+        centerImg.src = "https://uploads.onecompiler.io/445tyzay6/449je75ev/1000060521.png";
 
         function drawWheel(rot = 0) {
             ctx.clearRect(0, 0, W, W);
