@@ -11,7 +11,7 @@
      <script src="image_b64"></script>
     <style>
         /* =========================================
-           CSS STYLES - Jaisa aapne diya tha
+           CSS STYLES
            ========================================= */
         * { 
             box-sizing: border-box; 
@@ -127,7 +127,7 @@
         #loginBlock {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.0);
+            background: rgba(0, 0, 0, 0.8);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -509,20 +509,6 @@
         #topActions button:first-child { background: linear-gradient(180deg,#00c853,#009624); }
         #topActions button:last-child { background: linear-gradient(180deg,#1e90ff,#003cff); }
 
-        .device-logout-notice {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background: linear-gradient(90deg, #ff0000, #ff4500);
-            color: white;
-            text-align: center;
-            padding: 12px;
-            z-index: 9999999;
-            font-weight: bold;
-            box-shadow: 0 4px 10px rgba(255,0,0,0.3);
-        }
-
         @media (orientation: portrait) {
             .game-container-wrap { display: none !important; }
             .portrait-warning { display: block !important; }
@@ -662,10 +648,11 @@
             bets: Array(10).fill(0),
             betHistory: [],
             selectedAmount: 10,
-            sessionToken: null,
-            deviceListener: null,
             lastResultHandled: null,
-            spinStarted: false
+            spinStarted: false,
+            resultProcessed: false,
+            currentHistory: [],
+            sessionID: null // Current device session ID
         };
 
         let betRepeatInterval = null;
@@ -674,12 +661,47 @@
         let serverStartTime = null; 
         const TIMER_DURATION = 60;
 
-        // --- REAL-TIME SYNC LOGIC ---
+        function listenToUserCoins(uid) {
+            rtdb.ref("users/uid/" + uid + "/coins").on("value", (snapshot) => {
+                state.coins = Number(snapshot.val()) || 0;
+                updateUI();
+            });
+            
+            // Single Session Listener: Watch for Session ID changes
+            rtdb.ref("users/uid/" + uid + "/sessionID").on("value", (snapshot) => {
+                const cloudSession = snapshot.val();
+                if (state.sessionID && cloudSession && cloudSession !== state.sessionID) {
+                    alert("Logged in from another device. Please login again.");
+                    location.reload(); 
+                }
+            });
+        }
+
+        rtdb.ref('history').limitToLast(5).on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                state.currentHistory = Object.values(data).reverse();
+                if (!state.spinning) {
+                    refreshHistoryUI();
+                }
+            }
+        });
+
+        function refreshHistoryUI() {
+            const historyBox = document.getElementById('last5');
+            historyBox.innerHTML = '';
+            state.currentHistory.forEach((res, index) => {
+                const span = document.createElement('span');
+                span.className = 'hist-item' + (index === 0 ? ' hist-last-blink' : '');
+                span.innerText = res;
+                historyBox.appendChild(span);
+            });
+        }
+
         timerDoc.onSnapshot((snap) => {
             if (!snap.exists) return;
             const data = snap.data();
             
-            // Result handling
             if (data.status === "RESULT" && !state.spinning && data.result !== undefined) {
                 if(state.lastResultHandled !== data.timerStartTime?.toMillis()) {
                     state.lastResultHandled = data.timerStartTime?.toMillis();
@@ -687,7 +709,6 @@
                 }
             }
 
-            // Sync Timer from Server Start Time
             if (data.timerStartTime) {
                 const newServerTime = data.timerStartTime.toMillis();
                 if (serverStartTime !== newServerTime) {
@@ -719,7 +740,6 @@
                     if(state.uid && !state.spinning) document.getElementById('gameStatus').textContent = "PLACE YOUR BETS";
                 }
 
-                // 8 seconds pehle logic result calculate karega
                 if (left === 8 && !state.spinStarted) calculateAndSetResult();
                 if (left <= -5) triggerNewRound();
             }, 1000);
@@ -735,48 +755,35 @@
             } catch (e) {}
         }
 
-        /* =========================================
-           FIXED LOGIC: Lowest Bet Winner
-           Sabhi users ka total Firestore se check karta hai
-           ========================================= 
-        */
         async function calculateAndSetResult() {
             state.spinStarted = true;
             const snap = await timerDoc.get();
             const d = snap.data();
             if (!d || d.status !== "BET") return;
-            
-            let bets = d.bets || {};
-            let minAmt = Infinity;
-            let winners = [];
 
-            // 0 se 9 tak check karo kis par sabse kam paisa hai
+            let allBets = d.bets || {};
+            let minAmount = Infinity;
+            let bestNumbers = [];
+
             for (let i = 0; i < 10; i++) {
-                let currentNumTotal = bets[i] || 0;
-                
-                if (currentNumTotal < minAmt) {
-                    minAmt = currentNumTotal;
-                    winners = [i]; // Naya minimum mila
-                } else if (currentNumTotal === minAmt) {
-                    winners.push(i); // Agar do numbers par barabar kam paisa ho
+                let totalOnThisNum = allBets[i] || 0;
+                if (totalOnThisNum < minAmount) {
+                    minAmount = totalOnThisNum;
+                    bestNumbers = [i];
+                } else if (totalOnThisNum === minAmount) {
+                    bestNumbers.push(i);
                 }
             }
 
-            // Un numbers mein se koi ek select karo (mostly 0 total wala hi aayega)
-            let finalResult = winners[Math.floor(Math.random() * winners.length)];
-
-            // Result update karo Firestore mein
-            await timerDoc.update({ 
-                status: "RESULT", 
-                result: finalResult 
-            });
-            
-            // History mein push karo
+            let finalResult = bestNumbers[Math.floor(Math.random() * bestNumbers.length)];
+            await timerDoc.update({ status: "RESULT", result: finalResult });
             rtdb.ref('history').push(finalResult);
         }
 
         function START_SPIN_ANIMATION(winnerNum) {
             state.spinning = true;
+            state.resultProcessed = false;
+            document.getElementById('winner').textContent = "-";
             document.getElementById('gameStatus').textContent = "SPINNING...";
             document.getElementById('ptrOverlay').classList.add('jiggle');
             document.getElementById('spinSound').play().catch(()=>{});
@@ -800,21 +807,29 @@
             spinAnimationFrame = requestAnimationFrame(animate);
         }
 
-        function STOP_SPIN_AND_SHOW_RESULT(result) {
+        async function STOP_SPIN_AND_SHOW_RESULT(result) {
             cancelAnimationFrame(spinAnimationFrame);
             state.spinning = false;
             document.getElementById('spinSound').pause();
             document.getElementById('ptrOverlay').classList.remove('jiggle');
-            document.getElementById('winner').textContent = result;
             
+            document.getElementById('winner').textContent = result;
+            refreshHistoryUI();
+
             const targetBtn = document.getElementById(`btn-num-${result}`);
             if(targetBtn) targetBtn.classList.add('blink-blue');
 
-            if (state.bets[result] > 0) {
-                const win = state.bets[result] * 9;
-                state.coins += win;
-                syncCoinsToDB(state.coins);
-                document.getElementById('gameStatus').textContent = "WON " + win + " COINS!";
+            if (!state.resultProcessed && state.uid && state.bets[result] > 0) {
+                state.resultProcessed = true;
+                const winAmount = state.bets[result] * 9;
+                
+                rtdb.ref("users/uid/" + state.uid + "/coins").transaction((currentCoins) => {
+                    return (currentCoins || 0) + winAmount;
+                });
+                
+                document.getElementById('gameStatus').textContent = "WON " + winAmount + " COINS!";
+            } else if (state.uid) {
+                document.getElementById('gameStatus').textContent = "BET FINISHED";
             }
             updateUI();
         }
@@ -825,6 +840,7 @@
             state.betting = !!state.uid;
             state.spinning = false;
             state.spinStarted = false;
+            state.resultProcessed = false;
             document.getElementById('winner').textContent = "-";
             document.getElementById('slider').style.transition = "none";
             document.getElementById('slider').style.transform = "translateX(0)";
@@ -838,12 +854,21 @@
             try{
                 const snap=await rtdb.ref("users/uid/"+uid).once("value");
                 if(snap.exists() && String(snap.val().password) === pass){
+                    // Generate new Session ID for this login
+                    const newSessionID = Date.now() + Math.random().toString(36).substring(7);
+                    state.sessionID = newSessionID;
+                    
+                    // Update Database with new Session ID
+                    await rtdb.ref("users/uid/" + uid + "/sessionID").set(newSessionID);
+                    
                     state.uid = uid;
-                    state.coins = Number(snap.val().coins) || 0;
+                    listenToUserCoins(uid);
                     state.betting = true;
-                    updateUI();
                     document.getElementById("loginBlock").style.display="none";
                     document.getElementById('bgMusic').play().catch(()=>{});
+                    updateUI();
+                } else {
+                    document.getElementById("loginStatus").innerText = "Invalid Credentials";
                 }
             }catch(e){}
         }
@@ -853,7 +878,9 @@
         const canvas = document.getElementById('wheel');
         const ctx = canvas.getContext('2d');
         const W = canvas.width, R = W / 2 - 10;
-        const centerImg = new Image();
+        
+        const overlayImg = new Image();
+        overlayImg.src = 'https://uploads.onecompiler.io/445tyzay6/44789ygta/1000037218.png';
 
         function drawWheel(rot = 0) {
             ctx.clearRect(0, 0, W, W);
@@ -870,8 +897,13 @@
                 ctx.fillStyle="#000"; ctx.font="bold 40px Arial";
                 ctx.fillText(i, R*0.6, 0); ctx.restore();
             }
+            if(overlayImg.complete) {
+                ctx.drawImage(overlayImg, -300, -300, 600, 600);
+            }
             ctx.restore();
         }
+
+        overlayImg.onload = () => drawWheel(0);
 
         function updateUI() {
             document.getElementById('coins').textContent = state.coins;
@@ -881,7 +913,6 @@
             });
         }
 
-        async function syncCoinsToDB(val) { if(state.uid) rtdb.ref("users/uid/"+state.uid).update({coins:val}); }
         function selectChip(amt) { state.selectedAmount = amt; document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active')); event.target.classList.add('active'); }
 
         window.onload = () => {
@@ -906,68 +937,61 @@
         function stopBettingRepeat() { clearInterval(betRepeatInterval); }
 
         async function PLACE_BET(n) {
-            if (state.timer > 15 && state.coins >= state.selectedAmount) {
-                state.coins -= state.selectedAmount;
-                state.bets[n] += state.selectedAmount;
-                state.betHistory.push({n, amt: state.selectedAmount});
-                updateUI();
-                syncCoinsToDB(state.coins);
-                timerDoc.update({ [`bets.${n}`]: firebase.firestore.FieldValue.increment(state.selectedAmount) });
-                document.getElementById('clickSound').play().catch(()=>{});
+            if (state.timer > 15 && state.coins >= state.selectedAmount && state.uid) {
+                const amt = state.selectedAmount;
+                const userRef = rtdb.ref("users/uid/" + state.uid + "/coins");
+                userRef.transaction((currentCoins) => {
+                    if (currentCoins >= amt) return currentCoins - amt;
+                    else return;
+                }, (error, committed) => {
+                    if (committed) {
+                        state.bets[n] += amt;
+                        state.betHistory.push({n, amt: amt});
+                        timerDoc.update({ [`bets.${n}`]: firebase.firestore.FieldValue.increment(amt) });
+                        document.getElementById('clickSound').play().catch(()=>{});
+                        updateUI();
+                    }
+                });
             }
         }
 
         async function cancelLastBet() {
-            if (state.timer > 15 && state.betHistory.length > 0) {
+            if (state.timer > 15 && state.betHistory.length > 0 && state.uid) {
                 const last = state.betHistory.pop();
-                state.coins += last.amt;
+                rtdb.ref("users/uid/" + state.uid + "/coins").transaction(c => (c || 0) + last.amt);
                 state.bets[last.n] -= last.amt;
-                updateUI();
-                syncCoinsToDB(state.coins);
                 timerDoc.update({ [`bets.${last.n}`]: firebase.firestore.FieldValue.increment(-last.amt) });
+                updateUI();
             }
         }
 
         async function cancelAllBets() {
-            if (state.timer > 15) {
+            if (state.timer > 15 && state.uid) {
                 let total = state.bets.reduce((a, b) => a + b, 0);
                 if (total > 0) {
-                    state.coins += total;
+                    rtdb.ref("users/uid/" + state.uid + "/coins").transaction(c => (c || 0) + total);
                     state.bets.fill(0);
                     state.betHistory = [];
-                    updateUI();
-                    syncCoinsToDB(state.coins);
                     timerDoc.update({ bets: {} });
+                    updateUI();
                 }
             }
         }
 
-        rtdb.ref('history').limitToLast(5).on('value', (snapshot) => {
-            const historyBox = document.getElementById('last5');
-            historyBox.innerHTML = '';
-            const data = snapshot.val();
-            if (data) {
-                Object.values(data).reverse().forEach((res, index) => {
-                    const span = document.createElement('span');
-                    span.className = 'hist-item' + (index === 0 ? ' hist-last-blink' : '');
-                    span.innerText = res;
-                    historyBox.appendChild(span);
-                });
-            }
-        });
-
         function openSendPopup() { document.getElementById("sendPopup").style.display="flex"; }
         function closeSendPopup() { document.getElementById("sendPopup").style.display="none"; }
+        
         async function sendCoins() {
-            const to = document.getElementById("sendUID").value;
+            const to = document.getElementById("sendUID").value.trim();
             const amt = Number(document.getElementById("sendAmount").value);
-            if(amt > 0 && amt <= state.coins) {
-                const snap = await rtdb.ref("users/uid/"+to).once("value");
-                if(snap.exists()) {
-                    state.coins -= amt;
-                    syncCoinsToDB(state.coins);
-                    rtdb.ref("users/uid/"+to).update({ coins: (snap.val().coins || 0) + amt });
+            if(amt > 0 && amt <= state.coins && state.uid) {
+                const receiverSnap = await rtdb.ref("users/uid/"+to).once("value");
+                if(receiverSnap.exists()) {
+                    rtdb.ref("users/uid/"+state.uid+"/coins").transaction(c => c - amt);
+                    rtdb.ref("users/uid/"+to+"/coins").transaction(c => (c || 0) + amt);
                     alert("Sent!"); closeSendPopup();
+                } else {
+                    alert("User not found!");
                 }
             }
         }
