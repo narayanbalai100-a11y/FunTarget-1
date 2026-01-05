@@ -11,7 +11,7 @@
      <script src="image_b64"></script>
     <style>
         /* =========================================
-           CSS STYLES - Jaisa aapne diya tha (No Changes)
+           CSS STYLES - Jaisa aapne diya tha
            ========================================= */
         * { 
             box-sizing: border-box; 
@@ -719,6 +719,7 @@
                     if(state.uid && !state.spinning) document.getElementById('gameStatus').textContent = "PLACE YOUR BETS";
                 }
 
+                // 8 seconds pehle logic result calculate karega
                 if (left === 8 && !state.spinStarted) calculateAndSetResult();
                 if (left <= -5) triggerNewRound();
             }, 1000);
@@ -734,22 +735,44 @@
             } catch (e) {}
         }
 
+        /* =========================================
+           FIXED LOGIC: Lowest Bet Winner
+           Sabhi users ka total Firestore se check karta hai
+           ========================================= 
+        */
         async function calculateAndSetResult() {
             state.spinStarted = true;
             const snap = await timerDoc.get();
             const d = snap.data();
             if (!d || d.status !== "BET") return;
+            
             let bets = d.bets || {};
-            let minBet = [];
             let minAmt = Infinity;
+            let winners = [];
+
+            // 0 se 9 tak check karo kis par sabse kam paisa hai
             for (let i = 0; i < 10; i++) {
-                let amt = bets[i] || 0;
-                if (amt < minAmt) { minAmt = amt; minBet = [i]; } 
-                else if (amt === minAmt) { minBet.push(i); }
+                let currentNumTotal = bets[i] || 0;
+                
+                if (currentNumTotal < minAmt) {
+                    minAmt = currentNumTotal;
+                    winners = [i]; // Naya minimum mila
+                } else if (currentNumTotal === minAmt) {
+                    winners.push(i); // Agar do numbers par barabar kam paisa ho
+                }
             }
-            let result = minBet[Math.floor(Math.random() * minBet.length)];
-            await timerDoc.update({ status: "RESULT", result: result });
-            rtdb.ref('history').push(result);
+
+            // Un numbers mein se koi ek select karo (mostly 0 total wala hi aayega)
+            let finalResult = winners[Math.floor(Math.random() * winners.length)];
+
+            // Result update karo Firestore mein
+            await timerDoc.update({ 
+                status: "RESULT", 
+                result: finalResult 
+            });
+            
+            // History mein push karo
+            rtdb.ref('history').push(finalResult);
         }
 
         function START_SPIN_ANIMATION(winnerNum) {
@@ -809,7 +832,6 @@
             updateUI();
         }
 
-        // --- REST OF THE CODE (No Changes) ---
         async function login(){
             const uid=document.getElementById("uid").value.trim();
             const pass=document.getElementById("pass").value.trim();
@@ -832,14 +854,6 @@
         const ctx = canvas.getContext('2d');
         const W = canvas.width, R = W / 2 - 10;
         const centerImg = new Image();
-                // 🔹 Base64 को file से load करें
-fetch('image.b64')
-  .then(res => res.text())
-  .then(b64 => {
-      overlayImg.src = b64.trim();
-      overlayImg.onload = () => drawWheel(0);
-  })
-  .catch(err => console.error("Image load error:", err));
 
         function drawWheel(rot = 0) {
             ctx.clearRect(0, 0, W, W);
@@ -856,7 +870,6 @@ fetch('image.b64')
                 ctx.fillStyle="#000"; ctx.font="bold 40px Arial";
                 ctx.fillText(i, R*0.6, 0); ctx.restore();
             }
-            ctx.drawImage(centerImg, -R, -R, R*2, R*2);
             ctx.restore();
         }
 
