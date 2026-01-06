@@ -187,7 +187,7 @@
         .wheel-base-image {
            position: absolute; 
            position: fixed;              
-           width: 830px;
+           width: 950px;
            height: 900px;
            border-radius: 50%;
            background-image: url('https://uploads.onecompiler.io/445tyzay6/449sn6br3/1000061003.png');
@@ -313,9 +313,10 @@
         .chip[data-amt="500"] { background: radial-gradient(circle, #f80759, #bc4e9c); }
         .chip[data-amt="1000"] { background: radial-gradient(circle, #00c6ff, #0072ff); }
 
+        /* Original wheel styling */
         .wheel-wrap { 
-            width: 400px; 
-            height: 310px; 
+            width: 370px; 
+            height: 300px; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
@@ -326,13 +327,13 @@
         .wheel-wrap::before {
             content: "";
             position: absolute;
-            width: 380px;
+            width: 370px;
             height: 280px;
             border-radius: 50%;
             border: 2px solid #ffd700;
             box-shadow: 0 0 8px #ffd700, inset 0 0 8px #000;
             background: transparent;
-            z-index: 100;
+            z-index: 0;
             pointer-events: none;
         }
 
@@ -340,51 +341,116 @@
             width: 500px; 
             height: 290px;
             border-radius: 50%; 
+            
+        }
+
+        /* New Ball Styling */
+        .ball-frame {
+            position: absolute;
+            width: 119px;
+            height: 95px;
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0 20px 25px rgba(0,0,0,0.9);
+            background-size: #ffd1700; 
+            top: 50%;
+            left: 50.2%;
+            transform: translate(-50%, -50%);
+            z-index: 0;
+        }
+
+       .spinning-ball {
+    width: 100%;
+    height: 106%;
+    background-size: 100%;   /* 🔽 छोटा */
+    /* background-size: 110%;  🔼 बड़ा */
+    background-repeat: no-repeat;
+    background-position: center;
+    
+}
+
+        .animate-now {
+            animation: rotateBall 2s steps(1) 4 forwards; 
+        }
+
+        @keyframes rotateBall {
+            0%   { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rx2mty/1000060967.jpg'); }
+            5%   { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rx2mty/1000060968.jpg'); }
+            10%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rx2mty/1000060979.jpg'); }
+            15%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rxvs4s/1000060980.jpg'); }
+            20%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rxvs4s/1000060981.jpg'); }
+            25%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rxvs4s/1000060982.jpg'); }
+            30%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rxvs4s/1000060983.jpg'); }
+            35%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rxvs4s/1000060984.jpg'); }
+            40%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rxvs4s/1000060985.jpg'); }
+            45%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rxvs4s/1000060986.jpg'); }
+            50%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rxvs4s/1000060938.jpg'); }
+            55%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rz476r/1000060970.jpg'); }
+            60%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rz476r/1000060971.jpg'); }
+            65%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rzzrfb/1000060941.jpg'); }
+            70%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rzzrfb/1000060901.jpg'); }
+            75%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449s2ey5g/1000060902.jpg'); }
+            80%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449s2ey5g/1000060944.jpg'); }
+            85%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449s2ey5g/1000060945.jpg'); }
+            90%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449s2ey5g/1000060946.jpg'); }
+            95%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449s2sj5r/1000060947.jpg'); }
+            100% { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rx2mty/1000060967.jpg'); }
+        }
+
+        .ball-frame::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 50%;
+            height:50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.15), transparent 0%);
+            pointer-events: none;
         }
 
         .pointer-overlay { 
             position: absolute; 
-            top: -30px; 
+            top: -20px; 
             left: 50%; 
             transform: translateX(-50%); 
-            width: 100px; 
-            height: 100px; 
-            background-image: url('https://uploads.onecompiler.io/445tyzay6/447a3r3jd/1000038035.png'); 
+            width: 80px; 
+            height: 80px; 
+            background-image: url('https://uploads.onecompiler.io/445tyzay6/449ttb5ur/1000061114.png'); 
             background-size: contain; 
             z-index: 40; 
         }
 
         .pointer-top-image { 
             position: absolute; 
-            top: -30px; 
+            top: -20px; 
             left: 50%; 
-            transform: translateX(-50%); 
-            width: 100px; 
-            height: 100px; 
-            background-image: url('https://uploads.onecompiler.io/445tyzay6/4479yvh72/1000038029.png'); 
+            transform: translateX(-51.9%); 
+            width: 80px; 
+            height: 80px; 
+            background-image: url('https://uploads.onecompiler.io/445tyzay6/449ttb5ur/1000061113.png'); 
             background-size: contain; 
             background-repeat: no-repeat; 
             background-position: center; 
-            z-index: 0; 
+            z-index: 30; 
             pointer-events: none; 
         }
 
-        .pointer-overlay.jiggle { animation: blink-pointer 0.15s steps(1) infinite; }
+        .pointer-overlay.jiggle { animation: blink-pointer 0.50s steps(1) infinite; }
         @keyframes blink-pointer { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
         .slider-container { 
-            width: 122px; 
-            height: 87px; 
+            width: 110px; 
+            height: 90px; 
             position: absolute; 
-            top: 49%; 
-            left: 50%; 
+            top: 50%; 
+            left: 50.55%; 
             transform: translate(-50%, -47%); 
             overflow: hidden; 
             border-radius: 50%; 
-            background: #FFD700;
-            box-shadow: 0 0 15px rgba(255,215,0,0.8), inset 0 0 15px rgba(0,0,0,0.9);
-            z-index: 100;
-            border: 2.5px solid #ffd700;
+            background: ;
+            box-shadow: 0 0 0px rgba(255,215,0,0.0), inset 0 0 5px rgba(0,0,0,0.10);
+            z-index: 0;
+            border: 
         }
         
         .slides-inner { 
@@ -467,25 +533,12 @@
         }
 
         .status-bar { 
-            background: rgba(27, 27, 27, 0.85); 
-            border-radius: 60px; 
-            padding: 8px; 
-            text-align: center; 
-            color: #eee; 
-            font-weight: 800; 
-            margin: 0px;
-            font-size: 14px;
-            background: linear-gradient(145deg, #000, #333), linear-gradient(145deg, #FFD700, #b8860b);
-            background-blend-mode: overlay;
-            box-shadow: 0 0 10px rgba(255,215,0,0.8), inset 0 0 8px rgba(0,0,0,0.9);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            
+           
         }
 
         @keyframes result-blink {
-            0%, 100% { background: linear-gradient(145deg, #000, #333), linear-gradient(145deg, #FFD700, #b8860b); color: #1b1300; }
-            50% { background: #0072ff; color: #fff; box-shadow: 0 0 20px #0072ff; }
+          
         }
         .blink-blue { animation: result-blink 0.4s ease-in-out 10; }
 
@@ -561,20 +614,19 @@
                         <div class="pointer-overlay" id="ptrOverlay"></div>
                         <div class="pointer-top-image"></div>
                 
+                        <!-- Original slider container -->
                         <div class="slider-container">
                             <div class="slides-inner" id="slider">
-                                <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/448mfppru/1000053482.png"></div>
-                                <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/448mfppru/1000053482.png"></div>
-                                <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/448mfppru/1000053482.png"></div>
-                                <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/448mfppru/1000053482.png"></div>
-                                <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/448mfppru/1000053482.png"></div>
-                                <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/448mfppru/1000053482.png"></div>
-                                <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/448mfppru/1000053482.png"></div>
-                                <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/448mfppru/1000053482.png"></div>
-                                <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/448mfppru/1000053482.png"></div>
-                                <div class="slide-item"><img class="slide" src="https://uploads.onecompiler.io/445tyzay6/448mfppru/1000053482.png"></div>
+        
+             
                             </div>
                         </div>
+                        
+                        <!-- New Ball System (positioned in center) -->
+                        <div class="ball-frame">
+                            <div id="ball" class="spinning-ball" style="background-image: url('https://uploads.onecompiler.io/445tyzay6/449rx2mty/1000060967.jpg');"></div>
+                        </div>
+                        
                         <canvas id="wheel" width="600" height="600"></canvas>
                     </div>
                 </div>
@@ -640,6 +692,15 @@
         const db = firebase.firestore();
         const rtdb = firebase.database();
         const timerDoc = db.collection("settings").doc("timer");
+
+        // New ball system variables
+        const ballFinalImages = [
+            'https://uploads.onecompiler.io/445tyzay6/449rx2mty/1000060967.jpg',
+            'https://uploads.onecompiler.io/445tyzay6/449rxvs4s/1000060982.jpg',
+            'https://uploads.onecompiler.io/445tyzay6/449rxvs4s/1000060938.jpg',
+            'https://uploads.onecompiler.io/445tyzay6/449s2ey5g/1000060902.jpg'
+        ];
+        let ballCurrentIndex = 0;
 
         const state = {
             uid: null,
@@ -789,7 +850,13 @@
             document.getElementById('gameStatus').textContent = "SPINNING...";
             document.getElementById('ptrOverlay').classList.add('jiggle');
             document.getElementById('spinSound').play().catch(()=>{});
-            runSpinAnimation(winnerNum);
+            
+            // Start both animations
+            runSpinAnimation(winnerNum); // Original wheel animation
+            
+            // Start new ball animation
+            const ball = document.getElementById('ball');
+            ball.classList.add('animate-now');
         }
 
         function runSpinAnimation(winnerNum) {
@@ -814,6 +881,12 @@
             state.spinning = false;
             document.getElementById('spinSound').pause();
             document.getElementById('ptrOverlay').classList.remove('jiggle');
+            
+            // Stop ball animation
+            const ball = document.getElementById('ball');
+            ball.classList.remove('animate-now');
+            ballCurrentIndex = (ballCurrentIndex + 1) % ballFinalImages.length;
+            ball.style.backgroundImage = `url('${ballFinalImages[ballCurrentIndex]}')`;
             
             document.getElementById('winner').textContent = result;
             refreshHistoryUI();
@@ -846,6 +919,12 @@
             document.getElementById('winner').textContent = "-";
             document.getElementById('slider').style.transition = "none";
             document.getElementById('slider').style.transform = "translateX(0)";
+            
+            // Reset ball
+            const ball = document.getElementById('ball');
+            ball.classList.remove('animate-now');
+            ball.style.backgroundImage = `url('${ballFinalImages[0]}')`;
+            
             document.querySelectorAll('.num').forEach(el => el.classList.remove('blink-blue'));
             updateUI();
         }
@@ -882,7 +961,7 @@
         const W = canvas.width, R = W / 2 - 10;
         
         const overlayImg = new Image();
-        overlayImg.src = 'https://uploads.onecompiler.io/445tyzay6/44789ygta/1000037218.png';
+        overlayImg.src = 'https://uploads.onecompiler.io/445tyzay6/449ttb5ur/1000061105.png';
 
         function drawWheel(rot = 0) {
             ctx.clearRect(0, 0, W, W);
@@ -897,7 +976,7 @@
                 ctx.save();
                 ctx.rotate((i*Math.PI*2/10)+(Math.PI/10));
                 ctx.fillStyle="#000"; ctx.font="bold 40px Arial";
-                ctx.fillText(i, R*0.6, 0); ctx.restore();
+                ctx.fillText(i, R*0.6, 6); ctx.restore();
             }
             if(overlayImg.complete) {
                 ctx.drawImage(overlayImg, -300, -300, 600, 600);
@@ -905,7 +984,7 @@
             ctx.restore();
         }
 
-        overlayImg.onload = () => drawWheel(0);
+        overlayImg.onload = () => drawWheel(100);
 
         function updateUI() {
             document.getElementById('coins').textContent = state.coins;
@@ -915,7 +994,11 @@
             });
         }
 
-        function selectChip(amt) { state.selectedAmount = amt; document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active')); event.target.classList.add('active'); }
+        function selectChip(amt) { 
+            state.selectedAmount = amt; 
+            document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active')); 
+            event.target.classList.add('active'); 
+        }
 
         window.onload = () => {
             const row = document.getElementById('betRow');
@@ -1000,3 +1083,71 @@
     </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+<script>
+(function () {
+    const ballFrame = document.querySelector('.ball-frame');
+
+    let isDragging = false;
+    let startX = 0;
+    let currentX = 0;
+
+    const MAX_DRAG = 120; // जितना चाहें उतना लिमिट
+
+    function getX(e) {
+        return e.touches ? e.touches[0].clientX : e.clientX;
+    }
+
+    function startDrag(e) {
+        if (state.spinning) return; // spin के दौरान drag बंद
+        isDragging = true;
+        startX = getX(e);
+    }
+
+    function onDrag(e) {
+        if (!isDragging || state.spinning) return;
+
+        let x = getX(e);
+        let delta = x - startX;
+        startX = x;
+
+        currentX += delta;
+        currentX = Math.max(-MAX_DRAG, Math.min(MAX_DRAG, currentX));
+
+        ballFrame.style.transform =
+            `translate(calc(-50% + ${currentX}px), -50%)`;
+    }
+
+    function stopDrag() {
+        if (!isDragging) return;
+        isDragging = false;
+
+        // चाहें तो center में वापस आए
+        ballFrame.style.transition = 'transform 0.25s ease';
+        ballFrame.style.transform = 'translate(-50%, -50%)';
+        currentX = 0;
+
+        setTimeout(() => {
+            ballFrame.style.transition = '';
+        }, 300);
+    }
+
+    ballFrame.addEventListener('mousedown', startDrag);
+    ballFrame.addEventListener('touchstart', startDrag, { passive: true });
+
+    document.addEventListener('mousemove', onDrag);
+    document.addEventListener('touchmove', onDrag, { passive: true });
+
+    document.addEventListener('mouseup', stopDrag);
+    document.addEventListener('touchend', stopDrag);
+})();
+</script> 
