@@ -231,7 +231,7 @@
                 filter: brightness(1.5);
             }
             to { 
-                opacity: 0.3; 
+                opacity: 0.8; 
                 transform: scale(1) rotate(20deg); 
                 filter: brightness(1);
             }
@@ -410,30 +410,48 @@
             border-radius: 50%; 
         }
 
-        .ball-frame {
-            position: absolute;
-            width: 105px;
-            height: 100px;
-            border-radius: 50%;
-            overflow: hidden;
-            box-shadow: 0 20px 25px rgba(0,0,0,0.0);
-            top: 50%;
-            left: 50.1%;
-            transform: translate(-50%, -50%);
-            z-index: 100;
-        }
+       .ball-frame {
+    /* Ball ko screen par ek jagah lock karne ke liye */
+    position: absolute;
+    width: 105px;
+    height: 100px;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 20px 25px rgba(0,0,0,0.0);
+    top: 50%;
+    left: 50.1%;
+    transform: translate(-50%, -50%);
+    z-index: 100;
 
-        .ning-ball {
-            width: 100%;
-            height: 100%;
-            background-size: 100%;
-            background-repeat: no-repeat;
-            background-position: center;
-        }
+    /* Isse piche ka background nahi dikhega */
+    background-color: #ffffff; 
 
-        .animate-now {
-            animation: rotateBall 1.5s steps(1) 4 forwards; 
-        }
+    /* In do lines se ball ko touch karne par wo hilegi nahi */
+    pointer-events: none; /* Touch aur Mouse clicks ko disable karta hai */
+    user-select: none;    /* Text ya image selection ko rokta hai */
+    
+    /* Touch devices par drag hone se rokne ke liye */
+    touch-action: none;
+}
+
+.ning-ball {
+    width: 100%;
+    height: 101%;
+    background-size: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: inherit;
+    
+    /* Image ko drag hone se rokne ke liye */
+    -webkit-user-drag: none;
+}
+
+.animate-now {
+    /* Animation rotate hote waqt bhi ball apni jagah locked rahegi */
+    animation: rotateBall 1s steps(2) 8 forwards; 
+}
+
+
 
         @keyframes rotateBall {
             0%   { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rx2mty/1000060967.jpg'); }
@@ -461,11 +479,11 @@
 
         .pointer-overlay { 
             position: absolute; 
-            top: -21px; 
+            top: -13px; 
             left: 51%; 
             transform: translateX(-50%); 
-            width: 70px; 
-            height: 70px; 
+            width: 65px; 
+            height: 65px; 
             background-image: url('https://uploads.onecompiler.io/445tyzay6/449ttb5ur/1000061114.png'); 
             background-size: contain; 
             background-repeat: no-repeat;
@@ -474,11 +492,11 @@
 
         .pointer-top-image { 
             position: absolute; 
-            top: -21px; 
+            top: -13px; 
             left: 51%; 
             transform: translateX(-51.9%); 
-            width: 70px; 
-            height: 70px; 
+            width: 65px; 
+            height: 65px; 
             background-image: url('https://uploads.onecompiler.io/445tyzay6/449ttb5ur/1000061113.png'); 
             background-size: contain; 
             background-repeat: no-repeat; 
@@ -487,7 +505,7 @@
             pointer-events: none; 
         }
 
-        .pointer-overlay.jiggle { animation: blink-pointer 0.50s steps(3) infinite; }
+        .pointer-overlay.jiggle { animation: blink-pointer 0.50s steps(1) infinite; }
         @keyframes blink-pointer { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
         .slider-container { 
@@ -548,7 +566,7 @@
             background-blend-mode: overlay;
             box-shadow: 0 0 15px rgba(255,215,0,0.8), inset 0 0 15px rgba(0,0,0,0.95);
             margin: 0 auto;
-                 z-index: 1100;         
+                 z-index: 1000;         
         }
 
         .number-box .bet-placed { 
@@ -568,21 +586,21 @@
             align-items: center;
             justify-content: center;
             min-width: 40px;
-                 z-index: 1100;         
+                 z-index: 1000;         
         }
         
        
         .status-bar { 
             background: rgba(27, 27, 27, 0.85); 
-            border-radius: 6px; 
+            border-radius: 1px; 
             padding: 1px; 
             text-align: center; 
             color: #eee; 
-            font-weight: 100; 
+            font-weight: 800; 
             margin-top: 0px; 
             background: linear-gradient(145deg, #000, #333), linear-gradient(145deg, #FFD700, #b8860b);
             background-blend-mode: overlay;
-            box-shadow: 0 0 15px rgba(255,215,0,0.8), inset 0 0 10px rgba(0,0,0,0.9);
+            box-shadow: 0 0 5px rgba(255,215,0,0.8), inset 0 0 10px rgba(0,0,0,0.9);
             display: flex;
             align-items: center;
             justify-content: center;
