@@ -76,7 +76,7 @@ body, html { width: 100%; height: 100%; background-color: #000; overflow: hidden
 .points-label { color: var(--gold-orange); margin-left: 21%; }
 .dynamic-val { color: var(--pure-white); margin-left: 10px; }
 
-.games-title { position: absolute; top: 10.5%; right: 15%; color: var(--neon-green); font-size: 3.2vw; font-weight: 900; }
+.games-title { position: absolute; top: 7.5%; right: 15%; color: var(--neon-green); font-size: 3.2vw; font-weight: 900; }
 
 /* FUN TARGET BUTTON */
 .fun-target-gif-container {
@@ -99,20 +99,20 @@ body, html { width: 100%; height: 100%; background-color: #000; overflow: hidden
 .child-reg-text { color: var(--neon-green); font-size: 2.1vw; font-weight: bold; line-height: 1.1; text-transform: uppercase; }
 
 .panel-action-bar {
-  position: absolute; top: 63.2%; width: 100%; display: flex; justify-content: space-between;
-  padding: 0 5% 0 3.5%; font-size: 2.45vw;
+  position: absolute; top: 61.5%; width: 80%; display: flex; justify-content: space-between;
+  padding: 0 1% 0 10.5%; font-size: 2vw;
 }
 .label-green { color: var(--neon-green); font-style: italic; font-weight: bold; }
 .btn-orange { color: var(--gold-orange); cursor: pointer; font-weight: bold; }
 
-.response-msg-home { position: absolute; bottom: 5.5%; left: 20.5%; color: var(--neon-green); font-size: 1.4vw; font-weight: bold; }
+.response-msg-home { position: absolute; bottom: 5.5%; left: 2.5%; color: var(--neon-green); font-size: 1.4vw; font-weight: bold; }
 
 /* Footer */
 .footer-links {
   position: absolute; bottom: 5.1%; width: 90%; display: flex; justify-content: space-between; padding: 0 3%;
 }
 .refresh-action { color: var(--neon-green); font-size: 1.5vw; cursor: pointer; font-weight: bold; }
-.logout-action { color: var(--logout-red); font-size: 1.5vw; cursor: pointer; font-weight: bold; z-index: 200; }
+.logout-action { color: var(--logout-red); font-size: 2.5vw; cursor: pointer; font-weight: bold; z-index: 200; }
 
 /* Modal */
 #transferModal {
@@ -584,6 +584,7 @@ canvas#wheel {
   text-align: center; 
   position: relative; 
   cursor: pointer; 
+  z-index: 999999
 }
 
 .number-box .num { 
@@ -600,7 +601,7 @@ canvas#wheel {
   background-blend-mode: overlay;
   box-shadow: 0 0 15px rgba(255,215,0,0.8), inset 0 0 15px rgba(0,0,0,0.95);
   margin: 0 auto;
-       z-index: 1000;         
+       z-index: 999999;         
 }
 
 .number-box .bet-placed { 
@@ -620,7 +621,7 @@ canvas#wheel {
   align-items: center;
   justify-content: center;
   min-width: 40px;
-       z-index: 1000;         
+       z-index: 999999;         
 }
 
 .status-bar { 
