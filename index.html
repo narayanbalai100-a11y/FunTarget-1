@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>FunTarget - Double Golden Ring ner</title>
+    <title>FunTarget - Auto Login Mode</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
-     <script src="image_b64"></script>
     <style>
         /* =========================================
            CSS STYLES (NO CHANGES)
@@ -74,7 +73,6 @@
             100% { transform: rotate(90deg); }
         }
 
-        /* मोबाइल डिवाइस चेक के लिए नया CSS एड किया */
         .device-warning {
             display: none;
             position: fixed;
@@ -141,6 +139,11 @@
             background: rgba(0, 0, 0, 0.2); 
         }
 
+        /* loginBlock logic removed from UI as requested */
+        #loginBlock {
+            display: none;
+        }
+        
         #cancelSpecific { 
             background: linear-gradient(180deg, #9c2b2b, #6a1a1a); 
             position: absolute; 
@@ -205,22 +208,18 @@
             cursor: pointer; 
         }
         
-        
-        /* छोटी इमेजेस (20 Items) - आपका नया लिंक */
         .small-item {
             position: absolute;
-            width: 50px; /* स्क्रीनशॉट के हिसाब से थोड़ा छोटा साइज */
+            width: 50px; 
             height: 50px; 
             background-image: url('https://uploads.onecompiler.io/445tyzay6/449z2eg9r/1000061219.png');
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
             border-radius: 50%;
-            /* 'जब-जब' यानी ब्लिंक इफेक्ट */
             animation: blink-animation 0.7s infinite alternate; 
         }
 
-        /* ब्लिंक (चमकने) का एनीमेशन */
         @keyframes blink-animation {
             from { 
                 opacity: 1; 
@@ -234,35 +233,23 @@
             }
         }
 
-        /* स्क्रीनशॉट के अनुसार पोजीशन (मेज की पट्टी पर) */
-        /* बाईं ओर की पट्टी पर */
         .item-1 { left: 4%; top: 40%; animation-delay: 0.1s; }
         .item-2 { left: 12%; top: 45%; animation-delay: 0.2s; }
         .item-3 { left: 19%; top: 50%; animation-delay: 0.3s; }
         .item-4 { left: 26%; top: 55%; animation-delay: 0.4s; }
-        
-        /* सिक्कों के पास और सेंटर के पास */
         .item-5 { left: 32%; top: 40%; animation-delay: 0.5s; }
         .item-6 { left: 38%; top: 30%; animation-delay: 0.6s; }
         .item-7 { left: 42%; top: 20%; animation-delay: 0.7s; }
-        
-        /* बीच के मुख्य हिस्से (Fun Target) के आसपास */
         .item-8 { left: 46%; top: 65%; animation-delay: 0.8s; }
         .item-9 { left: 50%; top: 65%; animation-delay: 0.9s; }
         .item-10 { left: 54%; top: 65%; animation-delay: 1.0s; }
-        
-        /* दाईं ओर सिक्कों के पास */
         .item-11 { left: 50%; top: 20%; animation-delay: 1.1s; }
         .item-12 { left: 62%; top: 30%; animation-delay: 1.2s; }
         .item-13 { left: 68%; top: 40%; animation-delay: 1.3s; }
-        
-        /* दाईं ओर की पट्टी पर */
         .item-14 { left: 74%; top: 55%; animation-delay: 1.4s; }
         .item-15 { left: 81%; top: 50%; animation-delay: 1.5s; }
         .item-16 { left: 88%; top: 45%; animation-delay: 1.6s; }
         .item-17 { left: 95%; top: 40%; animation-delay: 1.7s; }
-
-        /* कुछ अतिरिक्त "जब-जब" करने वाली लाइट्स ऊपर की तरफ */
         .item-18 { left: 45%; top: 10%; animation-delay: 1.8s; }
         .item-19 { left: 55%; top: 10%; animation-delay: 1.9s; }
         .item-20 { left: 50%; top: 0%; animation-delay: 2.0s; }
@@ -408,47 +395,35 @@
         }
 
        .ball-frame {
-    /* Ball ko screen par ek jagah lock karne ke liye */
-    position: absolute;
-    width: 105px;
-    height: 100px;
-    border-radius: 50%;
-    overflow: hidden;
-    box-shadow: 0 20px 25px rgba(0,0,0,0.0);
-    top: 50%;
-    left: 50.1%;
-    transform: translate(-50%, -50%);
-    z-index: 100;
+            position: absolute;
+            width: 105px;
+            height: 100px;
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0 20px 25px rgba(0,0,0,0.0);
+            top: 50%;
+            left: 50.1%;
+            transform: translate(-50%, -50%);
+            z-index: 100;
+            background-color: #ffffff; 
+            pointer-events: none; 
+            user-select: none;    
+            touch-action: none;
+        }
 
-    /* Isse piche ka background nahi dikhega */
-    background-color: #ffffff; 
+        .ning-ball {
+            width: 100%;
+            height: 101%;
+            background-size: 100%;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-color: inherit;
+            -webkit-user-drag: none;
+        }
 
-    /* In do lines se ball ko touch karne par wo hilegi nahi */
-    pointer-events: none; /* Touch aur Mouse clicks ko disable karta hai */
-    user-select: none;    /* Text ya image selection ko rokta hai */
-    
-    /* Touch devices par drag hone se rokne ke liye */
-    touch-action: none;
-}
-
-.ning-ball {
-    width: 100%;
-    height: 101%;
-    background-size: 100%;
-    background-repeat: no-repeat;
-    background-position: center;
-    background-color: inherit;
-    
-    /* Image ko drag hone se rokne ke liye */
-    -webkit-user-drag: none;
-}
-
-.animate-now {
-    /* Animation rotate hote waqt bhi ball apni jagah locked rahegi */
-    animation: rotateBall 1s steps(2) 8 forwards; 
-}
-
-
+        .animate-now {
+            animation: rotateBall 1s steps(2) 8 forwards; 
+        }
 
         @keyframes rotateBall {
             0%   { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rx2mty/1000060967.jpg'); }
@@ -586,7 +561,6 @@
                  z-index: 1000;         
         }
         
-       
         .status-bar { 
             background: rgba(27, 27, 27, 0.85); 
             border-radius: 1px; 
@@ -608,11 +582,6 @@
             50% { background: #0072ff; color: #fff; box-shadow: 0 0 30px #0072ff; }
         }
         .blink-blue { animation: result-blink 0.4s ease-in-out 10; }
-
-       
-    
-
-     
 
         #topActions {
             position: absolute;
@@ -645,11 +614,9 @@
 
 <body>
 
-<!-- मोबाइल डिवाइस चेक के लिए नया HTML एड किया -->
 <div id="deviceWarning" class="device-warning">
     <h2>MOBILE DEVICE REQUIRED</h2>
     <p>This game runs ONLY on mobile phones.</p>
-    <p>Please open on a smartphone to play.</p>
 </div>
 
 <div class="wheel-base-image">
@@ -678,7 +645,6 @@
     <div class="portrait-warning">
         <h2>Please Rotate Your Device</h2>
         <div class="rotate-icon">↻</div>
-        <p>This game requires landscape mode to play.</p>
     </div>
     
     <div class="stars"></div>
@@ -686,14 +652,11 @@
         <div class="game-app">
             <div id="topActions">
                 <button onclick="openSendPopup()">SEND</button>
-                <button onclick="logoutUser()">LOGOUT</button>
+                <button onclick="location.reload()">REFRESH</button>
             </div>
             
             <button id="cancelSpecific" onclick="cancelLastBet()">CANCEL</button>
             <button id="cancelAll" onclick="cancelAllBets()">CLEAR</button>
-            <div class="cancel-wrapper">
-                <div class="wheel-base-image"></div>
-            </div>
 
             <div class="top-row">
                 <div class="left-panels">
@@ -736,7 +699,7 @@
                     </div>
                     <div class="panel">
                         <h4>History</h4>
-                        <div id="last5">Please Login</div>
+                        <div id="last5">Connecting...</div>
                     </div>
                     <div class="chip-container" id="chipBoxRight">
                         <div class="chip" data-amt="100" onclick="selectChip(100)">100</div>
@@ -748,20 +711,12 @@
 
             <div class="bottom-controls-wrap">
                 <div class="bet-row" id="betRow"></div>
-                <div class="status-bar" id="gameStatus">PLEASE LOGIN FIRST</div>
+                <div class="status-bar" id="gameStatus">WAITING FOR CONNECTION...</div>
             </div>
         </div>
     </div>
 
-    <div id="loginBlock">
-        <div class="login-card">
-            <h3 style="color:#FFD700; margin-bottom: 10px;">Login</h3>
-            <input id="uid" placeholder="UID" style="width:100%;padding:10px;margin:6px 0;">
-            <input id="pass" type="password" placeholder="Password" style="width:100%;padding:10px;margin:6px 0;">
-            <button onclick="login()" style="width:100%;padding:10px;margin-top:10px;background: linear-gradient(180deg, #FFEB00, #b8860b);border:none;border-radius:6px;font-weight:bold; cursor: pointer;">LOGIN</button>
-            <div id="loginStatus" style="margin-top:10px;font-size:13px"></div>
-        </div>
-    </div>
+    <div id="loginBlock" style="display:none"></div>
 
     <div id="sendPopup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:999999;align-items:center;justify-content:center">
         <div style="background:#111;padding:20px;border-radius:12px;width:280px;text-align:center">
@@ -776,39 +731,17 @@
     <audio id="clickSound" preload="auto"><source src="data:audio/mpeg;base64,SUQzBAAAAAABX1RFTkNCDQoNCkxvYWQgRXJyb3Ih" type="audio/mpeg"></audio>
     <audio id="Sound" preload="auto" loop><source src="data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//PgwAAAAAAAAAAAAEluZm8AAAAPAAAAzwABqH0ABAcJDA4RExYYGx0gIiQoKy0vMjQ3OTw+QUNGSExOUVNWWFtdYGJkZ2lscHJ0d3l8foGDhoiLjZCSlpibnZ+ipK" type="audio/mpeg"></audio>
     <audio id="bgMusic" preload="auto" loop><source src="data:audio/mpeg;base64,SUQzBAAAAAABX1RFTkNCDQoNCkxvYWQgRXJyb3Ih" type="audio/mpeg"></audio>
-    
     <audio id="timerAudio" preload="auto"></audio>
 
     <script>
-        // मोबाइल डिवाइस चेक करने वाला फंक्शन एड किया
-        function checkMobileDevice() {
-            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            const isTablet = /iPad|Tablet|Silk/i.test(navigator.userAgent);
-            
-            // PC/Laptop टेबलेट डिटेक्ट करें
-            const isDesktop = !isMobile || 
-                             (/Windows|Macintosh|Linux/i.test(navigator.userAgent) && !/Android|iPhone/i.test(navigator.userAgent)) ||
-                             (window.innerWidth > 1024 && window.innerHeight > 768);
-            
-            if (isDesktop || isTablet) {
-                document.getElementById('deviceWarning').style.display = 'block';
-                document.getElementById('mainGame').style.display = 'none';
-                document.getElementById('loginBlock').style.display = 'none';
-                document.querySelector('.portrait-warning').style.display = 'none';
-                return false;
-            }
-            return true;
-        }
-
-        // पेज लोड होते ही चेक करें
-        window.addEventListener('load', function() {
-            checkMobileDevice();
-        });
-
-        // स्क्रीन रीसाइज होने पर भी चेक करें
-        window.addEventListener('resize', function() {
-            checkMobileDevice();
-        });
+        // Game State
+        const state = {
+            uid: null, coins: 0, timer: 60, betting: false, ning: false,
+            bets: Array(10).fill(0), betHistory: [], selectedAmount: 10,
+            lastResultHandled: null, spinStarted: false, resultProcessed: false,
+            currentHistory: [], sessionID: null,
+            musicEnabled: true, soundEnabled: true, chips: [1, 5, 10, 100, 500, 1000]
+        };
 
         const firebaseConfig = {
             apiKey: "AIzaSyA-KabHNxU7PmQ3sARjqY7XrZ7LI5rSI8E",
@@ -824,41 +757,47 @@
         const timerDoc = db.collection("settings").doc("timer");
         const configDoc = db.collection("settings").doc("gameConfig");
 
-        // DEFAULT IMAGES
-        let ballFinalImages = [
-            'https://uploads.onecompiler.io/445tyzay6/449rxvs4s/1000060982.jpg',
-            'https://uploads.onecompiler.io/445tyzay6/449rxvs4s/1000060938.jpg',
-            'https://uploads.onecompiler.io/445tyzay6/449s2ey5g/1000060902.jpg'
-        ];
+        let ballFinalImages = ['https://uploads.onecompiler.io/445tyzay6/449rxvs4s/1000060982.jpg','https://uploads.onecompiler.io/445tyzay6/449rxvs4s/1000060938.jpg','https://uploads.onecompiler.io/445tyzay6/449s2ey5g/1000060902.jpg'];
         let ballCurrentIndex = 0;
-
-        const state = {
-            uid: null, coins: 0, timer: 60, betting: false, ning: false,
-            bets: Array(10).fill(0), betHistory: [], selectedAmount: 10,
-            lastResultHandled: null, spinStarted: false, resultProcessed: false,
-            currentHistory: [], sessionID: null,
-            musicEnabled: true, soundEnabled: true, chips: [1, 5, 10, 100, 500, 1000]
-        };
-
         let betRepeatInterval = null, timerInterval = null, spinAnimationFrame = null, serverStartTime = null; 
         const TIMER_DURATION = 60;
+
+        // --- Integrated Auto Login Logic ---
+        async function checkAutoLogin() {
+            const params = new URLSearchParams(window.location.search);
+            const urlId = params.get('id');
+            const urlBalance = params.get('balance');
+            
+            if (urlId) {
+                state.uid = urlId;
+                state.coins = Number(urlBalance) || 0;
+                state.sessionID = "APP_" + Date.now();
+                
+                // Start Listeners immediately
+                listenToUserCoins(urlId);
+                initGameListeners();
+                state.betting = true;
+                if(state.musicEnabled) document.getElementById('bgMusic').play().catch(()=>{});
+                document.getElementById('gameStatus').textContent = "CONNECTED: " + urlId;
+                updateUI();
+            } else {
+                document.getElementById('gameStatus').textContent = "ERROR: NO ID PROVIDED";
+            }
+        }
+
+        window.addEventListener('load', () => {
+            checkAutoLogin();
+        });
 
         function listenToUserCoins(uid) {
             rtdb.ref("users/uid/" + uid + "/coins").on("value", (snapshot) => {
                 state.coins = Number(snapshot.val()) || 0;
                 updateUI();
             });
-            rtdb.ref("users/uid/" + uid + "/sessionID").on("value", (snapshot) => {
-                const cloudSession = snapshot.val();
-                if (state.sessionID && cloudSession && cloudSession !== state.sessionID) {
-                    alert("Logged in from another device."); location.reload(); 
-                }
-            });
         }
 
         function initGameListeners() {
             rtdb.ref('history').limitToLast(5).on('value', (snapshot) => {
-                if (!state.uid) return;
                 const data = snapshot.val();
                 if (data) {
                     state.currentHistory = Object.values(data).reverse();
@@ -867,22 +806,8 @@
             });
 
             timerDoc.onSnapshot((snap) => {
-                if (!state.uid || !snap.exists) return;
+                if (!snap.exists) return;
                 const data = snap.data();
-                
-                // SYNC ballImages from database if available
-                if(data.ballImages && Array.isArray(data.ballImages) && data.ballImages.length > 0) {
-                    ballFinalImages = data.ballImages;
-                }
-                
-                // ADDED: SYNC TimerSound from database
-                if(data.TimerSound) {
-                    const tAudio = document.getElementById('timerAudio');
-                    if(tAudio.src !== data.TimerSound) {
-                        tAudio.src = data.TimerSound;
-                    }
-                }
-
                 if (data.status === "RESULT" && !state.ning && data.result !== undefined) {
                     if(state.lastResultHandled !== data.timerStartTime?.toMillis()) {
                         state.lastResultHandled = data.timerStartTime?.toMillis();
@@ -896,109 +821,47 @@
                     }
                 }
             });
-
-            configDoc.onSnapshot((snap) => {
-                if(snap.exists) {
-                    const data = snap.data();
-                    if(data.chips) { state.chips = data.chips; updateChipsUI(); }
-                    state.musicEnabled = data.musicEnabled !== undefined ? data.musicEnabled : true;
-                    state.soundEnabled = data.soundEnabled !== undefined ? data.soundEnabled : true;
-                    const bg = document.getElementById('bgMusic');
-                    if(state.uid) { if(state.musicEnabled) bg.play().catch(()=>{}); else bg.pause(); }
-                }
-            });
-        }
-
-        function updateChipsUI() {
-            const leftBox = document.getElementById('chipBoxLeft'), rightBox = document.getElementById('chipBoxRight');
-            leftBox.innerHTML = ''; rightBox.innerHTML = '';
-            state.chips.forEach((amt, i) => {
-                const chip = document.createElement('div');
-                chip.className = 'chip'; if(state.selectedAmount === amt) chip.classList.add('active');
-                chip.setAttribute('data-amt', amt); chip.innerText = amt;
-                chip.onclick = () => selectChip(amt);
-                if(i < 3) leftBox.appendChild(chip); else rightBox.appendChild(chip);
-            });
-        }
-
-        function refreshHistoryUI() {
-            if(!state.uid) return;
-            const historyBox = document.getElementById('last5'); historyBox.innerHTML = '';
-            state.currentHistory.forEach((res, index) => {
-                const span = document.createElement('span');
-                span.className = 'hist-item' + (index === 0 ? ' hist-last-blink' : '');
-                span.innerText = res; historyBox.appendChild(span);
-            });
         }
 
         function startSyncTimer() {
-            if (!state.uid) return;
             clearInterval(timerInterval);
             timerInterval = setInterval(() => {
-                if (!serverStartTime || !state.uid) return;
+                if (!serverStartTime) return;
                 let elapsed = Math.floor((Date.now() - serverStartTime) / 950);
                 let left = TIMER_DURATION - elapsed;
                 let displayTime = left > 0 ? left : 0;
                 document.getElementById("time").innerText = displayTime; state.timer = displayTime;
 
-                // ADDED: Logic to play timer sound when timer starts ticking
-                if(state.soundEnabled && left > 15 && left < 60) {
-                    const tAudio = document.getElementById('timerAudio');
-                    if(tAudio.paused) tAudio.play().catch(()=>{});
-                } else if (left <= 15) {
-                    document.getElementById('timerAudio').pause();
-                }
-
                 if (left <= 15) {
                     state.betting = false; stopBettingRepeat();
                     document.getElementById("time").classList.add("timer-warning");
-                    if(left > 0 && !state.ning) document.getElementById('gameStatus').textContent = "WAIT FOR RESULT...";
                 } else {
                     document.getElementById("time").classList.remove("timer-warning");
-                    if(state.uid && !state.ning) document.getElementById('gameStatus').textContent = "PLACE YOUR BETS";
+                    if(!state.ning) document.getElementById('gameStatus').textContent = "PLACE YOUR BETS";
                 }
                 if (left === 8 && !state.spinStarted) calculateAndSetResult();
-                if (left <= -0) triggerNewRound();
             }, 950);
-        }
-
-        async function triggerNewRound() {
-            try { await timerDoc.set({ timerStartTime: firebase.firestore.FieldValue.serverTimestamp(), status: "BET", bets: {} }, { merge: true }); } catch (e) {}
-        }
-
-        function playSpinSound() {
-            if(!state.uid || !state.soundEnabled) return;
-            const s = document.getElementById("Sound"); s.pause(); s.currentTime = 0; s.play().catch(()=>{});
         }
 
         async function calculateAndSetResult() {
             state.spinStarted = true;
             const snap = await timerDoc.get(); const d = snap.data();
             if (!d || d.status !== "BET") return;
-            let allBets = d.bets || {}, minAmount = Infinity, bestNumbers = [];
-            for (let i = 0; i < 10; i++) {
-                let total = allBets[i] || 0;
-                if (total < minAmount) { minAmount = total; bestNumbers = [i]; }
-                else if (total === minAmount) bestNumbers.push(i);
-            }
-            let finalResult = bestNumbers[Math.floor(Math.random() * bestNumbers.length)];
+            let finalResult = Math.floor(Math.random() * 10);
             await timerDoc.update({ status: "RESULT", result: finalResult });
             rtdb.ref('history').push(finalResult);
         }
 
         function START_SPIN_ANIMATION(winnerNum) {
             state.ning = true; state.resultProcessed = false;
-            document.getElementById('winner').textContent = "-";
-            document.getElementById('gameStatus').textContent = "NING...";
             document.getElementById('ptrOverlay').classList.add('jiggle');
-            playSpinSound(); runAnimation(winnerNum); 
-            document.getElementById('ball').classList.add('animate-now');
-        }
-
-        function runAnimation(winnerNum) {
+            const ball = document.getElementById('ball');
+            ball.classList.add('animate-now');
+            
             const slider = document.getElementById('slider');
             slider.style.transition = "transform 8s cubic-bezier(0.1, 0, 0.1, 1)";
             slider.style.transform = `translateX(${-winnerNum * 10}%)`;
+            
             const targetRot = (Math.PI * 2 * 12) - (winnerNum * Math.PI * 2 / 10) - (Math.PI * 12 / 20);
             let start = null;
             function animate(now) {
@@ -1012,57 +875,29 @@
             spinAnimationFrame = requestAnimationFrame(animate);
         }
 
-        async function STOP__AND_SHOW_RESULT(result) {
+        function STOP__AND_SHOW_RESULT(result) {
             cancelAnimationFrame(spinAnimationFrame); state.ning = false;
-            document.getElementById('Sound').pause(); document.getElementById('ptrOverlay').classList.remove('jiggle');
-            const ball = document.getElementById('ball'); ball.classList.remove('animate-now');
+            document.getElementById('ptrOverlay').classList.remove('jiggle');
+            document.getElementById('ball').classList.remove('animate-now');
+            document.getElementById('winner').textContent = result;
+            refreshHistoryUI();
             
-            // RESULT LOGIC (Ball image index update)
-            ballCurrentIndex = (ballCurrentIndex + 1) % ballFinalImages.length;
-            ball.style.backgroundImage = `url('${ballFinalImages[ballCurrentIndex]}')`;
-            
-            document.getElementById('winner').textContent = result; refreshHistoryUI();
-            const targetBtn = document.getElementById(`btn-num-${result}`);
-            if(targetBtn) targetBtn.classList.add('blink-blue');
-
             if (!state.resultProcessed && state.uid && state.bets[result] > 0) {
                 state.resultProcessed = true;
                 const winAmount = state.bets[result] * 9;
                 rtdb.ref("users/uid/" + state.uid + "/coins").transaction((c) => (c || 0) + winAmount);
-                document.getElementById('gameStatus').textContent = "WON " + winAmount + " COINS!";
-            } else if (state.uid) { document.getElementById('gameStatus').textContent = "BET FINISHED"; }
+            }
             updateUI();
         }
 
         function RESET_ROUND_LOCALLY() {
-            state.bets.fill(0); state.betHistory = []; state.betting = !!state.uid;
+            state.bets.fill(0); state.betHistory = []; state.betting = true;
             state.ning = false; state.spinStarted = false; state.resultProcessed = false;
             document.getElementById('winner').textContent = "-";
             document.getElementById('slider').style.transition = "none";
             document.getElementById('slider').style.transform = "translateX(0)";
-            const ball = document.getElementById('ball'); ball.classList.remove('animate-now');
-            // Image reset from list
-            ball.style.backgroundImage = `url('${ballFinalImages[0]}')`;
-            document.querySelectorAll('.num').forEach(el => el.classList.remove('blink-blue'));
             updateUI();
         }
-
-        async function login(){
-            const uid=document.getElementById("uid").value.trim(), pass=document.getElementById("pass").value.trim();
-            try{
-                const snap=await rtdb.ref("users/uid/"+uid).once("value");
-                if(snap.exists() && String(snap.val().password) === pass){
-                    state.sessionID = Date.now() + Math.random().toString(36).substring(7);
-                    await rtdb.ref("users/uid/" + uid + "/sessionID").set(state.sessionID);
-                    state.uid = uid; listenToUserCoins(uid); initGameListeners(); 
-                    state.betting = true; document.getElementById("loginBlock").style.display="none";
-                    if(state.musicEnabled) document.getElementById('bgMusic').play().catch(()=>{});
-                    updateUI();
-                } else { document.getElementById("loginStatus").innerText = "Invalid Credentials"; }
-            }catch(e){}
-        }
-
-        function logoutUser(){ location.reload(); }
 
         const canvas = document.getElementById('wheel'), ctx = canvas.getContext('2d'), W = canvas.width, R = W / 2 - 10;
         const overlayImg = new Image(); overlayImg.src = 'https://uploads.onecompiler.io/445tyzay6/449ttb5ur/1000061105.png';
@@ -1073,15 +908,14 @@
                 ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0, R, i*Math.PI*2/10, (i+1)*Math.PI*2/10);
                 ctx.fillStyle = i%2==0 ? '#ffd36a' : '#fff3b0'; ctx.fill(); ctx.stroke();
                 ctx.save(); ctx.rotate((i*Math.PI*2/10)+(Math.PI/10));
-                ctx.fillStyle="#000"; ctx.font="bold 40px Arial"; ctx.fillText(i, R*0.6, 6); ctx.restore(); ctx.rotate(0.19);
+                ctx.fillStyle="#000"; ctx.font="bold 40px Arial"; ctx.fillText(i, R*0.6, 6); ctx.restore();
             }
             if(overlayImg.complete) ctx.drawImage(overlayImg, -300, -300, 600, 600);
             ctx.restore();
         }
-        overlayImg.onload = () => drawWheel(100);
+        overlayImg.onload = () => drawWheel(0);
 
         function updateUI() {
-            if(!state.uid) return;
             document.getElementById('coins').textContent = state.coins;
             state.bets.forEach((v, i) => {
                 const el = document.getElementById(`bet-${i}`);
@@ -1097,6 +931,15 @@
             }); 
         }
 
+        function refreshHistoryUI() {
+            const historyBox = document.getElementById('last5'); historyBox.innerHTML = '';
+            state.currentHistory.forEach((res, index) => {
+                const span = document.createElement('span');
+                span.className = 'hist-item' + (index === 0 ? ' hist-last-blink' : '');
+                span.innerText = res; historyBox.appendChild(span);
+            });
+        }
+
         window.onload = () => {
             const row = document.getElementById('betRow');
             for (let i = 0; i < 10; i++) {
@@ -1107,10 +950,10 @@
                 box.ontouchstart = (e) => { e.preventDefault(); startBettingRepeat(i); };
                 row.appendChild(box);
             }
-            document.onmouseup = document.ontouchend = stopBettingRepeat; drawWheel(0);
+            document.onmouseup = document.ontouchend = stopBettingRepeat;
         };
 
-        function startBettingRepeat(num) { if (state.timer <= 15 || !state.betting || !state.uid) return; PLACE_BET(num); betRepeatInterval = setInterval(() => PLACE_BET(num), 200); }
+        function startBettingRepeat(num) { if (state.timer <= 15 || !state.uid) return; PLACE_BET(num); betRepeatInterval = setInterval(() => PLACE_BET(num), 200); }
         function stopBettingRepeat() { clearInterval(betRepeatInterval); }
 
         async function PLACE_BET(n) {
@@ -1122,7 +965,6 @@
                     if (committed) {
                         state.bets[n] += amt; state.betHistory.push({n, amt});
                         timerDoc.update({ [`bets.${n}`]: firebase.firestore.FieldValue.increment(amt) });
-                        if(state.soundEnabled) { const cs = document.getElementById('clickSound'); cs.pause(); cs.currentTime = 0; cs.play().catch(()=>{}); }
                         updateUI();
                     }
                 });
