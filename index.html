@@ -586,7 +586,7 @@ canvas#wheel {
   text-align: center; 
   position: relative; 
   cursor: pointer; 
-  z-index: 999999;
+  z-index: 999999
 }
 
 .number-box .num { 
@@ -886,7 +886,8 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const rtdb = firebase.database();
-const timerDoc = db.collection("settings").doc("timer");
+
+const timerDoc = db.collection("Game").doc("Timer"); 
 const configDoc = db.collection("settings").doc("gameConfig");
 
 // ============================
@@ -910,7 +911,7 @@ const state = {
 };
 
 let betRepeatInterval = null, timerInterval = null, spinAnimationFrame = null, serverStartTime = null; 
-const TIMER_DURATION = 60;
+let TIMER_DURATION = 60; 
 
 // ============================
 // LOGIN & HOME FUNCTIONS
@@ -921,7 +922,6 @@ function login() {
   const status = document.getElementById('statusMsg');
   
   if(!u || !p) return;
-  
   status.textContent = "Verify...";
   status.style.color = "var(--neon-green)";
 
@@ -935,8 +935,9 @@ function login() {
       status.textContent = "Login Fail!";
       status.style.color = "var(--logout-red)";
     }
-  }).catch((e) => { 
-    status.textContent = "Error!"; 
+  }).catch(e => {
+    status.textContent = "Error Connection";
+    console.error(e);
   });
 }
 
@@ -954,7 +955,7 @@ function startPointsListener(uid) {
       myCurrentCoins = parseFloat(snap.val() || 0);
       document.getElementById('ptsVal').textContent = myCurrentCoins.toFixed(2);
       state.coins = myCurrentCoins;
-      document.getElementById('coins').textContent = state.coins;
+      document.getElementById('coins').textContent = Math.floor(state.coins);
     }
   });
 }
@@ -962,8 +963,6 @@ function startPointsListener(uid) {
 function playGame() {
   document.getElementById('homeSection').style.display = 'none';
   document.getElementById('gameSection').style.display = 'block';
-  
-  // Initialize game if not already initialized
   if (!state.uid) {
     state.uid = myId;
     initializeGame();
@@ -980,69 +979,11 @@ function logout() {
   location.reload(); 
 }
 
-function logoutUser() { 
-  sessionStorage.removeItem('gk_session'); 
-  location.reload(); 
-}
-
-// ============================
-// TRANSFER MODAL FUNCTIONS
-// ============================
-function openTransferModal() { 
-  document.getElementById('transferModal').style.display = 'flex'; 
-}
-
-function closeTransferModal() { 
-  document.getElementById('transferModal').style.display = 'none'; 
-}
-
-async function executeRealTransfer() {
-  const tId = document.getElementById('targetId').value.trim();
-  const amt = parseFloat(document.getElementById('transferAmt').value);
-  const pinInput = document.getElementById('transferPin').value;
-  const res = document.getElementById('hRes');
-  
-  if(!tId || isNaN(amt) || amt <= 0 || !pinInput) { 
-    alert("Details bharen!"); 
-    return; 
-  }
-  
-  if(amt > myCurrentCoins) { 
-    alert("Balance kam hai!"); 
-    return; 
-  }
-  
-  try {
-    const mySnap = await rtdb.ref("users/uid/" + myId).once("value");
-    if(mySnap.exists() && mySnap.val().PIN == pinInput) {
-      const targetSnap = await rtdb.ref("users/uid/" + tId).once("value");
-      if(targetSnap.exists() && targetSnap.val().PIN) {
-        const sBal = myCurrentCoins - amt;
-        const rBal = (targetSnap.val().coins || 0) + amt;
-        
-        await rtdb.ref("users/uid/" + myId).update({ coins: sBal });
-        await rtdb.ref("users/uid/" + tId).update({ coins: rBal });
-        
-        res.textContent = "Response - Success: Sent " + amt + " to " + tId;
-        alert("Transfer Successful!");
-        closeTransferModal();
-      } else { 
-        alert("Target ID error!"); 
-      }
-    } else { 
-      alert("Ghalat PIN!"); 
-    }
-  } catch(e) { 
-    alert("Error!"); 
-  }
-}
-
 // ============================
 // GAME FUNCTIONS
 // ============================
 function initializeGame() {
   if (!state.uid) return;
-  
   listenToUserCoins(state.uid);
   initGameListeners();
   createBetButtons();
@@ -1053,14 +994,6 @@ function listenToUserCoins(uid) {
   rtdb.ref("users/uid/" + uid + "/coins").on("value", (snapshot) => {
     state.coins = Number(snapshot.val()) || 0;
     updateUI();
-  });
-  
-  rtdb.ref("users/uid/" + uid + "/sessionID").on("value", (snapshot) => {
-    const cloudSession = snapshot.val();
-    if (state.sessionID && cloudSession && cloudSession !== state.sessionID) {
-      alert("Logged in from another device."); 
-      location.reload(); 
-    }
   });
 }
 
@@ -1074,188 +1007,82 @@ function initGameListeners() {
     }
   });
 
+  // TIMER & STATUS LISTENER
   timerDoc.onSnapshot((snap) => {
-    if (!state.uid || !snap.exists) return;
+    if (!snap.exists) return;
     const data = snap.data();
     
-    if(data.ballImages && Array.isArray(data.ballImages) && data.ballImages.length > 0) {
-      ballFinalImages = data.ballImages;
-    }
-    
-    if(data.TimerSound) {
-      const tAudio = document.getElementById('timerAudio');
-      if(tAudio.src !== data.TimerSound) {
-        tAudio.src = data.TimerSound;
+    if(data.timerDurationSeconds !== undefined) TIMER_DURATION = data.timerDurationSeconds;
+    if(data.ballImages) ballFinalImages = data.ballImages;
+
+    // --- PROTECTED START TIME LOGIC ---
+    if (data.startTime) {
+      let newServerTime;
+      try {
+        if (typeof data.startTime.toMillis === 'function') {
+          newServerTime = data.startTime.toMillis();
+        } else if (data.startTime.seconds) {
+          newServerTime = data.startTime.seconds * 1000;
+        } else {
+          newServerTime = Number(data.startTime);
+        }
+
+        if (serverStartTime !== newServerTime) {
+          serverStartTime = newServerTime; 
+          RESET_ROUND_LOCALLY(); 
+          startSyncTimer();
+        }
+      } catch (err) {
+        console.error("Timer Sync Error:", err);
       }
     }
 
     if (data.status === "RESULT" && !state.ning && data.result !== undefined) {
-      if(state.lastResultHandled !== data.timerStartTime?.toMillis()) {
-        state.lastResultHandled = data.timerStartTime?.toMillis();
+      if(state.lastResultHandled !== serverStartTime) {
+        state.lastResultHandled = serverStartTime;
         START_SPIN_ANIMATION(data.result);
       }
     }
-    
-    if (data.timerStartTime) {
-      const newServerTime = data.timerStartTime.toMillis();
-      if (serverStartTime !== newServerTime) {
-        serverStartTime = newServerTime; 
-        RESET_ROUND_LOCALLY(); 
-        startSyncTimer();
-      }
-    }
-  });
-
-  configDoc.onSnapshot((snap) => {
-    if(snap.exists) {
-      const data = snap.data();
-      if(data.chips) { 
-        state.chips = data.chips; 
-        updateChipsUI(); 
-      }
-      state.musicEnabled = data.musicEnabled !== undefined ? data.musicEnabled : true;
-      state.soundEnabled = data.soundEnabled !== undefined ? data.soundEnabled : true;
-      const bg = document.getElementById('bgMusic');
-      if(state.uid) { 
-        if(state.musicEnabled) bg.play().catch(()=>{}); 
-        else bg.pause(); 
-      }
-    }
-  });
-}
-
-function createBetButtons() {
-  const row = document.getElementById('betRow');
-  row.innerHTML = '';
-  
-  for (let i = 0; i < 10; i++) {
-    const box = document.createElement('div');
-    box.className = 'number-box';
-    box.innerHTML = `<div class="num" id="btn-num-${i}">${i}</div><div class="bet-placed" id="bet-${i}">0</div>`;
-    box.onmousedown = () => startBettingRepeat(i);
-    box.ontouchstart = (e) => { e.preventDefault(); startBettingRepeat(i); };
-    row.appendChild(box);
-  }
-  
-  document.onmouseup = document.ontouchend = stopBettingRepeat;
-}
-
-function updateChipsUI() {
-  const leftBox = document.getElementById('chipBoxLeft');
-  const rightBox = document.getElementById('chipBoxRight');
-  leftBox.innerHTML = ''; 
-  rightBox.innerHTML = '';
-  
-  state.chips.forEach((amt, i) => {
-    const chip = document.createElement('div');
-    chip.className = 'chip'; 
-    if(state.selectedAmount === amt) chip.classList.add('active');
-    chip.setAttribute('data-amt', amt); 
-    chip.innerText = amt;
-    chip.onclick = () => selectChip(amt);
-    
-    if(i < 3) leftBox.appendChild(chip); 
-    else rightBox.appendChild(chip);
-  });
-}
-
-function refreshHistoryUI() {
-  if(!state.uid) return;
-  const historyBox = document.getElementById('last5'); 
-  historyBox.innerHTML = '';
-  
-  state.currentHistory.forEach((res, index) => {
-    const span = document.createElement('span');
-    span.className = 'hist-item' + (index === 0 ? ' hist-last-blink' : '');
-    span.innerText = res; 
-    historyBox.appendChild(span);
+  }, (err) => {
+    console.error("Firestore Listen Error:", err);
   });
 }
 
 function startSyncTimer() {
-  if (!state.uid) return;
+  if (!serverStartTime) return;
   clearInterval(timerInterval);
   
   timerInterval = setInterval(() => {
-    if (!serverStartTime || !state.uid) return;
-    let elapsed = Math.floor((Date.now() - serverStartTime) / 950);
+    let now = Date.now();
+    let elapsed = Math.floor((now - serverStartTime) / 1000);
     let left = TIMER_DURATION - elapsed;
-    let displayTime = left > 0 ? left : 0;
     
-    document.getElementById("time").innerText = displayTime; 
+    let displayTime = left > 0 ? left : 0;
+    const timerEl = document.getElementById("time");
+    if(timerEl) timerEl.innerText = displayTime;
     state.timer = displayTime;
-
-    if(state.soundEnabled && left > 15 && left < 60) {
-      const tAudio = document.getElementById('timerAudio');
-      if(tAudio.paused) tAudio.play().catch(()=>{});
-    } else if (left <= 15) {
-      document.getElementById('timerAudio').pause();
-    }
 
     if (left <= 15) {
       state.betting = false; 
       stopBettingRepeat();
-      document.getElementById("time").classList.add("timer-warning");
       if(left > 0 && !state.ning) document.getElementById('gameStatus').textContent = "WAIT FOR RESULT...";
     } else {
-      document.getElementById("time").classList.remove("timer-warning");
-      if(state.uid && !state.ning) document.getElementById('gameStatus').textContent = "PLACE YOUR BETS";
+      state.betting = true;
+      if(!state.ning) document.getElementById('gameStatus').textContent = "PLACE YOUR BETS";
     }
     
-    if (left === 8 && !state.spinStarted) calculateAndSetResult();
-    if (left <= -0) triggerNewRound();
-  }, 950);
-}
-
-async function triggerNewRound() {
-  try { 
-    await timerDoc.set({ 
-      timerStartTime: firebase.firestore.FieldValue.serverTimestamp(), 
-      status: "BET", 
-      bets: {} 
-    }, { merge: true }); 
-  } catch (e) {}
-}
-
-function playSpinSound() {
-  if(!state.uid || !state.soundEnabled) return;
-  const s = document.getElementById("Sound"); 
-  s.pause(); 
-  s.currentTime = 0; 
-  s.play().catch(()=>{});
-}
-
-async function calculateAndSetResult() {
-  state.spinStarted = true;
-  const snap = await timerDoc.get(); 
-  const d = snap.data();
-  if (!d || d.status !== "BET") return;
-  
-  let allBets = d.bets || {};
-  let minAmount = Infinity;
-  let bestNumbers = [];
-  
-  for (let i = 0; i < 10; i++) {
-    let total = allBets[i] || 0;
-    if (total < minAmount) { 
-      minAmount = total; 
-      bestNumbers = [i]; 
+    if (left <= 0) {
+        clearInterval(timerInterval);
     }
-    else if (total === minAmount) bestNumbers.push(i);
-  }
-  
-  let finalResult = bestNumbers[Math.floor(Math.random() * bestNumbers.length)];
-  await timerDoc.update({ status: "RESULT", result: finalResult });
-  rtdb.ref('history').push(finalResult);
+  }, 1000);
 }
 
 function START_SPIN_ANIMATION(winnerNum) {
   state.ning = true; 
   state.resultProcessed = false;
-  document.getElementById('winner').textContent = "-";
-  document.getElementById('gameStatus').textContent = "NING...";
+  state.betting = false;
+  document.getElementById('gameStatus').textContent = "SPINNING...";
   document.getElementById('ptrOverlay').classList.add('jiggle');
-  playSpinSound(); 
   runAnimation(winnerNum); 
   document.getElementById('ball').classList.add('animate-now');
 }
@@ -1277,19 +1104,19 @@ function runAnimation(winnerNum) {
     if (progress < 1) spinAnimationFrame = requestAnimationFrame(animate);
     else STOP__AND_SHOW_RESULT(winnerNum);
   }
-  
   spinAnimationFrame = requestAnimationFrame(animate);
 }
 
+// ==========================================
+// WIN LOGIC: 9x CREDIT
+// ==========================================
 async function STOP__AND_SHOW_RESULT(result) {
   cancelAnimationFrame(spinAnimationFrame); 
   state.ning = false;
-  document.getElementById('Sound').pause(); 
   document.getElementById('ptrOverlay').classList.remove('jiggle');
   
   const ball = document.getElementById('ball'); 
   ball.classList.remove('animate-now');
-  
   ballCurrentIndex = (ballCurrentIndex + 1) % ballFinalImages.length;
   ball.style.backgroundImage = `url('${ballFinalImages[ballCurrentIndex]}')`;
   
@@ -1298,33 +1125,44 @@ async function STOP__AND_SHOW_RESULT(result) {
   const targetBtn = document.getElementById(`btn-num-${result}`);
   if(targetBtn) targetBtn.classList.add('blink-blue');
 
-  if (!state.resultProcessed && state.uid && state.bets[result] > 0) {
+  if (!state.resultProcessed && state.uid) {
     state.resultProcessed = true;
-    const winAmount = state.bets[result] * 9;
-    rtdb.ref("users/uid/" + state.uid + "/coins").transaction((c) => (c || 0) + winAmount);
-    document.getElementById('gameStatus').textContent = "WON " + winAmount + " COINS!";
-  } else if (state.uid) { 
-    document.getElementById('gameStatus').textContent = "BET FINISHED"; 
+    const myWinBetAmount = state.bets[result] || 0;
+
+    if (myWinBetAmount > 0) {
+      const winPayout = myWinBetAmount * 9;
+      const userRef = rtdb.ref("users/uid/" + state.uid + "/coins");
+      
+      try {
+        await userRef.transaction((currentValue) => {
+          return (currentValue || 0) + winPayout;
+        });
+        document.getElementById('gameStatus').textContent = "WON " + winPayout + " COINS!";
+      } catch (e) {
+        console.error("Payout failed", e);
+      }
+    } else { 
+      document.getElementById('gameStatus').textContent = "BET FINISHED"; 
+    }
   }
-  
   updateUI();
 }
 
 function RESET_ROUND_LOCALLY() {
   state.bets.fill(0); 
   state.betHistory = []; 
-  state.betting = !!state.uid;
+  state.betting = true;
   state.ning = false; 
   state.spinStarted = false; 
   state.resultProcessed = false;
   
   document.getElementById('winner').textContent = "-";
-  document.getElementById('slider').style.transition = "none";
-  document.getElementById('slider').style.transform = "translateX(0)";
+  const slider = document.getElementById('slider');
+  slider.style.transition = "none";
+  slider.style.transform = "translateX(0)";
   
   const ball = document.getElementById('ball'); 
   ball.classList.remove('animate-now');
-  ball.style.backgroundImage = `url('${ballFinalImages[0]}')`;
   
   document.querySelectorAll('.num').forEach(el => el.classList.remove('blink-blue'));
   updateUI();
@@ -1332,8 +1170,7 @@ function RESET_ROUND_LOCALLY() {
 
 function updateUI() {
   if(!state.uid) return;
-  document.getElementById('coins').textContent = state.coins;
-  
+  document.getElementById('coins').textContent = Math.floor(state.coins);
   state.bets.forEach((v, i) => {
     const el = document.getElementById(`bet-${i}`);
     if (el) { 
@@ -1343,72 +1180,52 @@ function updateUI() {
   });
 }
 
-function selectChip(amt) { 
-  state.selectedAmount = amt; 
-  document.querySelectorAll('.chip').forEach(c => {
-    c.classList.remove('active');
-    if(Number(c.getAttribute('data-amt')) === amt) c.classList.add('active');
-  }); 
-}
-
-function startBettingRepeat(num) { 
-  if (state.timer <= 15 || !state.betting || !state.uid) return; 
-  PLACE_BET(num); 
-  betRepeatInterval = setInterval(() => PLACE_BET(num), 200); 
-}
-
-function stopBettingRepeat() { 
-  clearInterval(betRepeatInterval); 
+function createBetButtons() {
+  const row = document.getElementById('betRow');
+  if(!row) return;
+  row.innerHTML = '';
+  for (let i = 0; i < 10; i++) {
+    const box = document.createElement('div');
+    box.className = 'number-box';
+    box.innerHTML = `<div class="num" id="btn-num-${i}">${i}</div><div class="bet-placed" id="bet-${i}">0</div>`;
+    box.onmousedown = () => startBettingRepeat(i);
+    box.ontouchstart = (e) => { e.preventDefault(); startBettingRepeat(i); };
+    row.appendChild(box);
+  }
+  document.onmouseup = document.ontouchend = stopBettingRepeat;
 }
 
 async function PLACE_BET(n) {
-  if (state.timer > 15 && state.coins >= state.selectedAmount && state.uid) {
+  if (state.timer > 15 && state.coins >= state.selectedAmount && state.uid && state.betting) {
     const amt = state.selectedAmount;
-    rtdb.ref("users/uid/" + state.uid + "/coins").transaction((c) => {
-      if (c >= amt) return c - amt; 
-      else return;
-    }, (err, committed) => {
-      if (committed) {
-        state.bets[n] += amt; 
-        state.betHistory.push({n, amt});
-        timerDoc.update({ [`bets.${n}`]: firebase.firestore.FieldValue.increment(amt) });
-        
-        if(state.soundEnabled) { 
-          const cs = document.getElementById('clickSound'); 
-          cs.pause(); 
-          cs.currentTime = 0; 
-          cs.play().catch(()=>{}); 
-        }
-        updateUI();
-      }
-    });
-  }
-}
-
-async function cancelLastBet() {
-  if (state.timer > 15 && state.betHistory.length > 0 && state.uid) {
-    const last = state.betHistory.pop();
-    rtdb.ref("users/uid/" + state.uid + "/coins").transaction(c => (c || 0) + last.amt);
-    state.bets[last.n] -= last.amt;
-    timerDoc.update({ [`bets.${last.n}`]: firebase.firestore.FieldValue.increment(-last.amt) });
-    updateUI();
-  }
-}
-
-async function cancelAllBets() {
-  if (state.timer > 15 && state.uid) {
-    let total = state.bets.reduce((a, b) => a + b, 0);
-    if (total > 0) {
-      rtdb.ref("users/uid/" + state.uid + "/coins").transaction(c => (c || 0) + total);
-      state.bets.fill(0); 
-      state.betHistory = []; 
-      timerDoc.update({ bets: {} }); 
+    try {
+      await timerDoc.update({ [`bets.${n}`]: firebase.firestore.FieldValue.increment(amt) });
+      const newCoins = state.coins - amt;
+      await rtdb.ref("users/uid/" + state.uid).update({ coins: newCoins });
+      state.bets[n] += amt;
       updateUI();
-    }
+    } catch (error) { console.error("Bet error", error); }
   }
 }
 
-// सेंड पॉपअप फंक्शन्स को हटा दिया क्योंकि सेंड बटन हट गया है
+function refreshHistoryUI() {
+  const historyBox = document.getElementById('last5'); 
+  if(!historyBox) return;
+  historyBox.innerHTML = '';
+  state.currentHistory.forEach((res, index) => {
+    const span = document.createElement('span');
+    span.className = 'hist-item' + (index === 0 ? ' hist-last-blink' : '');
+    span.innerText = res; 
+    historyBox.appendChild(span);
+  });
+}
+
+function startBettingRepeat(num) { 
+  if (state.timer <= 15 || !state.uid || !state.betting) return; 
+  PLACE_BET(num); 
+  betRepeatInterval = setInterval(() => PLACE_BET(num), 200); 
+}
+function stopBettingRepeat() { clearInterval(betRepeatInterval); }
 
 // ============================
 // WHEEL DRAWING
@@ -1425,54 +1242,23 @@ function drawWheel(rot = 0) {
   ctx.save(); 
   ctx.translate(300, 300); 
   ctx.rotate(rot);
-  
   for (let i = 0; i < 10; i++) {
-    ctx.beginPath(); 
-    ctx.moveTo(0,0); 
+    ctx.beginPath(); ctx.moveTo(0,0); 
     ctx.arc(0,0, R, i*Math.PI*2/10, (i+1)*Math.PI*2/10);
     ctx.fillStyle = i%2==0 ? '#ffd36a' : '#fff3b0'; 
-    ctx.fill(); 
-    ctx.stroke();
+    ctx.fill(); ctx.stroke();
     ctx.save(); 
     ctx.rotate((i*Math.PI*2/10)+(Math.PI/10));
-    ctx.fillStyle="#000"; 
-    ctx.font="bold 40px Arial"; 
+    ctx.fillStyle="#000"; ctx.font="bold 40px Arial"; 
     ctx.fillText(i, R*0.6, 6); 
-    ctx.restore(); 
-    ctx.rotate(0.19);
+    ctx.restore();
   }
-  
   if(overlayImg.complete) ctx.drawImage(overlayImg, -300, -300, 600, 600);
   ctx.restore();
 }
+overlayImg.onload = () => drawWheel(0);
 
-overlayImg.onload = () => drawWheel(100);
-
-// ============================
-// DEVICE CHECK & INITIALIZATION
-// ============================
-function checkMobileDevice() {
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  const isTablet = /iPad|Tablet|Silk/i.test(navigator.userAgent);
-  
-  const isDesktop = !isMobile || 
-                   (/Windows|Macintosh|Linux/i.test(navigator.userAgent) && !/Android|iPhone/i.test(navigator.userAgent)) ||
-                   (window.innerWidth > 1024 && window.innerHeight > 768);
-  
-  if (isDesktop || isTablet) {
-    document.getElementById('deviceWarning').style.display = 'block';
-    document.getElementById('mainGame').style.display = 'none';
-    return false;
-  }
-  return true;
-}
-
-// ============================
-// PAGE LOAD
-// ============================
 window.onload = () => {
-  checkMobileDevice();
-  
   const saved = sessionStorage.getItem('gk_session');
   if (saved) {
     const user = JSON.parse(saved);
@@ -1480,52 +1266,8 @@ window.onload = () => {
     state.uid = user.uid;
     initializeGame();
   }
-  
   createBetButtons();
 };
-
-window.addEventListener('resize', function() {
-  checkMobileDevice();
-});
-
-// ============================
-// DRAGGING FEATURE
-// ============================
-(function () {
-  const ballFrame = document.querySelector('.ball-frame');
-  let isDragging = false, startX = 0, currentX = 0;
-  const MAX_DRAG = 120; 
-  
-  function getX(e) { return e.touches ? e.touches[0].clientX : e.clientX; }
-  
-  function startDrag(e) { if (state.ning || !state.uid) return; isDragging = true; startX = getX(e); }
-  
-  function onDrag(e) {
-    if (!isDragging || state.ning || !state.uid) return;
-    let x = getX(e); 
-    let delta = x - startX; 
-    startX = x;
-    currentX += delta; 
-    currentX = Math.max(-MAX_DRAG, Math.min(MAX_DRAG, currentX));
-    ballFrame.style.transform = `translate(calc(-50% + ${currentX}px), -50%)`;
-  }
-  
-  function stopDrag() {
-    if (!isDragging) return; 
-    isDragging = false;
-    ballFrame.style.transition = 'transform 0.25s ease'; 
-    ballFrame.style.transform = 'translate(-50%, -50%)';
-    currentX = 0; 
-    setTimeout(() => { ballFrame.style.transition = ''; }, 100);
-  }
-  
-  ballFrame.addEventListener('mousedown', startDrag); 
-  ballFrame.addEventListener('touchstart', startDrag, { passive: true });
-  document.addEventListener('mousemove', onDrag); 
-  document.addEventListener('touchmove', onDrag, { passive: true });
-  document.addEventListener('mouseup', stopDrag); 
-  document.addEventListener('touchend', stopDrag);
-})();
 </script>
 </body>
-</html>
+  </html>
