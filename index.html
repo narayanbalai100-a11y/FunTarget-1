@@ -9,6 +9,31 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 
     <style>
+        /* पेज को पूरी तरह लॉक करने के लिए CSS */
+        * {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+            touch-action: manipulation;
+        }
+        
+        input, textarea {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+        }
+        
+        body, html {
+            overscroll-behavior: none;
+            -webkit-overflow-scrolling: touch;
+            overflow: hidden;
+        }
+
         :root 
         {
             --neon-green: #39ff14;
@@ -34,6 +59,11 @@
             height: 100%; 
             background-color: #000; 
             overflow: hidden; 
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
         }
 
         #loginSection 
@@ -47,6 +77,7 @@
             left: 0; 
             z-index: 10000; 
             display: flex;
+            touch-action: none;
         }
 
         .response-header 
@@ -81,6 +112,10 @@
             font-size: 1.5vw; 
             padding: 0 10px; 
             outline: none; 
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
         }
 
         .btn-enter-visual 
@@ -101,6 +136,7 @@
             justify-content: center; 
             align-items: center; 
             text-shadow: 2px 2px #000; 
+            -webkit-tap-highlight-color: rgba(255, 255, 255, 0.3);
         }
 
         #homeSection 
@@ -112,6 +148,7 @@
             position: relative; 
             display: none; 
             z-index: 9000;
+            touch-action: none;
         }
 
         .top-nav 
@@ -165,6 +202,7 @@
             text-shadow: 2px 2px #000; 
             cursor: pointer; 
             z-index: 9500; 
+            -webkit-tap-highlight-color: rgba(57, 255, 20, 0.3);
         }
 
         .child-reg-container 
@@ -180,7 +218,7 @@
         .child-reg-text 
         { 
             color: var(--neon-green); 
-            font-size: 2.3vw; 
+            font-size: 2vw; 
             font-weight: bold; 
             line-height: 1.1; 
             text-transform: uppercase; 
@@ -210,6 +248,7 @@
             color: var(--gold-orange); 
             cursor: pointer; 
             font-weight: bold; 
+            -webkit-tap-highlight-color: rgba(255, 140, 0, 0.3);
         }
 
         .footer-links 
@@ -228,7 +267,7 @@
             font-size: 1vw; 
             cursor: pointer; 
             font-weight: bold; 
-            
+            -webkit-tap-highlight-color: rgba(57, 255, 20, 0.3);
         }
 
         .logout-action 
@@ -237,6 +276,7 @@
             font-size: 1.5vw; 
             cursor: pointer; 
             font-weight: bold; 
+            -webkit-tap-highlight-color: rgba(255, 51, 51, 0.3);
         }
 
         #transferModal 
@@ -251,6 +291,7 @@
             background-color: var(--modal-bg); 
             justify-content: center; 
             align-items: center; 
+            touch-action: none;
         }
 
         .new-modal-box 
@@ -298,6 +339,10 @@
             padding: 5px 10px; 
             width: 100%; 
             outline: none; 
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
         }
 
         .m-btn-container 
@@ -318,6 +363,7 @@
             font-weight: bold; 
             cursor: pointer; 
             text-transform: uppercase; 
+            -webkit-tap-highlight-color: rgba(255, 255, 255, 0.3);
         }
 
         #gameSection 
@@ -327,6 +373,7 @@
             height: 100vh; 
             position: relative; 
             background-color: #000; 
+            touch-action: none;
         }
 
         .deep-background 
@@ -364,8 +411,8 @@
         .data-box 
         { 
             position: absolute; 
-            background: rgba(255, 255, 255, 0.2); 
-            border: 2px solid red; 
+            background: rgba(255, 255, 255, 0.0); 
+            border: 0px solid red; 
             color: #000; 
             text-align: center; 
             font-weight: 900; 
@@ -422,7 +469,7 @@
             transform: translateX(-50%); 
             width: 6%; 
             height: 4%; 
-            border: 2px solid #ffd700; 
+            border: 0px solid #ffd700; 
             color: #000; 
             text-align: center; 
             font-size: 1vw; 
@@ -452,6 +499,7 @@
             background-size: 100% 100%; 
             text-shadow: 2px 2px 4px #000; 
             cursor: pointer; 
+            -webkit-tap-highlight-color: rgba(255, 255, 255, 0.0);
         }
 
         .action-setup 
@@ -467,6 +515,7 @@
             font-weight: bold; 
             background-size: 100% 100%; 
             border: none; 
+            -webkit-tap-highlight-color: rgba(255, 255, 255, 0.0);
         }
 
         #take-btn 
@@ -502,8 +551,8 @@
             right: 1%; 
             width: 6%; 
             height: 3.5%; 
-            color: red; 
-            background: rgba(0, 0, 0, 0.5); 
+            color: #fff; 
+            background: rgba(0, 0, 0, 0.0); 
             border: 1px solid red; 
         }
 
@@ -514,14 +563,15 @@
             height: 4%; 
             cursor: pointer; 
             z-index: 130; 
-            background: rgba(0, 0, 255, 0.2); 
-            border: 2px solid blue; 
+            background: rgba(0, 0, 255, 0.0); 
+            border: 0px solid blue; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
             color: blue; 
-            font-size: 0.8vw; 
+            font-size: 0vw; 
             font-weight: bold; 
+            -webkit-tap-highlight-color: rgba(0, 0, 255, 0.0);
         }
 
         .num-setup 
@@ -530,9 +580,10 @@
             width: 6.5%; 
             height: 8.9%; 
             cursor: pointer; 
-            z-index: 130; 
+            z-index: 130;
             background-size: 100% 100%; 
-            border: 1px solid yellow; 
+            border: 0px solid yellow; 
+            -webkit-tap-highlight-color: rgba(255, 255, 0, 0.0);
         }
 
         .bet-amt 
@@ -663,6 +714,33 @@
             transition: transform 10s cubic-bezier(0.15, 0, 0.2, 1); 
         }
 
+        /* NEW: Pointer overlay styles */
+        .pointer-overlay { 
+            position: absolute; 
+            top: -30px; 
+            left: 50.2%; 
+            transform: translateX(-50%); 
+            width: 63px; 
+            height: 63px; 
+            background-image: url('https://uploads.onecompiler.io/445tyzay6/449ttb5ur/1000061114.png'); 
+            background-size: contain; 
+            background-repeat: no-repeat;
+            z-index: 150; 
+        }
+
+        .pointer-overlay.jiggle { 
+            animation: blink-pointer 0.50s steps(2) infinite; 
+        }
+
+        @keyframes blink-pointer { 
+            0%, 100% { 
+                opacity: 1; 
+            } 
+            50% { 
+                opacity: 0; 
+            } 
+        }
+
         @keyframes timer-bg-anim 
         { 
             0%, 100% 
@@ -759,34 +837,31 @@
         }
 
         .animate-now {
-            animation: rotateBallSmooth 1.5s steps(1) infinite;
+            animation: rotateBall 1.5s steps(1) infinite;
         }
 
-        @keyframes rotateBallSmooth {
-            10%   { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rx2mty/1000060967.jpg'); }
-            20%   { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rx2mty/1000060968.jpg'); }
-            30%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rx2mty/1000060979.jpg'); }
-            40%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rxvs4s/1000060980.jpg'); }
-            50%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rxvs4s/1000060981.jpg'); }
-            25%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rxvs4s/1000060982.jpg'); }
-            30%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rxvs4s/1000060983.jpg'); }
-            35%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rxvs4s/1000060984.jpg'); }
-            40%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rxvs4s/1000060985.jpg'); }
-            42%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rxvs4s/1000060982.jpg'); }
-            45%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rxvs4s/1000060986.jpg'); }
-            50%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rxvs4s/1000060938.jpg'); }
-            55%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rz476r/1000060970.jpg'); }
-            60%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rz476r/1000060971.jpg'); }
-            65%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rzzrfb/1000060941.jpg'); }
-            70%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rzzrfb/1000060901.jpg'); }
-            72%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rxvs4s/1000060938.jpg'); }
-            75%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449s2ey5g/1000060902.jpg'); }
-            80%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449s2ey5g/1000060944.jpg'); }
-            85%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449s2ey5g/1000060945.jpg'); }
-            90%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449s2ey5g/1000060946.jpg'); }
-            95%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449s2sj5r/1000060947.jpg'); }
-            92%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449s2ey5g/1000060902.jpg'); }
-            100% { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rx2mty/1000060967.jpg'); }
+        @keyframes rotateBall {
+          0%   { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rx2mty/1000060967.jpg'); }
+          5%   { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rx2mty/1000060968.jpg'); }
+          10%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rx2mty/1000060979.jpg'); }
+          15%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rxvs4s/1000060980.jpg'); }
+          20%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rxvs4s/1000060981.jpg'); }
+          25%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rxvs4s/1000060982.jpg'); }
+          30%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rxvs4s/1000060983.jpg'); }
+          35%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rxvs4s/1000060984.jpg'); }
+          40%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rxvs4s/1000060985.jpg'); }
+          45%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rxvs4s/1000060986.jpg'); }
+          50%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rxvs4s/1000060938.jpg'); }
+          55%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rz476r/1000060970.jpg'); }
+          60%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rz476r/1000060971.jpg'); }
+          65%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rzzrfb/1000060941.jpg'); }
+          70%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rzzrfb/1000060901.jpg'); }
+          75%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449s2ey5g/1000060902.jpg'); }
+          80%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449s2ey5g/1000060944.jpg'); }
+          85%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449s2ey5g/1000060945.jpg'); }
+          90%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449s2ey5g/1000060946.jpg'); }
+          95%  { background-image: url('https://uploads.onecompiler.io/445tyzay6/449s2sj5r/1000060947.jpg'); }
+          100% { background-image: url('https://uploads.onecompiler.io/445tyzay6/449rx2mty/1000060967.jpg'); }
         }
 
         #pleaseWaitOverlay 
@@ -809,9 +884,27 @@
             border-radius: 0px;
         }
 
+        /* बटन पर क्लिक होने पर हाईलाइट दिखाने के लिए */
+        .click-effect:active {
+            transform: scale(0.95);
+            opacity: 0.8;
+            transition: transform 0.1s, opacity 0.1s;
+        }
+        
+        /* क्लिक रोकने के लिए */
+        .no-click {
+            pointer-events: none;
+        }
+        
+        /* डबल टैप जूम रोकने के लिए */
+        * {
+            -ms-content-zooming: none;
+            -ms-touch-action: manipulation;
+        }
+
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
 
 <!-- ऑडियो एलिमेंट्स -->
 <audio id="timerAudio" src="reset1_sound.mp3"></audio>
@@ -875,6 +968,8 @@
         <div class="pointer-container">
             <img class="pointer-base" src="https://uploads.onecompiler.io/445tyzay6/449ttb5ur/1000061113.png" style="width:100%">
         </div>
+        <!-- NEW: Pointer overlay div -->
+        <div class="pointer-overlay" id="pointerOverlay"></div>
         <div class="ball-frame">
             <div id="ning-ball" class="ning-ball"></div>
         </div>
@@ -962,6 +1057,115 @@
 </div>
 
 <script>
+    // पेज को पूरी तरह लॉक करने के लिए JavaScript
+    document.addEventListener('DOMContentLoaded', function() {
+        // सभी टेक्स्ट सिलेक्शन रोकें
+        document.addEventListener('selectstart', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        // राइट क्लिक रोकें (कॉन्टेक्स्ट मेन्यू)
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        // ड्रैग स्टार्ट रोकें
+        document.addEventListener('dragstart', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        // कॉपी इवेंट रोकें
+        document.addEventListener('copy', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        // कट इवेंट रोकें
+        document.addEventListener('cut', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        // पेस्ट इवेंट रोकें
+        document.addEventListener('paste', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        // डबल क्लिक रोकें (टेक्स्ट सिलेक्शन के लिए)
+        document.addEventListener('dblclick', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        // कीबोर्ड शॉर्टकट रोकें (Ctrl+C, Ctrl+V, आदि)
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+C, Ctrl+X, Ctrl+V रोकें
+            if (e.ctrlKey && (e.key === 'c' || e.key === 'C' || e.key === 'x' || e.key === 'X' || e.key === 'v' || e.key === 'V')) {
+                e.preventDefault();
+                return false;
+            }
+            
+            // F12 (डेवलपर टूल्स) रोकें
+            if (e.key === 'F12') {
+                e.preventDefault();
+                return false;
+            }
+            
+            // Ctrl+U (सोर्स कोड देखना) रोकें
+            if (e.ctrlKey && e.key === 'u') {
+                e.preventDefault();
+                return false;
+            }
+        });
+        
+        // बाउंड्री और हाईलाइट दिखाने के लिए
+        document.addEventListener('touchstart', function(e) {
+            var target = e.target;
+            if (target.classList.contains('btn-enter-visual') || 
+                target.classList.contains('fun-target-box') || 
+                target.classList.contains('child-reg-container') ||
+                target.classList.contains('btn-orange') ||
+                target.classList.contains('refresh-action') ||
+                target.classList.contains('logout-action') ||
+                target.classList.contains('m-btn') ||
+                target.classList.contains('action-setup') ||
+                target.classList.contains('chip-setup') ||
+                target.classList.contains('num-setup') ||
+                target.id === 'bottom-status-text') {
+                
+                target.classList.add('click-effect');
+                setTimeout(function() {
+                    target.classList.remove('click-effect');
+                }, 150);
+            }
+        }, {passive: true});
+        
+        document.addEventListener('mousedown', function(e) {
+            var target = e.target;
+            if (target.classList.contains('btn-enter-visual') || 
+                target.classList.contains('fun-target-box') || 
+                target.classList.contains('child-reg-container') ||
+                target.classList.contains('btn-orange') ||
+                target.classList.contains('refresh-action') ||
+                target.classList.contains('logout-action') ||
+                target.classList.contains('m-btn') ||
+                target.classList.contains('action-setup') ||
+                target.classList.contains('chip-setup') ||
+                target.classList.contains('num-setup') ||
+                target.id === 'bottom-status-text') {
+                
+                target.classList.add('click-effect');
+                setTimeout(function() {
+                    target.classList.remove('click-effect');
+                }, 150);
+            }
+        });
+    });
+
     // ऑडियो रेफरेन्सेस
     const timerAudio = document.getElementById('timerAudio');
     const spinAudio = document.getElementById('spinAudio');
@@ -974,6 +1178,9 @@
     let isGameActive = false;
     let isPageVisible = true;
     let timerAudioInterval = null;
+
+    // NEW: Pointer overlay reference
+    const pointerOverlay = document.getElementById('pointerOverlay');
 
     // ऑडियो प्ले करने के लिए फंक्शन (गेम एक्टिव होने पर ही)
     function playAudio(audioElement) {
@@ -1050,6 +1257,21 @@
     let currentTime = 60;
     let resultShownForRound = -1;
 
+    // NEW: Ball images variables from Firebase
+    let ballImages = [];
+    let currentBallImageIndex = 0;
+    let isBallImagesLoaded = false;
+
+    // NEW: Pattern variables for win/loss cycle
+    let patternStage = "WIN"; // "WIN" or "LOSS"
+    let winCounter = 0;
+    let lossCounter = 0;
+    let currentLossSequence = 0;
+    
+    // NEW: Loss sequence pattern (हार के बाद कितने हार चाहिए)
+    const lossSequence = [3, 5, 6, 4, 8, 3, 9, 10, 1, 15, 20, 5, 2, 11, 5, 21, 10, 22, 50, 5, 10, 20, 5, 10];
+    let lossSequenceIndex = 0;
+
     const numberDegrees = 
     { 
         0:0, 
@@ -1091,6 +1313,185 @@
     const cancelAllBtn = document.getElementById('cancel-all-bet-btn');
     const waitOverlay = document.getElementById('pleaseWaitOverlay');
 
+    // NEW: Generate unique session ID for this device
+    const sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+    // NEW: Function to load ball images from Firebase
+    function loadBallImagesFromFirebase() {
+        db.ref("game/ballImages").once("value").then((snapshot) => {
+            if (snapshot.exists()) {
+                ballImages = [];
+                const data = snapshot.val();
+                
+                // Collect all active ball images in order (img_1, img_2, img_3, ...)
+                Object.keys(data).sort().forEach((key) => {
+                    const imgData = data[key];
+                    if (imgData.active === true && imgData.url) {
+                        ballImages.push(imgData.url);
+                        console.log(`Loaded ball image ${key}: ${imgData.url}`);
+                    }
+                });
+                
+                console.log(`Total active ball images loaded: ${ballImages.length}`);
+                isBallImagesLoaded = true;
+                
+                // Set initial ball image if available
+                if (ballImages.length > 0) {
+                    updateBallImage();
+                }
+            } else {
+                console.log("No ball images found in Firebase");
+                isBallImagesLoaded = true;
+            }
+        }).catch((error) => {
+            console.error("Error loading ball images from Firebase:", error);
+            isBallImagesLoaded = true;
+        });
+    }
+
+    // NEW: Function to update ball image (only one static image per round)
+    function updateBallImage() {
+        if (ballImages.length === 0 || !isBallImagesLoaded) {
+            console.log("Ball images not loaded yet or empty");
+            return;
+        }
+        
+        // Get current ball image URL from Firebase
+        const currentBallUrl = ballImages[currentBallImageIndex];
+        
+        // Set the static image (not in animation)
+        console.log(`Next round will show ball image index ${currentBallImageIndex}: ${currentBallUrl}`);
+        
+        // Store this URL to use when animation stops
+        window.nextBallImage = currentBallUrl;
+        
+        // Move to next image for next round
+        currentBallImageIndex = (currentBallImageIndex + 1) % ballImages.length;
+    }
+
+    // NEW: Function to start pointer blink animation
+    function startPointerBlink() {
+        if (pointerOverlay) {
+            pointerOverlay.classList.add('jiggle');
+        }
+    }
+
+    // NEW: Function to stop pointer blink animation
+    function stopPointerBlink() {
+        if (pointerOverlay) {
+            pointerOverlay.classList.remove('jiggle');
+        }
+    }
+
+    // NEW: Function to get numbers with minimum bet (सबसे कम पैसा लगा है वह नंबर)
+    function getNumbersWithMinBet() {
+        const betsArray = Object.entries(bets);
+        const numbersWithBets = betsArray.filter(([num, bet]) => bet > 0);
+        
+        if (numbersWithBets.length === 0) return [];
+        
+        // Find minimum bet amount
+        const minBet = Math.min(...numbersWithBets.map(([num, bet]) => bet));
+        
+        // Return all numbers with minimum bet
+        return numbersWithBets
+            .filter(([num, bet]) => bet === minBet)
+            .map(([num, bet]) => parseInt(num));
+    }
+
+    // NEW: Function to get numbers without any bet (बिल्कुल ही पैसा नहीं लगा है वह नंबर)
+    function getNumbersWithoutAnyBet() {
+        return Object.entries(bets)
+            .filter(([num, bet]) => bet === 0)
+            .map(([num, bet]) => parseInt(num));
+    }
+
+    // NEW: Function to get winning number for WIN stage (जीत के लिए - सबसे कम पैसा लगा है वह नंबर)
+    function getWinningNumberForWin() {
+        const numbersWithMinBet = getNumbersWithMinBet();
+        
+        if (numbersWithMinBet.length > 0) {
+            // सबसे कम पैसा लगा है वह नंबर चुनें
+            return numbersWithMinBet[Math.floor(Math.random() * numbersWithMinBet.length)];
+        } else {
+            // कोई भी पैसा नहीं लगा है तो रैंडम नंबर
+            return Math.floor(Math.random() * 10);
+        }
+    }
+
+    // NEW: Function to get winning number for LOSS stage (हार के लिए - बिल्कुल ही पैसा नहीं लगा है वह नंबर)
+    function getWinningNumberForLoss() {
+        const numbersWithoutAnyBet = getNumbersWithoutAnyBet();
+        
+        if (numbersWithoutAnyBet.length > 0) {
+            // बिल्कुल ही पैसा नहीं लगा है वह नंबर चुनें
+            return numbersWithoutAnyBet[Math.floor(Math.random() * numbersWithoutAnyBet.length)];
+        } else {
+            // सभी नंबरों पर पैसा लगा है तो सबसे कम पैसे वाला चुनें (फॉलबैक)
+            const numbersWithMinBet = getNumbersWithMinBet();
+            if (numbersWithMinBet.length > 0) {
+                return numbersWithMinBet[Math.floor(Math.random() * numbersWithMinBet.length)];
+            } else {
+                return Math.floor(Math.random() * 10);
+            }
+        }
+    }
+
+    // NEW: Function to update pattern after each round
+    function updatePattern(winningNumber) {
+        const numbersWithMinBet = getNumbersWithMinBet();
+        const numbersWithBets = Object.entries(bets)
+            .filter(([num, bet]) => bet > 0)
+            .map(([num, bet]) => parseInt(num));
+        
+        const isUserWin = numbersWithBets.includes(winningNumber);
+        
+        console.log(`Pattern: ${patternStage}, Winning Number: ${winningNumber}, User Win: ${isUserWin}`);
+        console.log(`Numbers with bets: ${numbersWithBets}, Numbers with min bet: ${numbersWithMinBet}`);
+        
+        if (patternStage === "WIN") {
+            winCounter++;
+            
+            // 1 win complete, switch to LOSS
+            if (winCounter >= 1) {
+                patternStage = "LOSS";
+                winCounter = 0;
+                lossCounter = 0;
+                currentLossSequence = lossSequence[lossSequenceIndex];
+                lossSequenceIndex = (lossSequenceIndex + 1) % lossSequence.length;
+                
+                console.log(`Switching to LOSS stage, need ${currentLossSequence} losses`);
+            }
+        } else if (patternStage === "LOSS") {
+            lossCounter++;
+            
+            // Check if loss sequence complete
+            if (lossCounter >= currentLossSequence) {
+                patternStage = "WIN";
+                winCounter = 0;
+                lossCounter = 0;
+                console.log(`Switching to WIN stage after ${currentLossSequence} losses`);
+            }
+        }
+        
+        console.log(`Current pattern: ${patternStage}, Win Counter: ${winCounter}, Loss Counter: ${lossCounter}/${currentLossSequence}`);
+    }
+
+    // NEW: Function to get winning number based on pattern
+    function getWinningNumberByPattern() {
+        let winningNumber;
+        
+        if (patternStage === "WIN") {
+            winningNumber = getWinningNumberForWin();
+            console.log(`WIN stage: Selected number ${winningNumber} (सबसे कम पैसा लगा है वह नंबर)`);
+        } else {
+            winningNumber = getWinningNumberForLoss();
+            console.log(`LOSS stage: Selected number ${winningNumber} (बिल्कुल ही पैसा नहीं लगा है वह नंबर)`);
+        }
+        
+        return winningNumber;
+    }
+
     async function login() 
     {
         const u = document.getElementById('uid').value.trim();
@@ -1098,27 +1499,107 @@
         
         if(!u || !p) return;
         
-        const snap = await db.ref("users/" + u).once("value");
+        // NEW: Show "VERIFY" message during login attempt
+        document.getElementById('statusMsg').textContent = "VERIFY...";
+        document.getElementById('statusMsg').style.color = "#39ff14";
         
-        if(snap.exists()) 
-        {
-            const val = snap.val();
+        try {
+            const snap = await db.ref("users/" + u).once("value");
             
-            if(val.password === p && val.status === "active") 
+            if(snap.exists()) 
             {
-                myId = u;
-                sessionStorage.setItem('gk_session', JSON.stringify({uid: u}));
-                activateHome();
+                const val = snap.val();
+                
+                // NEW: Check if user is already logged in on another device
+                if (val.isLoggedIn === true && val.sessionId !== sessionId) {
+                    // Force logout from other device
+                    await db.ref("users/" + u).update({
+                        isLoggedIn: false,
+                        sessionId: null,
+                        forceLogout: true
+                    });
+                    
+                    // Small delay to ensure other device gets the update
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                }
+                
+                if(val.password === p && val.status === "active") 
+                {
+                    // NEW: Update user with session info
+                    await db.ref("users/" + u).update({
+                        isLoggedIn: true,
+                        sessionId: sessionId,
+                        lastLogin: Date.now(),
+                        deviceInfo: navigator.userAgent,
+                        forceLogout: false
+                    });
+                    
+                    myId = u;
+                    sessionStorage.setItem('gk_session', JSON.stringify({uid: u, sessionId: sessionId}));
+                    
+                    // NEW: Set up listener to detect logout from other devices
+                    setupLoginMonitor(u);
+                    
+                    activateHome();
+                } 
+                else 
+                { 
+                    document.getElementById('statusMsg').textContent = "Login Error: Details mismatch!";
+                    document.getElementById('statusMsg').style.color = "#ff3333";
+                }
             } 
             else 
             { 
-                alert("Login Error: Details mismatch!"); 
+                document.getElementById('statusMsg').textContent = "User not found!";
+                document.getElementById('statusMsg').style.color = "#ff3333";
             }
-        } 
-        else 
-        { 
-            alert("User not found!"); 
+        } catch (error) {
+            console.error("Login error:", error);
+            document.getElementById('statusMsg').textContent = "Login failed!";
+            document.getElementById('statusMsg').style.color = "#ff3333";
         }
+    }
+
+    // NEW: Function to monitor login status
+    function setupLoginMonitor(userId) {
+        db.ref("users/" + userId).on("value", (snap) => {
+            if (snap.exists()) {
+                const userData = snap.val();
+                
+                // Check if forceLogout flag is set
+                if (userData.forceLogout === true) {
+                    forceLogout();
+                    return;
+                }
+                
+                // If sessionId doesn't match or user is logged out, force logout
+                if (userData.isLoggedIn !== true || userData.sessionId !== sessionId) {
+                    forceLogout();
+                }
+            }
+        });
+    }
+
+    // NEW: Function to force logout (without alert)
+    function forceLogout() {
+        // Clear all session data
+        sessionStorage.removeItem('gk_session');
+        
+        // Show login section and hide all others
+        document.getElementById('loginSection').style.display = 'flex';
+        document.getElementById('homeSection').style.display = 'none';
+        document.getElementById('gameSection').style.display = 'none';
+        
+        // Show logout message in status
+        document.getElementById('statusMsg').textContent = "Logged out from another device!";
+        document.getElementById('statusMsg').style.color = "#ff3333";
+        
+        // Reset user ID
+        myId = "";
+        
+        // Stop all audio
+        isGameActive = false;
+        stopAllAudio();
     }
 
     function activateHome() 
@@ -1141,6 +1622,9 @@
         
         document.getElementById('homeSection').style.display = 'none';
         document.getElementById('gameSection').style.display = 'block';
+        
+        // NEW: Load ball images when game starts
+        loadBallImagesFromFirebase();
     }
 
     function backToHome() 
@@ -1153,12 +1637,35 @@
         document.getElementById('homeSection').style.display = 'block';
     }
 
-    function logout() 
+    async function logout() 
     {
         isGameActive = false;
         stopAllAudio();
+        
+        // NEW: Update Firebase to mark user as logged out
+        if (myId) {
+            try {
+                await db.ref("users/" + myId).update({
+                    isLoggedIn: false,
+                    sessionId: null,
+                    lastLogout: Date.now(),
+                    forceLogout: false
+                });
+            } catch (error) {
+                console.error("Error updating logout status:", error);
+            }
+        }
+        
         sessionStorage.removeItem('gk_session');
-        location.reload();
+        
+        // Show login section directly without alert
+        document.getElementById('loginSection').style.display = 'flex';
+        document.getElementById('homeSection').style.display = 'none';
+        document.getElementById('gameSection').style.display = 'none';
+        document.getElementById('statusMsg').textContent = "Successfully logged out";
+        document.getElementById('statusMsg').style.color = "#39ff14";
+        
+        myId = "";
     }
 
     function syncFromFirebase() 
@@ -1209,7 +1716,10 @@
                 { 
                     game.status = "WAITING"; 
                     game.time = 1; 
-                    game.lastWinner = Math.floor(Math.random() * 10); 
+                    
+                    // NEW: Get winning number based on pattern
+                    const winningNumber = getWinningNumberByPattern();
+                    game.lastWinner = winningNumber;
                 }
                 else if (game.status === "WAITING") 
                 { 
@@ -1272,6 +1782,13 @@
                 startSpinProcess(data.lastWinner, data.round);
             }
         }
+
+        // NEW: Start pointer blink when timer is low
+        if (currentStatus === "BETTING" && currentTime <= 10 && currentTime > 0) {
+            startPointerBlink();
+        } else {
+            stopPointerBlink();
+        }
     });
 
     function startSpinProcess(winNum, roundNum) 
@@ -1318,6 +1835,18 @@
                 playAudio(winAudio);
             }
         }
+        
+        // NEW: Update pattern after showing result
+        updatePattern(winNum);
+        
+        // NEW: Set the static ball image from Firebase after animation stops
+        if (window.nextBallImage) {
+            ball.style.backgroundImage = `url('${window.nextBallImage}')`;
+            console.log(`Ball image set to: ${window.nextBallImage}`);
+        }
+        
+        // NEW: Prepare next ball image for next round
+        updateBallImage();
         
         resetTable();
     }
@@ -1554,8 +2083,25 @@
         
         if (saved) 
         {
-            myId = JSON.parse(saved).uid;
-            activateHome();
+            const sessionData = JSON.parse(saved);
+            myId = sessionData.uid;
+            
+            // NEW: Check if session is still valid
+            db.ref("users/" + myId).once("value").then((snap) => {
+                if (snap.exists()) {
+                    const userData = snap.val();
+                    if (userData.isLoggedIn === true && userData.sessionId === sessionData.sessionId) {
+                        // Set up login monitor
+                        setupLoginMonitor(myId);
+                        activateHome();
+                    } else {
+                        // Session invalid, clear storage
+                        sessionStorage.removeItem('gk_session');
+                        document.getElementById('statusMsg').textContent = "Session expired. Please login again.";
+                        document.getElementById('statusMsg').style.color = "#ff3333";
+                    }
+                }
+            });
         }
     };
 
