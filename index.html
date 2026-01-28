@@ -44,7 +44,8 @@
             --modal-bg: rgba(0, 0, 0, 0.9);
         }
 
-        * { 
+        * 
+        { 
             margin: 0; 
             padding: 0; 
             box-sizing: border-box; 
@@ -905,6 +906,7 @@
 </head>
 <body oncontextmenu="return false;">
 
+<!-- ऑडियो एलिमेंट्स -->
 <audio id="timerAudio" src="reset1_sound.mp3"></audio>
     <source src="https://assets.mixkit.co/active_storage/sfx/286/286-preview.mp3" type="audio/mpeg">
 </audio>
@@ -966,6 +968,7 @@
         <div class="pointer-container">
             <img class="pointer-base" src="https://uploads.onecompiler.io/445tyzay6/449ttb5ur/1000061113.png" style="width:100%">
         </div>
+        <!-- NEW: Pointer overlay div -->
         <div class="pointer-overlay" id="pointerOverlay"></div>
         <div class="ball-frame">
             <div id="ning-ball" class="ning-ball"></div>
@@ -1254,9 +1257,19 @@
     let currentTime = 60;
     let resultShownForRound = -1;
 
-    // CHANGED: Removed local image index. Added global ballImages array.
+    // NEW: ऑटोमेटिक बॉल सिस्टम वेरिएबल्स
     let ballImages = [];
-    let isBallImagesLoaded = false;
+    let isAutoBallSystemReady = false;
+
+    // NEW: Pattern variables for win/loss cycle
+    let patternStage = "WIN"; // "WIN" or "LOSS"
+    let winCounter = 0;
+    let lossCounter = 0;
+    let currentLossSequence = 0;
+    
+    // NEW: Loss sequence pattern (हार के बाद कितने हार चाहिए)
+    const lossSequence = [3, 5, 6, 4, 8, 3, 9, 10, 1, 15, 20, 5, 2, 11, 5, 21, 10, 22, 50, 5, 10, 20, 5, 10];
+    let lossSequenceIndex = 0;
 
     const numberDegrees = 
     { 
@@ -1302,19 +1315,198 @@
     // NEW: Generate unique session ID for this device
     const sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 
-    // CHANGED: Simplified image loading. Now only populates the array.
-    function loadBallImagesFromFirebase() {
-        db.ref("game/ballImages").once("value").then((snapshot) => {
-            if (snapshot.exists()) {
+    // NEW: ऑटोमेटिक बॉल सिस्टम इनिशियलाइजेशन
+    function initializeAutoBallSystem() {
+        console.log("Initializing auto ball system...");
+        
+        // 1. पहले ballImages लोड करें
+        db.ref("game/ballImages").once("value").then((snap) => {
+            if (snap.exists()) {
+                const data = snap.val();
                 ballImages = [];
-                const data = snapshot.val();
+                
+                // सभी एक्टिव बॉल इमेजेस क्रम से लोड करें
                 Object.keys(data).sort().forEach((key) => {
                     const imgData = data[key];
                     if (imgData.active === true && imgData.url) {
-                        ballImages.push(imgData.url);
+                        ballImages.push({
+                            id: key,
+                            url: imgData.url,
+                            createdAt: imgData.createdAt || 0
+                        });
+                        console.log(`Loaded ball image: ${key} - ${imgData.url}`);
                     }
                 });
-                isBallImagesLoaded = true;
+                
+                console.log(`Total active ball images: ${ballImages.length}`);
+                
+                if (ballImages.length === 0) {
+                    console.error("No active ball images found in Firebase!");
+                    // डिफ़ॉल्ट बॉल इमेजेस ऑटो क्रिएट करें
+                    createDefaultBallImages();
+                    return;
+                }
+                
+                // 2. currentBall चेक करें, अगर नहीं है तो ऑटो क्रिएट करें
+                db.ref("game/currentBall").once("value").then((currentBallSnap) => {
+                    if (!currentBallSnap.exists()) {
+                        console.log("No currentBall found, creating automatically...");
+                        // पहली बॉल सेट करें
+                        const firstBall = ballImages[0];
+                        db.ref("game/currentBall").set({
+                            url: firstBall.url,
+                            ballId: firstBall.id,
+                            updatedAt: Date.now(),
+                            round: 1
+                        }).then(() => {
+                            console.log(`Auto-created currentBall: ${firstBall.url}`);
+                            isAutoBallSystemReady = true;
+                            
+                            // बॉल इमेज सेट करें
+                            ball.style.backgroundImage = `url('${firstBall.url}')`;
+                            
+                            // ऑटो रोटेशन सिस्टम शुरू करें
+                            startAutoBallRotation();
+                        });
+                    } else {
+                        // currentBall पहले से है, उसे लोड करें
+                        const currentBallData = currentBallSnap.val();
+                        console.log(`Current ball loaded: ${currentBallData.url}`);
+                        isAutoBallSystemReady = true;
+                        
+                        // बॉल इमेज सेट करें
+                        if (currentBallData.url) {
+                            ball.style.backgroundImage = `url('${currentBallData.url}')`;
+                        }
+                        
+                        // ऑटो रोटेशन सिस्टम शुरू करें
+                        startAutoBallRotation();
+                    }
+                });
+                
+            } else {
+                console.log("No ballImages found, creating default...");
+                createDefaultBallImages();
+            }
+        }).catch((error) => {
+            console.error("Error loading ball images:", error);
+        });
+    }
+
+    // NEW: डिफ़ॉल्ट बॉल इमेजेस ऑटो क्रिएट करें
+    function createDefaultBallImages() {
+        const defaultBalls = [
+            {id: 'img_1', url: 'https://uploads.onecompiler.io/445tyzay6/449rx2mty/1000060967.jpg'},
+            {id: 'img_2', url: 'https://uploads.onecompiler.io/445tyzay6/449rx2mty/1000060968.jpg'},
+            {id: 'img_3', url: 'https://uploads.onecompiler.io/445tyzay6/449rx2mty/1000060979.jpg'}
+        ];
+        
+        const updates = {};
+        defaultBalls.forEach((ball, index) => {
+            updates[`game/ballImages/${ball.id}`] = {
+                url: ball.url,
+                active: true,
+                createdAt: Date.now() + index,
+                order: index
+            };
+        });
+        
+        db.ref().update(updates).then(() => {
+            console.log("Default ball images created in Firebase");
+            ballImages = defaultBalls;
+            
+            // currentBall सेट करें
+            const firstBall = ballImages[0];
+            db.ref("game/currentBall").set({
+                url: firstBall.url,
+                ballId: firstBall.id,
+                updatedAt: Date.now(),
+                round: 1
+            }).then(() => {
+                console.log(`Auto-created currentBall: ${firstBall.url}`);
+                isAutoBallSystemReady = true;
+                
+                // बॉल इमेज सेट करें
+                ball.style.backgroundImage = `url('${firstBall.url}')`;
+                
+                // ऑटो रोटेशन सिस्टम शुरू करें
+                startAutoBallRotation();
+            });
+        });
+    }
+
+    // NEW: ऑटो बॉल रोटेशन सिस्टम शुरू करें
+    function startAutoBallRotation() {
+        // फायरबेस से currentBall के अपडेट सुनें
+        db.ref("game/currentBall").on("value", (snap) => {
+            if (snap.exists() && isAutoBallSystemReady) {
+                const ballData = snap.val();
+                if (ballData && ballData.url) {
+                    // सभी डिवाइस पर एक ही बॉल इमेज दिखाएं
+                    ball.style.backgroundImage = `url('${ballData.url}')`;
+                    console.log(`Ball image updated: ${ballData.url}`);
+                }
+            }
+        });
+        
+        // गेम राउंड कम्पलीट होने पर बॉल बदलने के लिए लिसन करें
+        db.ref("game").on("value", (snap) => {
+            if (snap.exists() && isAutoBallSystemReady) {
+                const gameData = snap.val();
+                
+                // जब नया राउंड शुरू हो (BETTING status और टाइमर 60)
+                if (gameData.status === "BETTING" && gameData.time === 60) {
+                    // पिछले राउंड का रिजल्ट आने के बाद नई बॉल सेट करें
+                    setTimeout(() => {
+                        rotateToNextBall();
+                    }, 3000); // 3 सेकंड डिले (रिजल्ट दिखाने के बाद)
+                }
+            }
+        });
+    }
+
+    // NEW: अगली बॉल पर रोटेट करें
+    function rotateToNextBall() {
+        if (ballImages.length === 0) {
+            console.error("No ball images available to rotate");
+            return;
+        }
+        
+        // currentBall डेटा लोड करें
+        db.ref("game/currentBall").once("value").then((snap) => {
+            if (snap.exists()) {
+                const currentBallData = snap.val();
+                let currentBallIndex = -1;
+                
+                // करंट बॉल का इंडेक्स ढूंढें
+                for (let i = 0; i < ballImages.length; i++) {
+                    if (ballImages[i].id === currentBallData.ballId) {
+                        currentBallIndex = i;
+                        break;
+                    }
+                }
+                
+                // अगली बॉल का इंडेक्स कैलकुलेट करें
+                let nextBallIndex;
+                if (currentBallIndex === -1 || currentBallIndex >= ballImages.length - 1) {
+                    nextBallIndex = 0; // पहली बॉल पर वापस
+                } else {
+                    nextBallIndex = currentBallIndex + 1;
+                }
+                
+                const nextBall = ballImages[nextBallIndex];
+                
+                // फायरबेस में currentBall अपडेट करें
+                db.ref("game/currentBall").update({
+                    url: nextBall.url,
+                    ballId: nextBall.id,
+                    updatedAt: Date.now(),
+                    round: (currentBallData.round || 0) + 1
+                }).then(() => {
+                    console.log(`Rotated to next ball: ${nextBall.url}`);
+                    
+                    // सभी डिवाइस ऑटो अपडेट हो जाएंगे क्योंकि वे currentBall सुन रहे हैं
+                });
             }
         });
     }
@@ -1333,47 +1525,113 @@
         }
     }
 
-    // UPDATED LOGIC: No changes to code structure. Added Firebase Weight Logic.
-    async function getWinningNumberByPattern() {
-        try {
-            // सभी यूजर्स का डेटा एक बार में प्राप्त करें
-            const usersSnapshot = await db.ref("users").once("value");
-            const usersData = usersSnapshot.val();
+    // NEW: Function to get numbers with minimum bet (सबसे कम पैसा लगा है वह नंबर)
+    function getNumbersWithMinBet() {
+        const betsArray = Object.entries(bets);
+        const numbersWithBets = betsArray.filter(([num, bet]) => bet > 0);
+        
+        if (numbersWithBets.length === 0) return [];
+        
+        // Find minimum bet amount
+        const minBet = Math.min(...numbersWithBets.map(([num, bet]) => bet));
+        
+        // Return all numbers with minimum bet
+        return numbersWithBets
+            .filter(([num, bet]) => bet === minBet)
+            .map(([num, bet]) => parseInt(num));
+    }
 
-            // 0-9 के लिए वेट कैलकुलेटर (शुरू में सब 0)
-            let totalWeights = { 0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0 };
+    // NEW: Function to get numbers without any bet (बिल्कुल ही पैसा नहीं लगा है वह नंबर)
+    function getNumbersWithoutAnyBet() {
+        return Object.entries(bets)
+            .filter(([num, bet]) => bet === 0)
+            .map(([num, bet]) => parseInt(num));
+    }
 
-            if (usersData) {
-                // हर यूजर की 'currentBets' (अगर मौजूद है) को स्कैन करना
-                Object.values(usersData).forEach(user => {
-                    // यहाँ हम मान कर चल रहे हैं कि आप डेटाबेस में 'currentBets' नोड में बेट्स सेव कर रहे हैं
-                    if (user.currentBets) { 
-                        Object.keys(user.currentBets).forEach(num => {
-                            totalWeights[num] += parseFloat(user.currentBets[num] || 0);
-                        });
-                    }
-                });
-            }
-
-            // वेट लॉजिक: जिस नंबर पर सबसे कम पैसा लगा है (या 0 लगा है) उसे जीतना
-            let winNum = 0;
-            let minAmount = Infinity;
-
-            // अगर सब पर बराबर या 0 है, तो रैंडम चुनेगा
-            for (let i = 0; i <= 9; i++) {
-                if (totalWeights[i] < minAmount) {
-                    minAmount = totalWeights[i];
-                    winNum = i;
-                }
-            }
-            
-            console.log("Weight Logic Decision: Number " + winNum + " wins with lowest bet: " + minAmount);
-            return winNum;
-
-        } catch (error) {
-            console.error("Firebase Weight Logic Error:", error);
-            return Math.floor(Math.random() * 10); // एरर होने पर रैंडम बैकअप
+    // NEW: Function to get winning number for WIN stage (जीत के लिए - सबसे कम पैसा लगा है वह नंबर)
+    function getWinningNumberForWin() {
+        const numbersWithMinBet = getNumbersWithMinBet();
+        
+        if (numbersWithMinBet.length > 0) {
+            // सबसे कम पैसा लगा है वह नंबर चुनें
+            return numbersWithMinBet[Math.floor(Math.random() * numbersWithMinBet.length)];
+        } else {
+            // कोई भी पैसा नहीं लगा है तो रैंडम नंबर
+            return Math.floor(Math.random() * 10);
         }
+    }
+
+    // NEW: Function to get winning number for LOSS stage (हार के लिए - बिल्कुल ही पैसा नहीं लगा है वह नंबर)
+    function getWinningNumberForLoss() {
+        const numbersWithoutAnyBet = getNumbersWithoutAnyBet();
+        
+        if (numbersWithoutAnyBet.length > 0) {
+            // बिल्कुल ही पैसा नहीं लगा है वह नंबर चुनें
+            return numbersWithoutAnyBet[Math.floor(Math.random() * numbersWithoutAnyBet.length)];
+        } else {
+            // सभी नंबरों पर पैसा लगा है तो सबसे कम पैसे वाला चुनें (फॉलबैक)
+            const numbersWithMinBet = getNumbersWithMinBet();
+            if (numbersWithMinBet.length > 0) {
+                return numbersWithMinBet[Math.floor(Math.random() * numbersWithMinBet.length)];
+            } else {
+                return Math.floor(Math.random() * 10);
+            }
+        }
+    }
+
+    // NEW: Function to update pattern after each round
+    function updatePattern(winningNumber) {
+        const numbersWithMinBet = getNumbersWithMinBet();
+        const numbersWithBets = Object.entries(bets)
+            .filter(([num, bet]) => bet > 0)
+            .map(([num, bet]) => parseInt(num));
+        
+        const isUserWin = numbersWithBets.includes(winningNumber);
+        
+        console.log(`Pattern: ${patternStage}, Winning Number: ${winningNumber}, User Win: ${isUserWin}`);
+        console.log(`Numbers with bets: ${numbersWithBets}, Numbers with min bet: ${numbersWithMinBet}`);
+        
+        if (patternStage === "WIN") {
+            winCounter++;
+            
+            // 1 win complete, switch to LOSS
+            if (winCounter >= 1) {
+                patternStage = "LOSS";
+                winCounter = 0;
+                lossCounter = 0;
+                currentLossSequence = lossSequence[lossSequenceIndex];
+                lossSequenceIndex = (lossSequenceIndex + 1) % lossSequence.length;
+                
+                console.log(`Switching to LOSS stage, need ${currentLossSequence} losses`);
+            }
+        } else if (patternStage === "LOSS") {
+            lossCounter++;
+            
+            // Check if loss sequence complete
+            if (lossCounter >= currentLossSequence) {
+                patternStage = "WIN";
+                winCounter = 0;
+                lossCounter = 0;
+                console.log(`Switching to WIN stage after ${currentLossSequence} losses`);
+            }
+        }
+        
+        console.log(`Current pattern: ${patternStage}, Win Counter: ${winCounter}, Loss Counter: ${lossCounter}/${currentLossSequence}`);
+    }
+
+    // NEW: Function to get winning number based on pattern
+    function getWinningNumberByPattern() {
+        let winningNumber;
+        
+        if (patternStage === "WIN") {
+            winningNumber = getWinningNumberForWin();
+            console.log(`WIN stage: Selected number ${winningNumber} (सबसे कम पैसा लगा है वह नंबर)`);
+        } else {
+            winningNumber = getWinningNumberForLoss();
+            console.log(`LOSS stage: Selected number ${winningNumber} (बिल्कुल ही पैसा नहीं लगा है वह नंबर)`);
+        }
+        
+        return winningNumber;
     }
 
     async function login() 
@@ -1383,6 +1641,7 @@
         
         if(!u || !p) return;
         
+        // NEW: Show "VERIFY" message during login attempt
         document.getElementById('statusMsg').textContent = "VERIFY...";
         document.getElementById('statusMsg').style.color = "#39ff14";
         
@@ -1393,17 +1652,22 @@
             {
                 const val = snap.val();
                 
+                // NEW: Check if user is already logged in on another device
                 if (val.isLoggedIn === true && val.sessionId !== sessionId) {
+                    // Force logout from other device
                     await db.ref("users/" + u).update({
                         isLoggedIn: false,
                         sessionId: null,
                         forceLogout: true
                     });
+                    
+                    // Small delay to ensure other device gets the update
                     await new Promise(resolve => setTimeout(resolve, 500));
                 }
                 
                 if(val.password === p && val.status === "active") 
                 {
+                    // NEW: Update user with session info
                     await db.ref("users/" + u).update({
                         isLoggedIn: true,
                         sessionId: sessionId,
@@ -1414,7 +1678,10 @@
                     
                     myId = u;
                     sessionStorage.setItem('gk_session', JSON.stringify({uid: u, sessionId: sessionId}));
+                    
+                    // NEW: Set up listener to detect logout from other devices
                     setupLoginMonitor(u);
+                    
                     activateHome();
                 } 
                 else 
@@ -1435,14 +1702,19 @@
         }
     }
 
+    // NEW: Function to monitor login status
     function setupLoginMonitor(userId) {
         db.ref("users/" + userId).on("value", (snap) => {
             if (snap.exists()) {
                 const userData = snap.val();
+                
+                // Check if forceLogout flag is set
                 if (userData.forceLogout === true) {
                     forceLogout();
                     return;
                 }
+                
+                // If sessionId doesn't match or user is logged out, force logout
                 if (userData.isLoggedIn !== true || userData.sessionId !== sessionId) {
                     forceLogout();
                 }
@@ -1450,22 +1722,34 @@
         });
     }
 
+    // NEW: Function to force logout (without alert)
     function forceLogout() {
+        // Clear all session data
         sessionStorage.removeItem('gk_session');
+        
+        // Show login section and hide all others
         document.getElementById('loginSection').style.display = 'flex';
         document.getElementById('homeSection').style.display = 'none';
         document.getElementById('gameSection').style.display = 'none';
+        
+        // Show logout message in status
         document.getElementById('statusMsg').textContent = "Logged out from another device!";
         document.getElementById('statusMsg').style.color = "#ff3333";
+        
+        // Reset user ID
         myId = "";
+        
+        // Stop all audio
         isGameActive = false;
         stopAllAudio();
     }
 
     function activateHome() 
     {
+        // होम पेज पर ऑडियो बंद
         isGameActive = false;
         stopAllAudio();
+        
         document.getElementById('loginSection').style.display = 'none';
         document.getElementById('homeSection').style.display = 'block';
         document.getElementById('gameSection').style.display = 'none';
@@ -1475,16 +1759,22 @@
 
     function launchGame() 
     {
+        // गेम सेक्शन खुलने पर ऑडियो एक्टिवेट
         isGameActive = true;
+        
         document.getElementById('homeSection').style.display = 'none';
         document.getElementById('gameSection').style.display = 'block';
-        loadBallImagesFromFirebase();
+        
+        // NEW: ऑटो बॉल सिस्टम इनिशियलाइज करें
+        initializeAutoBallSystem();
     }
 
     function backToHome() 
     {
+        // गेम सेक्शन से निकलने पर सभी ऑडियो बंद
         isGameActive = false;
         stopAllAudio();
+        
         document.getElementById('gameSection').style.display = 'none';
         document.getElementById('homeSection').style.display = 'block';
     }
@@ -1493,6 +1783,8 @@
     {
         isGameActive = false;
         stopAllAudio();
+        
+        // NEW: Update Firebase to mark user as logged out
         if (myId) {
             try {
                 await db.ref("users/" + myId).update({
@@ -1501,14 +1793,20 @@
                     lastLogout: Date.now(),
                     forceLogout: false
                 });
-            } catch (error) {}
+            } catch (error) {
+                console.error("Error updating logout status:", error);
+            }
         }
+        
         sessionStorage.removeItem('gk_session');
+        
+        // Show login section directly without alert
         document.getElementById('loginSection').style.display = 'flex';
         document.getElementById('homeSection').style.display = 'none';
         document.getElementById('gameSection').style.display = 'none';
         document.getElementById('statusMsg').textContent = "Successfully logged out";
         document.getElementById('statusMsg').style.color = "#39ff14";
+        
         myId = "";
     }
 
@@ -1546,12 +1844,11 @@
         });
     }
 
-    // CHANGED: Transaction now handles global image switching and pattern win logic
     setInterval(() => 
     {
         db.ref("game").transaction((game) => 
         {
-            if (!game) return { time: 60, status: "BETTING", round: 1, lastWinner: -1, currentBallUrl: "" };
+            if (!game) return { time: 60, status: "BETTING", round: 1, lastWinner: -1 };
             
             game.time--;
             
@@ -1561,7 +1858,10 @@
                 { 
                     game.status = "WAITING"; 
                     game.time = 1; 
-                    // Note: Here it calls random by default, but we'll use our weight logic in the listener below
+                    
+                    // NEW: Get winning number based on pattern
+                    const winningNumber = getWinningNumberByPattern();
+                    game.lastWinner = winningNumber;
                 }
                 else if (game.status === "WAITING") 
                 { 
@@ -1573,37 +1873,33 @@
                     game.status = "BETTING"; 
                     game.time = 60; 
                     game.round++; 
-
-                    // NEW: Server picks the next image for everyone
-                    if (ballImages.length > 0) {
-                        const nextIdx = game.round % ballImages.length;
-                        game.currentBallUrl = ballImages[nextIdx];
-                    }
                 }
             }
+            
             return game;
         });
     }, 1000);
 
-    db.ref("game").on("value", async (snap) => 
+    db.ref("game").on("value", (snap) => 
     {
         const data = snap.val();
+        
         if(!data) return;
         
         currentTime = data.time;
         currentStatus = data.status;
         tUI.innerText = `0:${currentTime < 10 ? '0'+currentTime : currentTime}`;
 
-        // NEW: Sync image from Firebase to local variable
-        if (data.currentBallUrl) {
-            window.nextBallImage = data.currentBallUrl;
-        }
-
+        // टाइमर ऑडियो - केवल गेम एक्टिव होने पर
         if (isGameActive && currentTime <= 60 && currentTime > 10 && currentStatus === "BETTING") {
             playAudio(timerAudio);
         }
 
-        if (currentStatus === "WAITING" || currentStatus === "RESULT_HOLD" || (currentStatus === "BETTING" && currentTime <= 10)) 
+        if (currentStatus === "WAITING" || currentStatus === "RESULT_HOLD") 
+        {
+            waitOverlay.style.display = 'flex';
+        } 
+        else if (currentStatus === "BETTING" && currentTime <= 10) 
         {
             waitOverlay.style.display = 'flex';
         } 
@@ -1625,12 +1921,11 @@
             
             if(currentTime === 10 && resultShownForRound !== data.round) 
             {
-                // यहाँ हम वेट लॉजिक के आधार पर विनिंग नंबर तय करेंगे
-                const winNum = await getWinningNumberByPattern();
-                startSpinProcess(winNum, data.round);
+                startSpinProcess(data.lastWinner, data.round);
             }
         }
 
+        // NEW: Start pointer blink when timer is low
         if (currentStatus === "BETTING" && currentTime <= 10 && currentTime > 0) {
             startPointerBlink();
         } else {
@@ -1640,6 +1935,7 @@
 
     function startSpinProcess(winNum, roundNum) 
     {
+        // स्पिन ऑडियो - केवल गेम एक्टिव होने पर
         if (isGameActive) {
             playAudio(spinAudio);
         }
@@ -1664,23 +1960,26 @@
         winBox.classList.add('blink-bg');
 
         history.unshift(winNum);
+        
         if(history.length > 10) history.pop();
+        
         hUI.innerText = history.join('   ');
 
         let roundWin = bets[winNum] * 9;
+        
         if(roundWin > 0) 
         {
             pendingWin += roundWin;
             updateFirebaseBalance(balance, pendingWin);
+            
+            // जीतने का ऑडियो - केवल गेम एक्टिव होने पर
             if (isGameActive) {
                 playAudio(winAudio);
             }
         }
         
-        // NEW: Apply the globally synced ball image
-        if (window.nextBallImage) {
-            ball.style.backgroundImage = `url('${window.nextBallImage}')`;
-        }
+        // NEW: Update pattern after showing result
+        updatePattern(winNum);
         
         resetTable();
     }
@@ -1697,12 +1996,20 @@
             }
         }
         
-        // बेट्स साफ करने से पहले सर्वर पर भी साफ करें (ताकि अगले राउंड का वेट लॉजिक सही रहे)
-        if (myId) {
-            db.ref("users/" + myId + "/currentBets").remove();
-        }
-
-        bets = { 0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0 };
+        bets = 
+        {
+            0:0,
+            1:0,
+            2:0,
+            3:0,
+            4:0,
+            5:0,
+            6:0,
+            7:0,
+            8:0,
+            9:0
+        };
+        
         statusText.innerText = "Prev bet";
         statusText.classList.remove('bet-ok-blink');
         cancelBtn.classList.remove('cancel-overlay-blink');
@@ -1726,20 +2033,18 @@
         {
             balance -= selectedChip;
             bets[n] += selectedChip;
-            
-            // डेटाबेस में बेट अपडेट करें ताकि वेट लॉजिक काम कर सके
-            if (myId) {
-                db.ref("users/" + myId + "/currentBets/" + n).set(bets[n]);
-            }
-
             document.getElementById(`b-${n}`).innerText = bets[n];
             document.getElementById(`num-${n}`).style.backgroundImage = `url(${numImgs[n]})`;
             statusText.innerText = "Bet ok";
             statusText.classList.add('bet-ok-blink');
+            
             cancelBtn.classList.add('cancel-overlay-blink');
             cancelAllBtn.classList.add('cancel-overlay-blink');
+            
             updateTotalBet();
             updateFirebaseBalance(balance, pendingWin);
+            
+            // बेट लगाने का ऑडियो - केवल गेम एक्टिव होने पर
             if (isGameActive) {
                 playAudio(betAudio);
             }
@@ -1748,46 +2053,65 @@
 
     window.doTake = function() 
     {
+        // टेक बटन के लिए ऑडियो - केवल गेम एक्टिव होने पर
         if (isGameActive) {
             playAudio(buttonAudio);
         }
+        
         if(pendingWin > 0) 
         {
             balance += pendingWin;
             pendingWin = 0;
             updateFirebaseBalance(balance, 0);
+            
             if(currentWinnerNum !== -1) 
             {
-                document.getElementById(`num-${currentWinnerNum}`).classList.remove('blink-bg');
+                document.getElementById(`num-${currentWinnerNum}`).classList.remove('blink-blog');
                 document.getElementById(`num-${currentWinnerNum}`).style.backgroundImage = 'none';
                 currentWinnerNum = -1;
             }
+            
             winUI.innerText = "?";
         }
     };
 
     window.doCancel = function() 
     {
-        if (isGameActive) { playAudio(buttonAudio); }
+        // कैंसल बटन के लिए ऑडियो - केवल गेम एक्टिव होने पर
+        if (isGameActive) {
+            playAudio(buttonAudio);
+        }
+        
         if(currentStatus !== "BETTING" || pendingWin > 0 || currentTime <= 15) return;
+        
         let totalOnTable = Object.values(bets).reduce((a,b)=>a+b, 0);
         balance += totalOnTable;
-
-        // डेटाबेस से बेट हटाएं
-        if (myId) {
-            db.ref("users/" + myId + "/currentBets").remove();
-        }
-
-        bets = { 0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0 };
+        
+        bets = 
+        {
+            0:0,
+            1:0,
+            2:0,
+            3:0,
+            4:0,
+            5:0,
+            6:0,
+            7:0,
+            8:0,
+            9:0
+        };
+        
         for(let i=0; i<=9; i++) 
         {
             document.getElementById(`b-${i}`).innerText = '0';
             document.getElementById(`num-${i}`).style.backgroundImage = 'none';
         }
+        
         cancelBtn.classList.remove('cancel-overlay-blink');
         cancelAllBtn.classList.remove('cancel-overlay-blink');
         statusText.classList.remove('bet-ok-blink');
         statusText.innerText = "Prev bet";
+        
         updateTotalBet();
         updateFirebaseBalance(balance, pendingWin);
     };
@@ -1800,60 +2124,120 @@
 
     window.selChip = function(v) 
     { 
-        if (isGameActive) { playAudio(clickAudio); }
+        // चिप चुनने का ऑडियो - केवल गेम एक्टिव होने पर
+        if (isGameActive) {
+            playAudio(clickAudio);
+        }
         selectedChip = v; 
     };
 
-    function openTransferModal() { document.getElementById('transferModal').style.display = 'flex'; }
-    function closeTransferModal() { document.getElementById('transferModal').style.display = 'none'; }
+    function openTransferModal() 
+    { 
+        // होम पेज पर कोई ऑडियो नहीं
+        document.getElementById('transferModal').style.display = 'flex'; 
+    }
+
+    function closeTransferModal() 
+    { 
+        // होम पेज पर कोई ऑडियो नहीं
+        document.getElementById('transferModal').style.display = 'none'; 
+    }
 
     async function executeRealTransfer() 
     {
+        // होम पेज पर कोई ऑडियो नहीं
         const tId = document.getElementById('targetId').value.trim();
         const amt = parseFloat(document.getElementById('transferAmt').value);
         const pinInput = document.getElementById('transferPin').value;
         const modalRes = document.getElementById('modalResMsg');
-        if(!tId || isNaN(amt) || amt <= 0 || !pinInput) { modalRes.textContent = "Details bharen!"; return; }
-        if(amt > balance) { modalRes.textContent = "Insufficient Balance!"; return; }
+
+        if(!tId || isNaN(amt) || amt <= 0 || !pinInput) 
+        { 
+            modalRes.textContent = "Details bharen!"; 
+            return; 
+        }
+        
+        if(amt > balance) 
+        { 
+            modalRes.textContent = "Insufficient Balance!"; 
+            return; 
+        }
+
         modalRes.textContent = "Processing...";
+
         try 
         {
             const senderSnap = await db.ref("users/" + myId).once("value");
-            if(!senderSnap.exists()) { modalRes.textContent = "User Error!"; return; }
+            
+            if(!senderSnap.exists()) 
+            { 
+                modalRes.textContent = "User Error!"; 
+                return; 
+            }
+            
             const senderData = senderSnap.val();
-            if(senderData.pin.toString() !== pinInput.toString()) { modalRes.textContent = "Wrong PIN!"; return; }
+
+            if(senderData.pin.toString() !== pinInput.toString()) 
+            {
+                modalRes.textContent = "Wrong PIN!";
+                return;
+            }
+
             const targetSnap = await db.ref("users/" + tId).once("value");
-            if(!targetSnap.exists()) { modalRes.textContent = "Target ID Not Found!"; return; }
+            
+            if(!targetSnap.exists()) 
+            {
+                modalRes.textContent = "Target ID Not Found!";
+                return;
+            }
+            
             const targetData = targetSnap.val();
+
             const updates = {};
             updates["/users/" + myId + "/balance"] = senderData.balance - amt;
             updates["/users/" + tId + "/balance"] = (targetData.balance || 0) + amt;
+
             await db.ref().update(updates);
+
             modalRes.textContent = "Transfer Success!";
             setTimeout(closeTransferModal, 2000);
-        } catch (error) { modalRes.textContent = "Transfer Failed!"; }
+
+        } 
+        catch (error) 
+        {
+            console.error(error);
+            modalRes.textContent = "Transfer Failed!";
+        }
     }
 
     window.onload = () => 
     {
         const saved = sessionStorage.getItem('gk_session');
+        
         if (saved) 
         {
             const sessionData = JSON.parse(saved);
             myId = sessionData.uid;
+            
+            // NEW: Check if session is still valid
             db.ref("users/" + myId).once("value").then((snap) => {
                 if (snap.exists()) {
                     const userData = snap.val();
                     if (userData.isLoggedIn === true && userData.sessionId === sessionData.sessionId) {
+                        // Set up login monitor
                         setupLoginMonitor(myId);
                         activateHome();
                     } else {
+                        // Session invalid, clear storage
                         sessionStorage.removeItem('gk_session');
+                        document.getElementById('statusMsg').textContent = "Session expired. Please login again.";
+                        document.getElementById('statusMsg').style.color = "#ff3333";
                     }
                 }
             });
         }
     };
+
 </script>
 </body>
 </html>
